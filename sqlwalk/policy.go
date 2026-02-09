@@ -86,13 +86,27 @@ func ParsePolicy(data []byte) (*Policy, error) {
 	if err := json.Unmarshal(data, &p); err != nil {
 		return nil, fmt.Errorf("parsing policy JSON: %w", err)
 	}
+	seenCatalogs := make(map[string]int)
 	for i, cp := range p.Permissions {
+		if prev, ok := seenCatalogs[cp.Catalog]; ok {
+			return nil, fmt.Errorf("duplicate catalog %q in permissions[%d] and permissions[%d]", cp.Catalog, prev, i)
+		}
+		seenCatalogs[cp.Catalog] = i
+
 		if cp.AllSchemas {
 			if _, err := parseAccessLevel(cp.BaseAccess); err != nil {
 				return nil, fmt.Errorf("permissions[%d].base_access: %w", i, err)
 			}
 		}
+
+		seenSchemas := make(map[string]int)
 		for j, sp := range cp.Schemas {
+			if prev, ok := seenSchemas[sp.SchemaName]; ok {
+				return nil, fmt.Errorf("duplicate schema_name %q in permissions[%d].schemas[%d] and permissions[%d].schemas[%d]",
+					sp.SchemaName, i, prev, i, j)
+			}
+			seenSchemas[sp.SchemaName] = j
+
 			if _, err := parseAccessLevel(sp.BaseAccess); err != nil {
 				return nil, fmt.Errorf("permissions[%d].schemas[%d].base_access: %w", i, j, err)
 			}

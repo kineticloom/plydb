@@ -421,6 +421,45 @@ func TestParsePolicy(t *testing.T) {
 	}
 }
 
+func TestParsePolicyDuplicateCatalog(t *testing.T) {
+	data := []byte(`{
+		"permissions": [
+			{"catalog": "mydb", "schemas": [{"schema_name": "public", "base_access": "read", "all_tables": true}]},
+			{"catalog": "mydb", "schemas": [{"schema_name": "other", "base_access": "read", "all_tables": true}]}
+		]
+	}`)
+
+	_, err := ParsePolicy(data)
+	if err == nil {
+		t.Fatal("expected error for duplicate catalog")
+	}
+	if !strings.Contains(err.Error(), "duplicate catalog") {
+		t.Errorf("error %q should mention duplicate catalog", err)
+	}
+}
+
+func TestParsePolicyDuplicateSchema(t *testing.T) {
+	data := []byte(`{
+		"permissions": [
+			{
+				"catalog": "mydb",
+				"schemas": [
+					{"schema_name": "public", "base_access": "read", "all_tables": true},
+					{"schema_name": "public", "base_access": "read_write", "all_tables": true}
+				]
+			}
+		]
+	}`)
+
+	_, err := ParsePolicy(data)
+	if err == nil {
+		t.Fatal("expected error for duplicate schema_name")
+	}
+	if !strings.Contains(err.Error(), "duplicate schema_name") {
+		t.Errorf("error %q should mention duplicate schema_name", err)
+	}
+}
+
 func TestParsePolicyInvalidAccess(t *testing.T) {
 	data := []byte(`{
 		"permissions": [
