@@ -1,0 +1,6 @@
+id,name,price,in_stock
+1,Widget,9.99,true
+2,Gadget,24.50,true
+3,Doohickey,3.75,false
+4,Thingamajig,15.00,true
+5,Whatchamacallit,7.25,false
