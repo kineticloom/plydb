@@ -1,0 +1,27 @@
+{
+  "credentials": {},
+  "databases": {
+    "customers": {
+      "metadata": {
+        "name": "Customers",
+        "description": "Customer contact information."
+      },
+      "type": "file",
+      "path": "examples/customers.csv",
+      "format": "csv",
+      "delimiter": ",",
+      "header_row": true
+    },
+    "orders": {
+      "metadata": {
+        "name": "Orders",
+        "description": "Customer order history."
+      },
+      "type": "file",
+      "path": "examples/orders.csv",
+      "format": "csv",
+      "delimiter": ",",
+      "header_row": true
+    }
+  }
+}

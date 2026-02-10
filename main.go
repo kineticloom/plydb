@@ -1,32 +1,93 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
+	"os"
 
-	pg_query "github.com/pganalyze/pg_query_go/v6"
-
-	"github.com/ypt/experiment-nexus/sqlwalk"
+	"github.com/ypt/experiment-nexus/queryengine"
 )
 
 func main() {
-	rawQuery2 := `with combined as (
-	  select * from db.accounts.organizations o
-	  join files.organization_priorities oca
-	    on o.id = oca.organization_id
-	  join files.organization_sizes oca2
-	    on o.id = oca2.organization_id
-	)
-	select * from combined
-	where priority = 'red'
-	and revenue_amount_limit <= 100000`
-	result, err := pg_query.Parse(rawQuery2)
-	if err != nil {
-		panic(err)
-	}
-	lr := sqlwalk.Extract(result)
+	configPath := flag.String("config", "", "path to the connection config JSON file")
+	sqlQuery := flag.String("sql", "", "SQL query to execute")
+	flag.Parse()
 
-	fmt.Println("Tables:")
-	for _, t := range lr.Tables {
-		fmt.Printf("  catalog=%q schema=%q name=%q alias=%q\n", t.Catalog, t.Schema, t.Name, t.Alias)
+	if *configPath == "" || *sqlQuery == "" {
+		fmt.Fprintln(os.Stderr, "usage: nexus --config <config.json> --sql <query>")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	data, err := os.ReadFile(*configPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error reading config file: %v\n", err)
+		os.Exit(1)
+	}
+
+	cfg, err := queryengine.ParseConfig(data)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error parsing config: %v\n", err)
+		os.Exit(1)
+	}
+
+	engine, err := queryengine.New(cfg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating query engine: %v\n", err)
+		os.Exit(1)
+	}
+	defer engine.Close()
+
+	rows, err := engine.Query(context.Background(), *sqlQuery)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error executing query: %v\n", err)
+		os.Exit(1)
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error reading columns: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Print header.
+	for i, col := range cols {
+		if i > 0 {
+			fmt.Print("\t")
+		}
+		fmt.Print(col)
+	}
+	fmt.Println()
+
+	// Print rows.
+	vals := make([]interface{}, len(cols))
+	ptrs := make([]interface{}, len(cols))
+	for i := range vals {
+		ptrs[i] = &vals[i]
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(ptrs...); err != nil {
+			fmt.Fprintf(os.Stderr, "error scanning row: %v\n", err)
+			os.Exit(1)
+		}
+		for i, v := range vals {
+			if i > 0 {
+				fmt.Print("\t")
+			}
+			if b, ok := v.([]byte); ok {
+				fmt.Print(string(b))
+			} else {
+				fmt.Print(v)
+			}
+		}
+		fmt.Println()
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "error iterating rows: %v\n", err)
+		os.Exit(1)
 	}
 }

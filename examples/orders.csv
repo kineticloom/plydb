@@ -1,0 +1,7 @@
+id,customer_id,product,amount,order_date
+1,1,Widget,2,2026-01-15
+2,3,Gadget,1,2026-01-20
+3,2,Widget,5,2026-02-01
+4,1,Doohickey,3,2026-02-05
+5,5,Gadget,2,2026-02-08
+6,4,Widget,1,2026-02-10
