@@ -5,51 +5,50 @@ import (
 	"testing"
 )
 
-// specPolicy returns a policy matching the spec's comprehensive example.
+// specPolicy returns a policy matching the v2 spec's comprehensive example.
 func specPolicy() *Policy {
 	return &Policy{
-		PolicyID: "pol_eng_admin_2026",
-		Version:  "1.2",
+		PolicyID: "global_enterprise_policy_2026",
+		Version:  "1.3",
 		Permissions: []CatalogPermission{
 			{
-				Catalog: "production_data",
+				Catalog:    "production_db",
+				BaseAccess: "read",
+				Management: &SchemaManagement{AllowDDL: false, AllowIndex: false},
 				Schemas: []SchemaPermission{
 					{
-						SchemaName: "public",
-						BaseAccess: "read",
-						AllTables:  true,
-						Management: &SchemaManagement{
-							AllowDDL:   false,
-							AllowIndex: true,
-						},
-						Overrides: SchemaOverrides{
-							ReadWrite: []string{"application_logs", "session_cache"},
-							Denied:    []string{"pii_vault_keys"},
-						},
-					},
-					{
-						SchemaName: "staging_area",
+						SchemaName: "app_data",
 						BaseAccess: "read_write",
 						AllTables:  true,
-						Management: &SchemaManagement{
-							AllowDDL: true,
-							CanDrop:  true,
-						},
+						Management: &SchemaManagement{AllowIndex: true},
 						Overrides: SchemaOverrides{
-							ReadOnly: []string{"reference_master_data"},
+							Denied:   []string{"user_passwords", "credit_card_numbers"},
+							ReadOnly: []string{"app_config_immutable"},
 						},
 					},
 					{
-						SchemaName: "finance_reports",
-						BaseAccess: "none",
-						AllTables:  false,
+						SchemaName: "reporting_sandbox",
+						BaseAccess: "full_dml",
+						AllTables:  true,
+						Management: &SchemaManagement{AllowDDL: true, CanDrop: true},
+					},
+				},
+			},
+			{
+				Catalog:    "staging_db",
+				BaseAccess: "read_write",
+				Management: &SchemaManagement{AllowDDL: true, AllowIndex: true},
+				Schemas: []SchemaPermission{
+					{
+						SchemaName: "finance_audit",
+						BaseAccess: "read",
+						AllTables:  true,
+						Management: &SchemaManagement{AllowDDL: false},
 						Overrides: SchemaOverrides{
-							ReadOnly: []string{"public_revenue_summary"},
 							Granular: []GranularOverride{
 								{
-									Tables:   []string{"ledger_entries"},
-									Actions:  []string{"SELECT", "INSERT"},
-									AllowDDL: false,
+									Tables:  []string{"audit_trail"},
+									Actions: []string{"SELECT", "INSERT"},
 								},
 							},
 						},
@@ -69,139 +68,180 @@ func TestValidate(t *testing.T) {
 		wantCount  int
 		wantSubstr string // substring in first violation's Error()
 	}{
-		// ---- public schema: base_access=read, management: allow_index=true ----
+		// ---- app_data schema: base_access=read_write, management: allow_index=true ----
 		{
-			name:      "public: SELECT allowed by base read",
-			sql:       "SELECT * FROM production_data.public.users",
+			name:      "app_data: SELECT allowed by base read_write",
+			sql:       "SELECT * FROM production_db.app_data.users",
 			wantCount: 0,
 		},
 		{
-			name:       "public: INSERT denied on base read table",
-			sql:        "INSERT INTO production_data.public.users (id) VALUES (1)",
+			name:      "app_data: INSERT allowed by base read_write",
+			sql:       "INSERT INTO production_db.app_data.users (id) VALUES (1)",
+			wantCount: 0,
+		},
+		{
+			name:      "app_data: UPDATE allowed by base read_write",
+			sql:       "UPDATE production_db.app_data.users SET name = 'x'",
+			wantCount: 0,
+		},
+		{
+			name:       "app_data: SELECT denied on user_passwords (denied)",
+			sql:        "SELECT * FROM production_db.app_data.user_passwords",
 			wantCount:  1,
-			wantSubstr: "INSERT on production_data.public.users",
+			wantSubstr: "SELECT on production_db.app_data.user_passwords",
 		},
 		{
-			name:      "public: INSERT allowed on read_write override",
-			sql:       "INSERT INTO production_data.public.application_logs (msg) VALUES ('hi')",
-			wantCount: 0,
-		},
-		{
-			name:      "public: UPDATE allowed on read_write override",
-			sql:       "UPDATE production_data.public.session_cache SET val = 'x'",
-			wantCount: 0,
-		},
-		{
-			name:       "public: SELECT denied on pii_vault_keys",
-			sql:        "SELECT * FROM production_data.public.pii_vault_keys",
+			name:       "app_data: ALTER TABLE denied on user_passwords (denied blocks DDL)",
+			sql:        "ALTER TABLE production_db.app_data.user_passwords ADD COLUMN x TEXT",
 			wantCount:  1,
-			wantSubstr: "SELECT on production_data.public.pii_vault_keys",
+			wantSubstr: "ALTER TABLE on production_db.app_data.user_passwords",
 		},
 		{
-			name:      "public: CREATE INDEX allowed by management",
-			sql:       "CREATE INDEX idx_users_name ON production_data.public.users (name)",
-			wantCount: 0,
-		},
-		{
-			name:       "public: ALTER TABLE denied (allow_ddl=false)",
-			sql:        "ALTER TABLE production_data.public.users ADD COLUMN email TEXT",
+			name:       "app_data: CREATE INDEX denied on credit_card_numbers (denied blocks DDL)",
+			sql:        "CREATE INDEX idx_cc ON production_db.app_data.credit_card_numbers (num)",
 			wantCount:  1,
-			wantSubstr: "ALTER TABLE on production_data.public.users",
+			wantSubstr: "CREATE INDEX on production_db.app_data.credit_card_numbers",
 		},
-		// ---- staging_area schema: base_access=read_write, management: allow_ddl, can_drop ----
 		{
-			name:      "staging: SELECT allowed",
-			sql:       "SELECT * FROM production_data.staging_area.temp",
+			name:      "app_data: read_only override allows SELECT",
+			sql:       "SELECT * FROM production_db.app_data.app_config_immutable",
 			wantCount: 0,
 		},
 		{
-			name:      "staging: INSERT allowed",
-			sql:       "INSERT INTO production_data.staging_area.temp (id) VALUES (1)",
-			wantCount: 0,
-		},
-		{
-			name:      "staging: UPDATE allowed",
-			sql:       "UPDATE production_data.staging_area.temp SET x = 1",
-			wantCount: 0,
-		},
-		{
-			name:      "staging: DELETE allowed",
-			sql:       "DELETE FROM production_data.staging_area.temp WHERE id = 1",
-			wantCount: 0,
-		},
-		{
-			name:      "staging: ALTER TABLE allowed (allow_ddl=true)",
-			sql:       "ALTER TABLE production_data.staging_area.temp ADD COLUMN y INT",
-			wantCount: 0,
-		},
-		{
-			name:      "staging: DROP TABLE allowed (can_drop=true)",
-			sql:       "DROP TABLE production_data.staging_area.temp",
-			wantCount: 0,
-		},
-		{
-			name:      "staging: TRUNCATE allowed (can_drop=true)",
-			sql:       "TRUNCATE production_data.staging_area.temp",
-			wantCount: 0,
-		},
-		{
-			name:       "staging: read_only override blocks UPDATE",
-			sql:        "UPDATE production_data.staging_area.reference_master_data SET x = 1",
+			name:       "app_data: read_only override blocks INSERT",
+			sql:        "INSERT INTO production_db.app_data.app_config_immutable (k) VALUES ('v')",
 			wantCount:  1,
-			wantSubstr: "UPDATE on production_data.staging_area.reference_master_data",
+			wantSubstr: "INSERT on production_db.app_data.app_config_immutable",
 		},
 		{
-			name:      "staging: read_only override allows SELECT",
-			sql:       "SELECT * FROM production_data.staging_area.reference_master_data",
-			wantCount: 0,
-		},
-		// ---- finance_reports schema: base_access=none, granular override ----
-		{
-			name:       "finance: SELECT denied on unlisted table",
-			sql:        "SELECT * FROM production_data.finance_reports.secret_budget",
-			wantCount:  1,
-			wantSubstr: "SELECT on production_data.finance_reports.secret_budget",
-		},
-		{
-			name:      "finance: SELECT allowed on read_only override",
-			sql:       "SELECT * FROM production_data.finance_reports.public_revenue_summary",
+			name:      "app_data: CREATE INDEX allowed by schema management",
+			sql:       "CREATE INDEX idx_users_name ON production_db.app_data.users (name)",
 			wantCount: 0,
 		},
 		{
-			name:       "finance: INSERT denied on read_only override",
-			sql:        "INSERT INTO production_data.finance_reports.public_revenue_summary (x) VALUES (1)",
-			wantCount:  1,
-			wantSubstr: "INSERT on production_data.finance_reports.public_revenue_summary",
-		},
-		{
-			name:      "finance: granular SELECT allowed on ledger_entries",
-			sql:       "SELECT * FROM production_data.finance_reports.ledger_entries",
+			name:      "app_data: DROP INDEX allowed by schema management (allow_index)",
+			sql:       "DROP INDEX production_db.app_data.idx_users_name",
 			wantCount: 0,
 		},
 		{
-			name:      "finance: granular INSERT allowed on ledger_entries",
-			sql:       "INSERT INTO production_data.finance_reports.ledger_entries (id) VALUES (1)",
+			name:       "app_data: ALTER TABLE denied (schema management allow_ddl=false)",
+			sql:        "ALTER TABLE production_db.app_data.users ADD COLUMN email TEXT",
+			wantCount:  1,
+			wantSubstr: "ALTER TABLE on production_db.app_data.users",
+		},
+		// ---- reporting_sandbox schema: base_access=full_dml, management: allow_ddl, can_drop ----
+		{
+			name:      "reporting_sandbox: SELECT allowed",
+			sql:       "SELECT * FROM production_db.reporting_sandbox.temp",
 			wantCount: 0,
 		},
 		{
-			name:       "finance: granular UPDATE denied on ledger_entries",
-			sql:        "UPDATE production_data.finance_reports.ledger_entries SET id = 2",
-			wantCount:  1,
-			wantSubstr: "UPDATE on production_data.finance_reports.ledger_entries",
+			name:      "reporting_sandbox: INSERT allowed",
+			sql:       "INSERT INTO production_db.reporting_sandbox.temp (id) VALUES (1)",
+			wantCount: 0,
 		},
 		{
-			name:       "finance: granular DELETE denied on ledger_entries",
-			sql:        "DELETE FROM production_data.finance_reports.ledger_entries WHERE id = 1",
-			wantCount:  1,
-			wantSubstr: "DELETE on production_data.finance_reports.ledger_entries",
+			name:      "reporting_sandbox: TRUNCATE allowed (full_dml)",
+			sql:       "TRUNCATE production_db.reporting_sandbox.temp",
+			wantCount: 0,
 		},
 		{
-			name:       "finance: granular ALTER TABLE denied on ledger_entries (allow_ddl=false)",
-			sql:        "ALTER TABLE production_data.finance_reports.ledger_entries ADD COLUMN y INT",
-			wantCount:  1,
-			wantSubstr: "ALTER TABLE on production_data.finance_reports.ledger_entries",
+			name:      "reporting_sandbox: ALTER TABLE allowed (allow_ddl=true)",
+			sql:       "ALTER TABLE production_db.reporting_sandbox.temp ADD COLUMN y INT",
+			wantCount: 0,
 		},
-		// ---- access level: append ----
+		{
+			name:      "reporting_sandbox: DROP TABLE allowed (can_drop=true)",
+			sql:       "DROP TABLE production_db.reporting_sandbox.temp",
+			wantCount: 0,
+		},
+		// ---- catalog-level defaults for unlisted schemas ----
+		{
+			name:      "unlisted schema: SELECT allowed by catalog base_access=read",
+			sql:       "SELECT * FROM production_db.unknown_schema.some_table",
+			wantCount: 0,
+		},
+		{
+			name:       "unlisted schema: INSERT denied (catalog base_access=read)",
+			sql:        "INSERT INTO production_db.unknown_schema.some_table (id) VALUES (1)",
+			wantCount:  1,
+			wantSubstr: "INSERT on production_db.unknown_schema.some_table",
+		},
+		{
+			name:       "unlisted schema: ALTER TABLE denied (catalog management allow_ddl=false)",
+			sql:        "ALTER TABLE production_db.unknown_schema.some_table ADD COLUMN x INT",
+			wantCount:  1,
+			wantSubstr: "ALTER TABLE on production_db.unknown_schema.some_table",
+		},
+		// ---- staging_db: catalog management inheritance ----
+		{
+			name:      "staging_db unlisted schema: SELECT allowed (catalog base_access=read_write)",
+			sql:       "SELECT * FROM staging_db.dev_sandbox.t1",
+			wantCount: 0,
+		},
+		{
+			name:      "staging_db unlisted schema: INSERT allowed (catalog base_access=read_write)",
+			sql:       "INSERT INTO staging_db.dev_sandbox.t1 (id) VALUES (1)",
+			wantCount: 0,
+		},
+		{
+			name:      "staging_db unlisted schema: ALTER TABLE allowed (catalog management allow_ddl=true)",
+			sql:       "ALTER TABLE staging_db.dev_sandbox.t1 ADD COLUMN y INT",
+			wantCount: 0,
+		},
+		{
+			name:      "staging_db unlisted schema: CREATE INDEX allowed (catalog management allow_index=true)",
+			sql:       "CREATE INDEX idx_t1 ON staging_db.dev_sandbox.t1 (id)",
+			wantCount: 0,
+		},
+		// ---- staging_db.finance_audit: schema management override ----
+		{
+			name:      "finance_audit: SELECT allowed by base read",
+			sql:       "SELECT * FROM staging_db.finance_audit.some_table",
+			wantCount: 0,
+		},
+		{
+			name:       "finance_audit: INSERT denied (base_access=read)",
+			sql:        "INSERT INTO staging_db.finance_audit.some_table (id) VALUES (1)",
+			wantCount:  1,
+			wantSubstr: "INSERT on staging_db.finance_audit.some_table",
+		},
+		{
+			name:       "finance_audit: ALTER TABLE denied (schema management overrides catalog: allow_ddl=false)",
+			sql:        "ALTER TABLE staging_db.finance_audit.some_table ADD COLUMN x INT",
+			wantCount:  1,
+			wantSubstr: "ALTER TABLE on staging_db.finance_audit.some_table",
+		},
+		{
+			name:       "finance_audit: CREATE INDEX denied (schema management full replacement, allow_index not set)",
+			sql:        "CREATE INDEX idx_fa ON staging_db.finance_audit.some_table (id)",
+			wantCount:  1,
+			wantSubstr: "CREATE INDEX on staging_db.finance_audit.some_table",
+		},
+		// ---- staging_db.finance_audit: granular override ----
+		{
+			name:      "finance_audit: granular SELECT allowed on audit_trail",
+			sql:       "SELECT * FROM staging_db.finance_audit.audit_trail",
+			wantCount: 0,
+		},
+		{
+			name:      "finance_audit: granular INSERT allowed on audit_trail",
+			sql:       "INSERT INTO staging_db.finance_audit.audit_trail (id) VALUES (1)",
+			wantCount: 0,
+		},
+		{
+			name:       "finance_audit: granular UPDATE denied on audit_trail",
+			sql:        "UPDATE staging_db.finance_audit.audit_trail SET id = 2",
+			wantCount:  1,
+			wantSubstr: "UPDATE on staging_db.finance_audit.audit_trail",
+		},
+		{
+			name:       "finance_audit: granular ALTER TABLE denied on audit_trail (schema management allow_ddl=false)",
+			sql:        "ALTER TABLE staging_db.finance_audit.audit_trail ADD COLUMN y INT",
+			wantCount:  1,
+			wantSubstr: "ALTER TABLE on staging_db.finance_audit.audit_trail",
+		},
+		// ---- access level: append (via separate policy) ----
 		{
 			name:      "append: SELECT and INSERT allowed",
 			sql:       "INSERT INTO mydb.logs.events (id) SELECT id FROM mydb.logs.events",
@@ -213,7 +253,7 @@ func TestValidate(t *testing.T) {
 			wantCount:  1,
 			wantSubstr: "UPDATE on mydb.logs.events",
 		},
-		// ---- access level: full_dml ----
+		// ---- access level: full_dml (via separate policy) ----
 		{
 			name:      "full_dml: TRUNCATE allowed",
 			sql:       "TRUNCATE mydb.scratch.temp",
@@ -225,34 +265,51 @@ func TestValidate(t *testing.T) {
 			wantCount:  1,
 			wantSubstr: "DROP TABLE on mydb.scratch.temp",
 		},
+		// ---- append override shorthand ----
+		{
+			name:      "append override: SELECT allowed",
+			sql:       "SELECT * FROM mydb.mixed.event_log",
+			wantCount: 0,
+		},
+		{
+			name:      "append override: INSERT allowed",
+			sql:       "INSERT INTO mydb.mixed.event_log (id) VALUES (1)",
+			wantCount: 0,
+		},
+		{
+			name:       "append override: UPDATE denied",
+			sql:        "UPDATE mydb.mixed.event_log SET id = 1",
+			wantCount:  1,
+			wantSubstr: "UPDATE on mydb.mixed.event_log",
+		},
 		// ---- compound statements ----
 		{
 			name:      "JOIN both allowed",
-			sql:       "SELECT * FROM production_data.public.users u JOIN production_data.public.application_logs l ON u.id = l.user_id",
+			sql:       "SELECT * FROM production_db.app_data.users u JOIN production_db.app_data.app_config_immutable c ON u.id = c.id",
 			wantCount: 0,
 		},
 		{
 			name:       "JOIN one denied",
-			sql:        "SELECT * FROM production_data.public.users u JOIN production_data.public.pii_vault_keys p ON u.id = p.user_id",
+			sql:        "SELECT * FROM production_db.app_data.users u JOIN production_db.app_data.user_passwords p ON u.id = p.user_id",
 			wantCount:  1,
-			wantSubstr: "pii_vault_keys",
+			wantSubstr: "user_passwords",
 		},
 		{
 			name:       "INSERT SELECT from denied table",
-			sql:        "INSERT INTO production_data.public.application_logs (id) SELECT id FROM production_data.public.pii_vault_keys",
+			sql:        "INSERT INTO production_db.app_data.users (id) SELECT id FROM production_db.app_data.user_passwords",
 			wantCount:  1,
-			wantSubstr: "pii_vault_keys",
+			wantSubstr: "user_passwords",
 		},
 		{
 			name:      "CTE reading allowed tables",
-			sql:       "WITH cte AS (SELECT * FROM production_data.public.users) SELECT * FROM cte",
+			sql:       "WITH cte AS (SELECT * FROM production_db.app_data.users) SELECT * FROM cte",
 			wantCount: 0,
 		},
 		{
 			name:       "subquery in WHERE accessing denied table",
-			sql:        "SELECT * FROM production_data.public.users WHERE id IN (SELECT user_id FROM production_data.public.pii_vault_keys)",
+			sql:        "SELECT * FROM production_db.app_data.users WHERE id IN (SELECT user_id FROM production_db.app_data.user_passwords)",
 			wantCount:  1,
-			wantSubstr: "pii_vault_keys",
+			wantSubstr: "user_passwords",
 		},
 		{
 			name:       "unknown catalog denied",
@@ -262,26 +319,38 @@ func TestValidate(t *testing.T) {
 		},
 		// ---- MERGE ----
 		{
-			name: "MERGE with INSERT+UPDATE on staging allowed",
-			sql: `MERGE INTO production_data.staging_area.temp t
-				  USING production_data.staging_area.src s ON t.id = s.id
+			name: "MERGE with INSERT+UPDATE on reporting_sandbox allowed",
+			sql: `MERGE INTO production_db.reporting_sandbox.temp t
+				  USING production_db.reporting_sandbox.src s ON t.id = s.id
 				  WHEN MATCHED THEN UPDATE SET val = s.val
 				  WHEN NOT MATCHED THEN INSERT (id, val) VALUES (s.id, s.val)`,
 			wantCount: 0,
 		},
 		{
 			name: "MERGE target on read-only table denied",
-			sql: `MERGE INTO production_data.public.users t
-				  USING production_data.public.application_logs s ON t.id = s.user_id
-				  WHEN MATCHED THEN UPDATE SET name = s.msg`,
+			sql: `MERGE INTO production_db.app_data.app_config_immutable t
+				  USING production_db.app_data.users s ON t.id = s.id
+				  WHEN MATCHED THEN UPDATE SET name = s.name`,
 			wantCount:  1,
-			wantSubstr: "UPDATE on production_data.public.users",
+			wantSubstr: "UPDATE on production_db.app_data.app_config_immutable",
 		},
 		// ---- multiple violations ----
 		{
 			name:      "multiple DDL+DML violations",
-			sql:       "ALTER TABLE production_data.public.users ADD COLUMN x INT; DROP TABLE production_data.public.users",
+			sql:       "ALTER TABLE production_db.app_data.users ADD COLUMN x INT; DROP TABLE production_db.app_data.users",
 			wantCount: 2,
+		},
+		// ---- DROP INDEX ----
+		{
+			name:      "DROP INDEX allowed when allow_index=true",
+			sql:       "DROP INDEX production_db.app_data.idx_test",
+			wantCount: 0,
+		},
+		{
+			name:       "DROP INDEX denied when allow_index=false (catalog default)",
+			sql:        "DROP INDEX production_db.unknown_schema.idx_test",
+			wantCount:  1,
+			wantSubstr: "DROP INDEX on production_db.unknown_schema.idx_test",
 		},
 	}
 
@@ -289,7 +358,8 @@ func TestValidate(t *testing.T) {
 	appendFullDMLPolicy := &Policy{
 		Permissions: []CatalogPermission{
 			{
-				Catalog: "mydb",
+				Catalog:    "mydb",
+				BaseAccess: "none",
 				Schemas: []SchemaPermission{
 					{
 						SchemaName: "logs",
@@ -300,6 +370,14 @@ func TestValidate(t *testing.T) {
 						SchemaName: "scratch",
 						BaseAccess: "full_dml",
 						AllTables:  true,
+					},
+					{
+						SchemaName: "mixed",
+						BaseAccess: "read",
+						AllTables:  true,
+						Overrides: SchemaOverrides{
+							Append: []string{"event_log"},
+						},
 					},
 				},
 			},
@@ -339,7 +417,7 @@ func TestValidate(t *testing.T) {
 func TestValidateFailFast(t *testing.T) {
 	policy := specPolicy()
 	// Query that produces 2 violations without FailFast.
-	sql := "SELECT * FROM production_data.public.pii_vault_keys p JOIN production_data.finance_reports.secret_budget s ON p.id = s.id"
+	sql := "SELECT * FROM production_db.app_data.user_passwords p JOIN production_db.app_data.credit_card_numbers c ON p.id = c.id"
 
 	parsed := parse(t, sql)
 
@@ -363,14 +441,16 @@ func TestValidateFailFast(t *testing.T) {
 func TestParsePolicy(t *testing.T) {
 	data := []byte(`{
 		"policy_id": "pol_test",
-		"version": "1.2",
+		"version": "1.3",
 		"permissions": [
 			{
 				"catalog": "mydb",
+				"base_access": "read",
+				"management": { "allow_ddl": false },
 				"schemas": [
 					{
 						"schema_name": "public",
-						"base_access": "read",
+						"base_access": "read_write",
 						"all_tables": true,
 						"management": {
 							"allow_ddl": true,
@@ -378,11 +458,11 @@ func TestParsePolicy(t *testing.T) {
 						},
 						"overrides": {
 							"denied": ["secret"],
+							"append": ["event_log"],
 							"granular": [
 								{
 									"tables": ["audit"],
-									"actions": ["SELECT", "INSERT"],
-									"allow_ddl": false
+									"actions": ["SELECT", "INSERT"]
 								}
 							]
 						}
@@ -400,18 +480,28 @@ func TestParsePolicy(t *testing.T) {
 	if p.PolicyID != "pol_test" {
 		t.Errorf("PolicyID = %q, want %q", p.PolicyID, "pol_test")
 	}
-	if p.Version != "1.2" {
-		t.Errorf("Version = %q, want %q", p.Version, "1.2")
+	if p.Version != "1.3" {
+		t.Errorf("Version = %q, want %q", p.Version, "1.3")
 	}
 	if len(p.Permissions) != 1 {
 		t.Fatalf("len(Permissions) = %d, want 1", len(p.Permissions))
 	}
-	schema := p.Permissions[0].Schemas[0]
+	cp := p.Permissions[0]
+	if cp.BaseAccess != "read" {
+		t.Errorf("catalog BaseAccess = %q, want %q", cp.BaseAccess, "read")
+	}
+	if cp.Management == nil {
+		t.Fatal("expected non-nil catalog Management")
+	}
+	schema := cp.Schemas[0]
 	if schema.Management == nil {
-		t.Fatal("expected non-nil Management")
+		t.Fatal("expected non-nil schema Management")
 	}
 	if !schema.Management.AllowDDL {
 		t.Error("expected AllowDDL=true")
+	}
+	if len(schema.Overrides.Append) != 1 {
+		t.Errorf("expected 1 append override, got %d", len(schema.Overrides.Append))
 	}
 	if len(schema.Overrides.Granular) != 1 {
 		t.Fatalf("expected 1 granular override, got %d", len(schema.Overrides.Granular))
@@ -424,8 +514,8 @@ func TestParsePolicy(t *testing.T) {
 func TestParsePolicyDuplicateCatalog(t *testing.T) {
 	data := []byte(`{
 		"permissions": [
-			{"catalog": "mydb", "schemas": [{"schema_name": "public", "base_access": "read", "all_tables": true}]},
-			{"catalog": "mydb", "schemas": [{"schema_name": "other", "base_access": "read", "all_tables": true}]}
+			{"catalog": "mydb", "base_access": "read", "schemas": [{"schema_name": "public", "base_access": "read", "all_tables": true}]},
+			{"catalog": "mydb", "base_access": "read", "schemas": [{"schema_name": "other", "base_access": "read", "all_tables": true}]}
 		]
 	}`)
 
@@ -443,6 +533,7 @@ func TestParsePolicyDuplicateSchema(t *testing.T) {
 		"permissions": [
 			{
 				"catalog": "mydb",
+				"base_access": "read",
 				"schemas": [
 					{"schema_name": "public", "base_access": "read", "all_tables": true},
 					{"schema_name": "public", "base_access": "read_write", "all_tables": true}
@@ -465,13 +556,8 @@ func TestParsePolicyInvalidAccess(t *testing.T) {
 		"permissions": [
 			{
 				"catalog": "mydb",
-				"schemas": [
-					{
-						"schema_name": "public",
-						"base_access": "invalid_level",
-						"all_tables": true
-					}
-				]
+				"base_access": "invalid_level",
+				"schemas": []
 			}
 		]
 	}`)
@@ -487,6 +573,7 @@ func TestParsePolicyAppendLevel(t *testing.T) {
 		"permissions": [
 			{
 				"catalog": "mydb",
+				"base_access": "none",
 				"schemas": [
 					{
 						"schema_name": "logs",
@@ -512,6 +599,7 @@ func TestParsePolicyFullDMLLevel(t *testing.T) {
 		"permissions": [
 			{
 				"catalog": "mydb",
+				"base_access": "none",
 				"schemas": [
 					{
 						"schema_name": "scratch",

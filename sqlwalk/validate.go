@@ -19,6 +19,7 @@ const (
 	OpTruncate                  // TRUNCATE target
 	OpAlterTable                // ALTER TABLE target
 	OpCreateIndex               // CREATE INDEX target
+	OpDropIndex                 // DROP INDEX target
 	OpDropTable                 // DROP TABLE target
 )
 
@@ -38,6 +39,8 @@ func (o OpType) String() string {
 		return "ALTER TABLE"
 	case OpCreateIndex:
 		return "CREATE INDEX"
+	case OpDropIndex:
+		return "DROP INDEX"
 	case OpDropTable:
 		return "DROP TABLE"
 	default:
@@ -301,10 +304,19 @@ func (ac *accessCollector) walkMergeStmt(stmt *pg_query.MergeStmt) {
 	}
 }
 
-// walkDropStmt handles DROP TABLE statements by extracting table names
-// from the objects list.
+// walkDropStmt handles DROP TABLE and DROP INDEX statements by extracting
+// object names from the objects list.
 func (ac *accessCollector) walkDropStmt(stmt *pg_query.DropStmt) {
-	if stmt == nil || stmt.GetRemoveType() != pg_query.ObjectType_OBJECT_TABLE {
+	if stmt == nil {
+		return
+	}
+	var op OpType
+	switch stmt.GetRemoveType() {
+	case pg_query.ObjectType_OBJECT_TABLE:
+		op = OpDropTable
+	case pg_query.ObjectType_OBJECT_INDEX:
+		op = OpDropIndex
+	default:
 		return
 	}
 	for _, obj := range stmt.GetObjects() {
@@ -326,7 +338,7 @@ func (ac *accessCollector) walkDropStmt(stmt *pg_query.DropStmt) {
 			name = nodeString(items[2])
 		}
 		if name != "" {
-			ac.addTableDirect(catalog, schema, name, OpDropTable)
+			ac.addTableDirect(catalog, schema, name, op)
 		}
 	}
 }

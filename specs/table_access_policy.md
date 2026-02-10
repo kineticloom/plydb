@@ -1,103 +1,115 @@
 ## Specification: Database Hierarchical Access Policy
 
-This specification defines a JSON schema for managing database access permissions, covering **DQL (Data Query Language)**, **DML (Data Manipulation Language)**, and **DDL (Data Definition Language)**. It supports a "Base-Override" inheritance model to minimize configuration verbosity.
+This specification defines a JSON-based schema for managing database access control. It utilizes a hierarchical inheritance model that allows for broad, high-level defaults at the **Catalog** level, with the ability to define granular overrides at the **Schema** and **Table** levels.
 
 ---
 
-### 1. Hierarchy & Inheritance
+## 1. Core Concepts
 
-The policy follows a strict top-down inheritance:
+### 1.1 Inheritance Hierarchy
 
-1. **Catalog (Database)**: The top-level container.
-2. **Schema**: Defines the default (`base_access`) for all contained objects.
-3. **Table Overrides**: Explicitly modifies permissions for specific tables, deviating from the schema base.
+Permissions flow from top to bottom. A more specific definition always overrides a more general one:
+`Catalog Default` → `Schema Override` → `Table Override`.
 
----
+### 1.2 Access Levels (Shorthands)
 
-### 2. Key Definitions
+To ensure clarity, the following shorthand strings map to specific SQL privilege sets:
 
-#### A. Access Shorthands
-
-To simplify the JSON, the following shorthands map to specific SQL privilege sets:
-
-* `none`: Revokes all privileges.
-* `read`: `SELECT`.
-* `append`: `SELECT`, `INSERT`.
-* `read_write`: `SELECT`, `INSERT`, `UPDATE`, `DELETE`.
-* `full_dml`: All of the above plus `TRUNCATE`.
-
-#### B. DDL & Management
-
-Because DDL (`ALTER`, `DROP`) usually requires ownership in Postgres, the policy engine interprets these flags to either change object ownership or grant membership in a "Manager" role.
-
-* **`allow_ddl`**: Enables `ALTER TABLE` (adding/modifying columns).
-* **`allow_index`**: Enables `CREATE INDEX`.
-* **`can_drop`**: Enables `DROP TABLE` and `TRUNCATE`.
-
----
-
-### 3. JSON Schema Specification
-
-| Path | Type | Description |
+| Level | SQL Privileges | Intended Use |
 | --- | --- | --- |
-| `permissions[].catalog` | String | The Postgres database name. |
-| `permissions[].all_schemas` | Boolean | If `true`, applies `base_access` to all schemas. |
-| `schemas[].base_access` | Enum | The default DQL/DML level for the schema. |
-| `schemas[].all_tables` | Boolean | If `true`, enables the allowlist for the schema. |
-| `schemas[].management` | Object | Defines DDL-level permissions for the schema. |
-| `schemas[].overrides` | Object | Arrays defining tables that differ from `base_access`. |
+| `none` | `REVOKE ALL` | Complete isolation/removal of access. |
+| `read` | `SELECT` | Standard data viewing. |
+| `append` | `SELECT, INSERT` | Logging and audit trails. |
+| `read_write` | `SELECT, INSERT, UPDATE, DELETE` | Standard application/DML access. |
+| `full_dml` | `SELECT, INSERT, UPDATE, DELETE, TRUNCATE` | High-level data manipulation. |
+
+### 1.3 Management (DDL) Capabilities
+
+DDL (Data Definition Language) permissions are handled via the `management` object.
+
+* **`allow_ddl`**: Grants the ability to `ALTER` existing table structures.
+* **`allow_index`**: Grants the ability to `CREATE` or `DROP` indexes.
+* **`can_drop`**: Grants the ability to `DROP` tables or the schema itself.
 
 ---
 
-### 4. Comprehensive Example Policy
+## 2. Data Dictionary
+
+### Catalog Level (Root)
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `catalog` | String | Name of the database. |
+| `base_access` | Enum | Default access level for every schema and table in the DB. |
+| `management` | Object | (Optional) Default DDL settings for the entire DB. |
+| `schemas` | Array | List of schema-specific overrides. |
+
+### Schema Level
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `schema_name` | String | Name of the schema. |
+| `base_access` | Enum | (Optional) Overrides the Catalog-level default for this schema. |
+| `all_tables` | Boolean | If `true`, applies the `base_access` to all tables in the schema. |
+| `management` | Object | (Optional) Overrides the Catalog-level DDL settings. |
+| `overrides` | Object | Contains `read_only`, `read_write`, `append`, `granular`, and `denied` arrays. |
+
+---
+
+## 3. Comprehensive Example Policy
+
+This policy demonstrates a multi-database environment with global defaults and surgical exceptions.
 
 ```json
 {
-  "policy_id": "pol_eng_admin_2026",
-  "version": "1.2",
+  "policy_id": "global_enterprise_policy_2026",
+  "version": "1.3",
   "permissions": [
     {
-      "catalog": "production_data",
+      "catalog": "production_db",
+      "base_access": "read",
+      "management": { "allow_ddl": false, "allow_index": false },
+      "comment": "Default to read-only for safety.",
       "schemas": [
         {
-          "schema_name": "public",
-          "base_access": "read",
-          "all_tables": true,
-          "management": {
-            "allow_ddl": false,
-            "allow_index": true,
-            "comment": "Users can tune performance via indexes but not change schema."
-          },
-          "overrides": {
-            "read_write": ["application_logs", "session_cache"],
-            "denied": ["pii_vault_keys"]
-          }
-        },
-        {
-          "schema_name": "staging_area",
+          "schema_name": "app_data",
           "base_access": "read_write",
           "all_tables": true,
-          "management": {
-            "allow_ddl": true,
-            "can_drop": true,
-            "comment": "Full DDL/DML control for staging tables."
-          },
+          "management": { "allow_index": true },
           "overrides": {
-            "read_only": ["reference_master_data"]
+            "denied": ["user_passwords", "credit_card_numbers"],
+            "read_only": ["app_config_immutable"]
           }
         },
         {
-          "schema_name": "finance_reports",
-          "base_access": "none",
-          "all_tables": false,
+          "schema_name": "reporting_sandbox",
+          "base_access": "full_dml",
+          "all_tables": true,
+          "management": { "allow_ddl": true, "can_drop": true },
+          "comment": "Full control within this specific schema only."
+        }
+      ]
+    },
+    {
+      "catalog": "staging_db",
+      "base_access": "read_write",
+      "management": {
+        "allow_ddl": true,
+        "allow_index": true
+      },
+      "comment": "Broad access for developers in staging environment.",
+      "schemas": [
+        {
+          "schema_name": "finance_audit",
+          "base_access": "read",
+          "all_tables": true,
+          "management": { "allow_ddl": false },
           "overrides": {
-            "read_only": ["public_revenue_summary"],
             "granular": [
               {
-                "tables": ["ledger_entries"],
+                "tables": ["audit_trail"],
                 "actions": ["SELECT", "INSERT"],
-                "allow_ddl": false,
-                "comment": "Append-only access to ledger; no modifications allowed."
+                "comment": "Promotion to append-only for the audit table."
               }
             ]
           }
@@ -108,3 +120,20 @@ Because DDL (`ALTER`, `DROP`) usually requires ownership in Postgres, the policy
 }
 
 ```
+
+---
+
+## 4. Implementation Rules & Logic Flow
+
+The Policy Engine must resolve permissions in the following order to ensure security:
+
+1. **Catalog Defaulting**: Start with the `catalog.base_access`.
+2. **Schema Merging**: If a schema entry exists, its `base_access` and `management` settings overwrite the catalog defaults.
+3. **Table Resolution**:
+* Apply `GRANT` for the resolved `base_access` to all tables in the schema.
+* Process `overrides` arrays to specific tables.
+* **Crucial**: Tables in the `denied` array must receive an explicit `REVOKE ALL PRIVILEGES` to override any schema-level grants.
+
+
+4. **DDL Execution**:
+* If `allow_ddl` is true, the script must ensure the target role is either the `OWNER` of the table or a member of a role with `CREATE` privileges on the schema.
