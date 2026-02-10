@@ -12,6 +12,8 @@ import (
 func main() {
 	configPath := flag.String("config", "", "path to the connection config JSON file")
 	sqlQuery := flag.String("sql", "", "SQL query to execute")
+	skipPreprocess := flag.Bool("skip-query-preprocessing", false, "skip query preprocessing (table reference rewriting)")
+	debug := flag.Bool("debug", false, "print the query after preprocessing")
 	flag.Parse()
 
 	if *configPath == "" || *sqlQuery == "" {
@@ -39,7 +41,20 @@ func main() {
 	}
 	defer engine.Close()
 
-	rows, err := engine.Query(context.Background(), *sqlQuery)
+	query := *sqlQuery
+	if !*skipPreprocess {
+		query, err = queryengine.PreprocessQuery(query, cfg)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error preprocessing query: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	if *debug {
+		fmt.Fprintf(os.Stderr, "[debug] query: %s\n", query)
+	}
+
+	rows, err := engine.Query(context.Background(), query)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error executing query: %v\n", err)
 		os.Exit(1)
