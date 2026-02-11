@@ -12,6 +12,7 @@ const usage = `Usage: nexus <command> [arguments] [flags]
 Commands:
   query          Execute a SQL query
   scan-context   Scan all data sources and output semantic context as YAML
+  mcp            Start an MCP server exposing a SQL query tool
 
 Run "nexus <command> -h" for command-specific usage.
 `
@@ -27,6 +28,8 @@ func main() {
 		cmd.RunQuery(os.Args[2:])
 	case "scan-context":
 		cmd.RunScanContext(os.Args[2:])
+	case "mcp":
+		cmd.RunMCP(os.Args[2:])
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n%s", os.Args[1], usage)
 		os.Exit(1)
