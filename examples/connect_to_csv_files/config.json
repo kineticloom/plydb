@@ -7,7 +7,7 @@
         "description": "Customer contact information."
       },
       "type": "file",
-      "path": "examples/customers.csv",
+      "path": "examples/connect_to_csv_files/customers.csv",
       "format": "csv",
       "delimiter": ",",
       "header_row": true
@@ -18,7 +18,7 @@
         "description": "Customer order history."
       },
       "type": "file",
-      "path": "examples/orders.csv",
+      "path": "examples/connect_to_csv_files/orders.csv",
       "format": "csv",
       "delimiter": ",",
       "header_row": true

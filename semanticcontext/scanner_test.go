@@ -103,7 +103,7 @@ func TestScanFile_MultipleFiles(t *testing.T) {
 			},
 			"customers": {
 				Type:   queryengine.File,
-				Path:   "../examples/customers.csv",
+				Path:   "testdata/customers.csv",
 				Format: "csv",
 				Metadata: queryengine.Metadata{
 					Name:        "Customers",
@@ -199,7 +199,7 @@ func TestScanFile_TimeDimensions(t *testing.T) {
 	// orders.csv has an order_date column that should be detected as time.
 	dbCfg := queryengine.DatabaseConfig{
 		Type:   queryengine.File,
-		Path:   "../examples/orders.csv",
+		Path:   "testdata/orders.csv",
 		Format: "csv",
 		Metadata: queryengine.Metadata{
 			Name:        "Orders",
