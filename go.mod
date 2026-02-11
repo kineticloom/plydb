@@ -5,6 +5,7 @@ go 1.24.4
 require (
 	github.com/duckdb/duckdb-go/v2 v2.5.5
 	github.com/pganalyze/pg_query_go/v6 v6.2.2
+	go.yaml.in/yaml/v4 v4.0.0-rc.4
 	google.golang.org/protobuf v1.36.11
 )
 

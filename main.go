@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/ypt/experiment-nexus/semanticcontext"
+	"go.yaml.in/yaml/v4"
 )
 
 func main() {
@@ -14,10 +16,17 @@ func main() {
 	sqlQuery := flag.String("sql", "", "SQL query to execute")
 	skipPreprocess := flag.Bool("skip-query-preprocessing", false, "skip query preprocessing (table reference rewriting)")
 	debug := flag.Bool("debug", false, "print the query after preprocessing")
+	scanContext := flag.Bool("scan-context", false, "scan all data sources and output semantic context as YAML")
 	flag.Parse()
 
-	if *configPath == "" || *sqlQuery == "" {
-		fmt.Fprintln(os.Stderr, "usage: nexus --config <config.json> --sql <query>")
+	if *configPath == "" {
+		fmt.Fprintln(os.Stderr, "usage: nexus --config <config.json> [--sql <query> | --scan-context]")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	if !*scanContext && *sqlQuery == "" {
+		fmt.Fprintln(os.Stderr, "usage: nexus --config <config.json> [--sql <query> | --scan-context]")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -40,6 +49,22 @@ func main() {
 		os.Exit(1)
 	}
 	defer engine.Close()
+
+	if *scanContext {
+		provider := semanticcontext.NewAutoScanProvider(cfg, engine)
+		model, err := provider.Provide(context.Background(), nil)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error scanning context: %v\n", err)
+			os.Exit(1)
+		}
+
+		enc := yaml.NewEncoder(os.Stdout)
+		if err := enc.Encode(model); err != nil {
+			fmt.Fprintf(os.Stderr, "error encoding YAML: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	query := *sqlQuery
 	if !*skipPreprocess {
