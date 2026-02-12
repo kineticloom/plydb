@@ -1,0 +1,28 @@
+{
+  "credentials": {},
+  "databases": {
+    "products": {
+      "metadata": {
+        "name": "Products",
+        "description": "Product catalog with pricing information."
+      },
+      "type": "file",
+      "path": "examples/connect_to_csv_and_postgres/products.csv",
+      "format": "csv",
+      "delimiter": ",",
+      "header_row": true
+    },
+    "store": {
+      "metadata": {
+        "name": "Store",
+        "description": "Store database with customers and orders."
+      },
+      "type": "postgresql",
+      "host": "localhost",
+      "port": 5432,
+      "database_name": "store",
+      "username": "nexus",
+      "password_env_var": "NEXUS_PG_PASSWORD"
+    }
+  }
+}
