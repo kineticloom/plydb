@@ -26,7 +26,7 @@ func pgContainer(t *testing.T) (host string, port int, cleanup func()) {
 	ctx := context.Background()
 
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:16-alpine",
+		Image:        "postgres:17-alpine",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_USER":     "testuser",
@@ -287,8 +287,8 @@ func TestIntegrationPostgres(t *testing.T) {
 		defer rows.Close()
 
 		type employee struct {
-			id    int
-			name  string
+			id     int
+			name   string
 			deptID int
 			salary float64
 		}

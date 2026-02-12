@@ -26,7 +26,7 @@ func pgContainer(t *testing.T) (host string, port int, cleanup func()) {
 	ctx := context.Background()
 
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:16-alpine",
+		Image:        "postgres:17-alpine",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_USER":     "testuser",
@@ -350,8 +350,8 @@ func TestIntegrationPostgres(t *testing.T) {
 
 		// Verify column comments are propagated as field descriptions.
 		tests := []struct {
-			fieldName   string
-			wantDesc    string
+			fieldName string
+			wantDesc  string
 		}{
 			{"id", "Employee identifier"},
 			{"name", "Full name"},
