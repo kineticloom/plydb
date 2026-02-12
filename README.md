@@ -115,9 +115,27 @@ relational view:
 | **Cloud / SaaS** (WIP) | Google Sheets, S3                 |
 | **Data Lake** (WIP)    | Apache Iceberg, Delta Lake        |
 
-## Quick start
+## Connecting AI agents to Nexus
 
-TODO: link to examples
+To connect an AI agent to Nexus, follow the step-by-step tutorial for your
+preferred client:
+
+- **[Claude Desktop](examples/connect_to_claude_desktop/README.md)** - full
+  walkthrough querying CSV files in Claude Desktop via MCP
+
+More examples of configuring data sources:
+
+- [Query CSV files](examples/connect_to_csv_files/README.md)
+- [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
+- [Semantic context scanning](examples/semantic_context_scanning/README.md)
+
+Nexus uses the [Model Context Protocol](https://modelcontextprotocol.io) and
+works with any MCP-compatible client. For other agents, see their MCP setup
+guides:
+
+- [ChatGPT](https://platform.openai.com/docs/guides/developer-mode)
+- [OpenCode](https://opencode.ai/docs/mcp-servers/)
+- [Gemini](https://geminicli.com/docs/tools/mcp-server/)
 
 ## Testing
 

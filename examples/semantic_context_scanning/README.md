@@ -1,21 +1,34 @@
 # Semantic Context Scanning
 
-This example demonstrates the `scan-context` command, which automatically discovers table schemas and PostgreSQL `COMMENT` metadata from configured data sources and outputs a semantic model as YAML.
+This example demonstrates how Nexus uses PostgreSQL `COMMENT` metadata to give
+AI agents the semantic context they need to understand your data. When an agent
+calls the `get_semantic_context` MCP tool, Nexus introspects the configured data
+sources and returns a structured YAML description of every table, column, and
+relationship — including any human-written comments that explain what the data
+actually means.
 
 ## Why This Matters
 
-The schema here tracks a fictional multidimensional power grid. The terminology is intentionally esoteric (e.g. `vortex_anchor`, `flux_telemetry`, `syn_link_01`) so an LLM cannot rely on "common sense" to generate queries.
+The schema here tracks a fictional multidimensional power grid. The terminology
+is intentionally esoteric (e.g. `vortex_anchor`, `flux_telemetry`,
+`syn_link_01`) so an LLM cannot rely on "common sense" to generate queries.
 
-PostgreSQL `COMMENT` statements are used to provide the semantic mapping. The `scan-context` command extracts these comments alongside column types and foreign keys, producing a structured YAML file that gives an LLM the context it needs to understand the domain.
+PostgreSQL `COMMENT` statements provide the semantic mapping. Nexus extracts
+these comments alongside column types and foreign keys, producing structured
+YAML that follows the
+[Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
+specification. This gives the agent the context it needs to understand the
+domain and write correct SQL.
 
 ## Data Sources
 
-- **grid** (PostgreSQL) — `vortex_anchor`, `flux_telemetry`, and `syn_link_01` tables with `COMMENT` metadata describing the fictional domain.
+- **grid** (PostgreSQL) — `vortex_anchor`, `flux_telemetry`, and `syn_link_01`
+  tables with `COMMENT` metadata describing the fictional domain.
 
 ## Prerequisites
 
 - Docker installed and running
-- nexus binary built (`go build -o nexus .` from the project root)
+- Nexus binary built (`go build -o nexus .` from the project root)
 
 ## Setup
 
@@ -47,17 +60,50 @@ docker exec -it nexus-postgres psql -U nexus -d grid
 export NEXUS_PG_PASSWORD=nexus
 ```
 
-## Usage
+## How It Works with AI Agents
 
-### Scan the Semantic Context
+When Nexus runs as an MCP server, it exposes a `get_semantic_context` tool
+alongside the `query` tool. An AI agent (Claude, ChatGPT, etc.) can call
+`get_semantic_context` at any time to retrieve a full semantic model of the
+configured data sources. The agent then uses this context to understand
+domain-specific terminology and write accurate SQL.
 
-Run `scan-context` to introspect the database and produce a semantic model:
+For example, after connecting Claude Desktop to this example's config (see the
+[Claude Desktop tutorial](../connect_to_claude_desktop/README.md) for setup
+steps), Claude would:
+
+1. Call `get_semantic_context` to learn that `oscill_rate` means "the frequency
+   of energy vibration" and that `syn_link_01` "maps the entanglement between
+   two different vortex anchors."
+2. Use that understanding to translate natural-language questions into correct
+   SQL via the `query` tool.
+
+### Example Prompts
+
+Try asking an agent connected to this data source:
+
+1. **"Which energy anchor is currently at risk of collapsing?"** — Requires
+   joining `vortex_anchor` to `flux_telemetry` and comparing
+   `stability_threshold` to `entropy_delta`.
+2. **"What is the average vibration frequency of Obsidian-Nine over the last
+   hour?"** — Requires mapping "vibration frequency" to `oscill_rate`.
+3. **"List all pairs of nodes that have a high ability to share energy."** —
+   Requires identifying that `conductivity_ratio` in `syn_link_01` represents
+   "sharing energy".
+
+Without the semantic context from `COMMENT` metadata, an agent would have no way
+to connect these natural-language concepts to the underlying column names.
+
+## Inspecting the Semantic Context via CLI
+
+You can also preview what the `get_semantic_context` tool returns by using the
+`scan-context` CLI command directly:
 
 ```bash
 ./nexus scan-context --config examples/semantic_context_scanning/config.json
 ```
 
-The output is content that follows the [Open Semantic Interchange](https://github.com/open-semantic-interchange/OSI) specification.
+This outputs the same OSI YAML that the MCP tool returns to agents:
 
 ```yaml
 semantic_model:
@@ -74,16 +120,21 @@ semantic_model:
         - name: recorded_at
           data_type: timestamp with time zone
         - name: oscill_rate
-          description: The frequency of energy vibration. Optimal range is between 400 and 600 mHz.
+          description:
+            The frequency of energy vibration. Optimal range is between 400 and
+            600 mHz.
           data_type: double precision
         - name: entropy_delta
-          description: The rate of energy decay. Positive values indicate system leakage.
+          description:
+            The rate of energy decay. Positive values indicate system leakage.
           data_type: double precision
       dimensions:
         - name: recorded_at
           is_time: true
     - name: grid.public.syn_link_01
-      description: Maps the entanglement between two different vortex anchors. High conductivity allows for energy sharing.
+      description:
+        Maps the entanglement between two different vortex anchors. High
+        conductivity allows for energy sharing.
       source: grid.public.syn_link_01
       fields:
         - name: link_id
@@ -95,7 +146,9 @@ semantic_model:
         - name: conductivity_ratio
           data_type: numeric
     - name: grid.public.vortex_anchor
-      description: Primary stability points for aetheric harvesting. Anchors must remain above their stability_threshold to prevent collapse.
+      description:
+        Primary stability points for aetheric harvesting. Anchors must remain
+        above their stability_threshold to prevent collapse.
       source: grid.public.vortex_anchor
       fields:
         - name: anchor_id
@@ -107,12 +160,7 @@ semantic_model:
           data_type: numeric
 ```
 
-Notice how the PostgreSQL `COMMENT` metadata appears as `description` fields in the YAML output. Without these comments, an LLM would have no way to know that `oscill_rate` is "the frequency of energy vibration" or that `syn_link_01` "maps the entanglement between two different vortex anchors."
-
-## Provide this context to your LLM
-
-Once your LLM has this context, it can understand the semantic meaning of your data. Try asking the LLM questions that require "understanding" the comments rather than the table names:
-
-1. "Which energy anchor is currently at risk of collapsing?" (Requires joining vortex_anchor to flux_telemetry and comparing stability_threshold to entropy_delta).
-2. "What is the average vibration frequency of Obsidian-Nine over the last hour?" (Requires mapping "vibration frequency" to oscill_rate).
-3. "List all pairs of nodes that have a high ability to share energy." (Requires identifying that conductivity_ratio in syn_link_01 represents "sharing energy").
+Notice how the PostgreSQL `COMMENT` metadata appears as `description` fields in
+the YAML output. Without these comments, an LLM would have no way to know that
+`oscill_rate` is "the frequency of energy vibration" or that `syn_link_01` "maps
+the entanglement between two different vortex anchors."
