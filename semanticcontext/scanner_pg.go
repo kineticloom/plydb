@@ -45,7 +45,8 @@ func scanPostgres(ctx context.Context, q MetadataQuerier, catalog string, _ quer
 	}
 
 	// Best-effort: fetch table and column comments from pg_catalog.
-	comments := fetchPgComments(ctx, q, catalog)
+	comments := fetchPgColumnComments(ctx, q, catalog)
+	tableComments := fetchPgTableComments(ctx, q, catalog)
 
 	// Apply comments to column info.
 	for tk, cols := range grouped {
@@ -59,17 +60,53 @@ func scanPostgres(ctx context.Context, q MetadataQuerier, catalog string, _ quer
 
 	datasets := make([]Dataset, 0, len(ordered))
 	for _, tk := range ordered {
-		ds := columnsToDataset(catalog, tk.schema, tk.table, grouped[tk], "")
+		tableDesc := tableComments[fmt.Sprintf("%s.%s", tk.schema, tk.table)]
+		ds := columnsToDataset(catalog, tk.schema, tk.table, grouped[tk], tableDesc)
 		datasets = append(datasets, ds)
 	}
 	return datasets, nil
 }
 
-// fetchPgComments attempts to read table/column comments from pg_catalog.
+// fetchPgTableComments attempts to read table-level comments from pg_catalog.
+// Returns a map of "schema.table" -> comment. Logs a warning and returns an
+// empty map if the query fails.
+func fetchPgTableComments(ctx context.Context, q MetadataQuerier, catalog string) map[string]string {
+	query := fmt.Sprintf(`
+		SELECT
+			n.nspname AS schema_name,
+			c.relname AS table_name,
+			d.description
+		FROM "%s".pg_catalog.pg_description d
+		JOIN "%s".pg_catalog.pg_class c ON d.objoid = c.oid
+		JOIN "%s".pg_catalog.pg_namespace n ON c.relnamespace = n.oid
+		WHERE d.objsubid = 0
+		  AND c.relkind IN ('r', 'v', 'm', 'f', 'p')
+	`, catalog, catalog, catalog)
+
+	rows, err := q.Query(ctx, query)
+	if err != nil {
+		log.Printf("warning: could not fetch table comments for %q: %v", catalog, err)
+		return make(map[string]string)
+	}
+	defer rows.Close()
+
+	comments := make(map[string]string)
+	for rows.Next() {
+		var schema, table, desc string
+		if err := rows.Scan(&schema, &table, &desc); err != nil {
+			log.Printf("warning: error scanning table comment row for %q: %v", catalog, err)
+			return comments
+		}
+		comments[fmt.Sprintf("%s.%s", schema, table)] = desc
+	}
+	return comments
+}
+
+// fetchPgColumnComments attempts to read table/column comments from pg_catalog.
 // Returns a map of "schema.table.column" -> comment. Logs a warning and
 // returns an empty map if the query fails (e.g. DuckDB Postgres scanner
 // doesn't support pg_description).
-func fetchPgComments(ctx context.Context, q MetadataQuerier, catalog string) map[string]string {
+func fetchPgColumnComments(ctx context.Context, q MetadataQuerier, catalog string) map[string]string {
 	query := fmt.Sprintf(`
 		SELECT
 			n.nspname AS schema_name,

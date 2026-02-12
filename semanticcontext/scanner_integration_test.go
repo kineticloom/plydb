@@ -140,6 +140,7 @@ func seedPostgres(t *testing.T, host string, port int) {
 			salary        NUMERIC(10,2) NOT NULL,
 			hired_at      TIMESTAMP NOT NULL DEFAULT NOW()
 		)`,
+		`COMMENT ON TABLE employees IS 'Employee records'`,
 		`COMMENT ON COLUMN employees.id IS 'Employee identifier'`,
 		`COMMENT ON COLUMN employees.name IS 'Full name'`,
 		`COMMENT ON COLUMN employees.department_id IS 'FK to departments'`,
@@ -185,7 +186,7 @@ func seedMySQL(t *testing.T, host string, port int) {
 			department_id INT NOT NULL COMMENT 'FK to departments',
 			salary        DECIMAL(10,2) NOT NULL COMMENT 'Annual salary in USD',
 			hired_at      DATETIME NOT NULL COMMENT 'Hire timestamp'
-		)`,
+		) COMMENT='Employee records'`,
 
 		`INSERT INTO employees (id, name, department_id, salary, hired_at) VALUES
 			(1, 'Alice',   1, 95000.00, '2024-01-15 09:00:00'),
@@ -374,6 +375,31 @@ func TestIntegrationPostgres(t *testing.T) {
 		}
 	})
 
+	t.Run("TableComments", func(t *testing.T) {
+		engine, cfg := pgEngine(t, "pg", host, port)
+
+		provider := NewAutoScanProvider(cfg, engine)
+		result, err := provider.Provide(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("Provide: %v", err)
+		}
+
+		// Verify table-level COMMENT ON TABLE is propagated as Dataset.Description.
+		tests := []struct {
+			datasetName string
+			wantDesc    string
+		}{
+			{"pg.public.departments", "Company departments"},
+			{"pg.public.employees", "Employee records"},
+		}
+		for _, tt := range tests {
+			ds := findDataset(t, result.SemanticModel.Datasets, tt.datasetName)
+			if ds.Description != tt.wantDesc {
+				t.Errorf("dataset %q description = %q, want %q", tt.datasetName, ds.Description, tt.wantDesc)
+			}
+		}
+	})
+
 	t.Run("DataTypes", func(t *testing.T) {
 		engine, cfg := pgEngine(t, "pg", host, port)
 
@@ -524,6 +550,31 @@ func TestIntegrationMySQL(t *testing.T) {
 			f := findField(t, empDS.Fields, tt.fieldName)
 			if f.Description != tt.wantDesc {
 				t.Errorf("field %q description = %q, want %q", tt.fieldName, f.Description, tt.wantDesc)
+			}
+		}
+	})
+
+	t.Run("TableComments", func(t *testing.T) {
+		engine, cfg := mysqlEngine(t, "my", host, port)
+
+		provider := NewAutoScanProvider(cfg, engine)
+		result, err := provider.Provide(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("Provide: %v", err)
+		}
+
+		// Verify table-level COMMENT= is propagated as Dataset.Description.
+		tests := []struct {
+			datasetName string
+			wantDesc    string
+		}{
+			{"my.testdb.departments", "Company departments"},
+			{"my.testdb.employees", "Employee records"},
+		}
+		for _, tt := range tests {
+			ds := findDataset(t, result.SemanticModel.Datasets, tt.datasetName)
+			if ds.Description != tt.wantDesc {
+				t.Errorf("dataset %q description = %q, want %q", tt.datasetName, ds.Description, tt.wantDesc)
 			}
 		}
 	})

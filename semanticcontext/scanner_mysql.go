@@ -3,6 +3,7 @@ package semanticcontext
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/ypt/experiment-nexus/queryengine"
 )
@@ -42,10 +43,43 @@ func scanMySQL(ctx context.Context, q MetadataQuerier, catalog string, _ queryen
 		return nil, fmt.Errorf("iterating columns: %w", err)
 	}
 
+	// Best-effort: fetch table-level comments.
+	tableComments := fetchMySQLTableComments(ctx, q, catalog)
+
 	datasets := make([]Dataset, 0, len(ordered))
 	for _, tk := range ordered {
-		ds := columnsToDataset(catalog, tk.schema, tk.table, grouped[tk], "")
+		tableDesc := tableComments[fmt.Sprintf("%s.%s", tk.schema, tk.table)]
+		ds := columnsToDataset(catalog, tk.schema, tk.table, grouped[tk], tableDesc)
 		datasets = append(datasets, ds)
 	}
 	return datasets, nil
+}
+
+// fetchMySQLTableComments queries information_schema.tables for table-level
+// comments. Returns a map of "schema.table" -> comment.
+func fetchMySQLTableComments(ctx context.Context, q MetadataQuerier, catalog string) map[string]string {
+	query := fmt.Sprintf(`
+		SELECT table_schema, table_name, table_comment
+		FROM "%s".information_schema.tables
+		WHERE table_schema NOT IN ('information_schema', 'mysql', 'performance_schema', 'sys')
+		  AND table_comment != ''
+	`, catalog)
+
+	rows, err := q.Query(ctx, query)
+	if err != nil {
+		log.Printf("warning: could not fetch table comments for %q: %v", catalog, err)
+		return make(map[string]string)
+	}
+	defer rows.Close()
+
+	comments := make(map[string]string)
+	for rows.Next() {
+		var schema, table, comment string
+		if err := rows.Scan(&schema, &table, &comment); err != nil {
+			log.Printf("warning: error scanning table comment row for %q: %v", catalog, err)
+			return comments
+		}
+		comments[fmt.Sprintf("%s.%s", schema, table)] = comment
+	}
+	return comments
 }
