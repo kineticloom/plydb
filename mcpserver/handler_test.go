@@ -14,7 +14,7 @@ import (
 // startTestServer creates an MCP server, connects a client, and returns the client session.
 func startTestServer(t *testing.T, cfg *queryengine.Config, engine *queryengine.QueryEngine) *mcp.ClientSession {
 	t.Helper()
-	server := NewServer(cfg, engine)
+	server := NewServer(cfg, engine, nil)
 	ctx := context.Background()
 
 	clientTransport, serverTransport := mcp.NewInMemoryTransports()

@@ -11,6 +11,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/ypt/experiment-nexus/mcpserver"
+	"github.com/ypt/experiment-nexus/semanticcontext"
 )
 
 func RunMCP(args []string) {
@@ -37,7 +38,14 @@ Flags:`)
 	cfg, engine := LoadConfigAndEngine(*configPath)
 	defer engine.Close()
 
-	server := mcpserver.NewServer(cfg, engine)
+	provider := semanticcontext.NewAutoScanProvider(cfg, engine)
+	model, err := provider.Provide(context.Background(), nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error scanning semantic context: %v\n", err)
+		os.Exit(1)
+	}
+
+	server := mcpserver.NewServer(cfg, engine, model)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

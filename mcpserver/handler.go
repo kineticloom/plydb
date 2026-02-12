@@ -7,6 +7,8 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/ypt/experiment-nexus/semanticcontext"
+	"go.yaml.in/yaml/v4"
 )
 
 const queryTimeout = 55 * time.Second
@@ -16,8 +18,8 @@ type QueryInput struct {
 	SQL string `json:"sql" jsonschema:"The SQL query to execute against the configured data sources"`
 }
 
-// NewServer creates an MCP server with the query tool registered.
-func NewServer(cfg *queryengine.Config, engine *queryengine.QueryEngine) *mcp.Server {
+// NewServer creates an MCP server with the query and semantic context tools registered.
+func NewServer(cfg *queryengine.Config, engine *queryengine.QueryEngine, model *semanticcontext.SemanticModelFile) *mcp.Server {
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "nexus",
 		Version: "0.1.0",
@@ -28,7 +30,29 @@ func NewServer(cfg *queryengine.Config, engine *queryengine.QueryEngine) *mcp.Se
 		Description: "Execute a SQL query against the configured data sources. Tables must be referenced as fully-qualified 3-part names: catalog.schema.table.",
 	}, makeQueryHandler(cfg, engine))
 
+	// Pre-serialize semantic context YAML once at init time.
+	contextYAML, err := yaml.Marshal(model)
+	if err != nil {
+		contextYAML = []byte(fmt.Sprintf("error serializing semantic context: %v", err))
+	}
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "get_semantic_context",
+		Description: "Returns the semantic context of the configured data sources, including dataset schemas, field types, descriptions, and dimensions, in Open Semantic Interchange (OSI) YAML format. For more on the OSI spec, see: https://github.com/open-semantic-interchange/OSI",
+	}, makeSemanticContextHandler(string(contextYAML)))
+
 	return server
+}
+
+// makeSemanticContextHandler returns a handler that returns the pre-serialized semantic context YAML.
+func makeSemanticContextHandler(yamlStr string) mcp.ToolHandlerFor[any, any] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, input any) (*mcp.CallToolResult, any, error) {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: yamlStr},
+			},
+		}, nil, nil
+	}
 }
 
 // makeQueryHandler returns a typed tool handler for the query tool.
