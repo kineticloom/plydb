@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -43,7 +44,28 @@ Flags:`)
 
 	switch *transport {
 	case "stdio":
-		if err := server.Run(ctx, &mcp.StdioTransport{}); err != nil {
+		// Use a pipe to decouple stdin EOF from the MCP server's read loop.
+		// Without this, when stdin is a pipe (e.g. echo '...' | nexus mcp),
+		// EOF arrives immediately after the last message and races with
+		// response writes — the SDK rejects writes once it detects EOF on
+		// the read side, so responses are never sent.
+		//
+		// By forwarding stdin through a pipe and only closing the write end
+		// when the context is cancelled, the server keeps running long enough
+		// to process all messages and write responses.
+		pr, pw := io.Pipe()
+		go func() {
+			io.Copy(pw, os.Stdin)
+			// stdin closed; keep the pipe open until shutdown is requested.
+			<-ctx.Done()
+			pw.Close()
+		}()
+
+		t := &mcp.IOTransport{
+			Reader: pr,
+			Writer: nopWriteCloser{os.Stdout},
+		}
+		if err := server.Run(ctx, t); err != nil {
 			fmt.Fprintf(os.Stderr, "mcp server error: %v\n", err)
 			os.Exit(1)
 		}
@@ -71,3 +93,10 @@ Flags:`)
 		os.Exit(1)
 	}
 }
+
+// nopWriteCloser wraps an io.Writer with a no-op Close method.
+type nopWriteCloser struct {
+	io.Writer
+}
+
+func (nopWriteCloser) Close() error { return nil }

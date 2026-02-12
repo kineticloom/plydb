@@ -26,8 +26,16 @@ nexus mcp --config config.json
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{},"clientInfo":{"name":"test"},"protocolVersion":"2025-03-26"}}' \
-  | ./experiment-nexus mcp --transport stdio --config config.json
+  | ./nexus mcp --transport stdio --config config.json
 ```
+
+NOTE: with stdio transort, the server will wait for Ctrl+C (or SIGINT) after processing piped input, rather than exiting immediately. For testing, you can use `timeout` to automatically shut the process down after a preset delay.
+
+```
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}' | timeout 2 ./nexus mcp --config ...
+```
+
+Or send SIGINT after piping. For real MCP clients that manage the server subprocess, this is the expected behavior - the client kills the process when done.
 
 ## HTTP Transport
 
