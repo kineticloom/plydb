@@ -1,6 +1,6 @@
 # MCP Server
 
-An MCP (Model Context Protocol) server that exposes a `query` tool, allowing AI assistants to execute SQL queries against configured data sources.
+An MCP (Model Context Protocol) server that exposes tools allowing AI assistants to query configured data sources via SQL (`query`) and retrieve their semantic context (`get_semantic_context`).
 
 ## Usage
 
@@ -63,6 +63,20 @@ curl -X POST http://localhost:9090 \
   -H "Mcp-Session-Id: <session-id>" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query","arguments":{"sql":"SELECT 1 AS n"}}}'
 ```
+
+## Tool: `get_semantic_context`
+
+Returns the semantic context of the configured data sources in [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI) YAML format. The output includes dataset schemas, field types, descriptions, and dimensions.
+
+At startup, the MCP server auto-scans all configured data sources to construct the semantic model.
+
+### Input
+
+No parameters required.
+
+### Output
+
+A YAML string containing the semantic model in OSI format.
 
 ## Tool: `query`
 
