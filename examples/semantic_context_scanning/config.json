@@ -1,0 +1,17 @@
+{
+  "credentials": {},
+  "databases": {
+    "grid": {
+      "metadata": {
+        "name": "Grid",
+        "description": "Multidimensional power grid with vortex anchors and flux telemetry."
+      },
+      "type": "postgresql",
+      "host": "localhost",
+      "port": 5432,
+      "database_name": "grid",
+      "username": "nexus",
+      "password_env_var": "NEXUS_PG_PASSWORD"
+    }
+  }
+}

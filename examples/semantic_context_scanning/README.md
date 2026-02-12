@@ -1,0 +1,118 @@
+# Semantic Context Scanning
+
+This example demonstrates the `scan-context` command, which automatically discovers table schemas and PostgreSQL `COMMENT` metadata from configured data sources and outputs a semantic model as YAML.
+
+## Why This Matters
+
+The schema here tracks a fictional multidimensional power grid. The terminology is intentionally esoteric (e.g. `vortex_anchor`, `flux_telemetry`, `syn_link_01`) so an LLM cannot rely on "common sense" to generate queries.
+
+PostgreSQL `COMMENT` statements are used to provide the semantic mapping. The `scan-context` command extracts these comments alongside column types and foreign keys, producing a structured YAML file that gives an LLM the context it needs to understand the domain.
+
+## Data Sources
+
+- **grid** (PostgreSQL) — `vortex_anchor`, `flux_telemetry`, and `syn_link_01` tables with `COMMENT` metadata describing the fictional domain.
+
+## Prerequisites
+
+- Docker installed and running
+- nexus binary built (`go build -o nexus .` from the project root)
+
+## Setup
+
+### 1. Start PostgreSQL
+
+Start and pre-seed the database with the esoteric schema and data:
+
+```bash
+docker run -d \
+  --rm \
+  --name nexus-postgres \
+  -e POSTGRES_USER=nexus \
+  -e POSTGRES_PASSWORD=nexus \
+  -e POSTGRES_DB=grid \
+  -p 5432:5432 \
+  -v $PWD/examples/semantic_context_scanning/seed.sql:/docker-entrypoint-initdb.d/seed.sql \
+  postgres:17-alpine
+```
+
+If needed, access the database via psql like so:
+
+```bash
+docker exec -it nexus-postgres psql -U nexus -d grid
+```
+
+### 2. Set the Password Environment Variable
+
+```bash
+export NEXUS_PG_PASSWORD=nexus
+```
+
+## Usage
+
+### Scan the Semantic Context
+
+Run `scan-context` to introspect the database and produce a semantic model:
+
+```bash
+./nexus scan-context --config examples/semantic_context_scanning/config.json
+```
+
+The output is content that follows the [Open Semantic Interchange](https://github.com/open-semantic-interchange/OSI) specification.
+
+```yaml
+semantic_model:
+  name: Auto-scanned Semantic Model
+  datasets:
+    - name: grid.public.flux_telemetry
+      description: Time-series log of multidimensional energy fluctuations.
+      source: grid.public.flux_telemetry
+      fields:
+        - name: telemetry_id
+          data_type: integer
+        - name: anchor_ref
+          data_type: uuid
+        - name: recorded_at
+          data_type: timestamp with time zone
+        - name: oscill_rate
+          description: The frequency of energy vibration. Optimal range is between 400 and 600 mHz.
+          data_type: double precision
+        - name: entropy_delta
+          description: The rate of energy decay. Positive values indicate system leakage.
+          data_type: double precision
+      dimensions:
+        - name: recorded_at
+          is_time: true
+    - name: grid.public.syn_link_01
+      description: Maps the entanglement between two different vortex anchors. High conductivity allows for energy sharing.
+      source: grid.public.syn_link_01
+      fields:
+        - name: link_id
+          data_type: integer
+        - name: alpha_node
+          data_type: uuid
+        - name: beta_node
+          data_type: uuid
+        - name: conductivity_ratio
+          data_type: numeric
+    - name: grid.public.vortex_anchor
+      description: Primary stability points for aetheric harvesting. Anchors must remain above their stability_threshold to prevent collapse.
+      source: grid.public.vortex_anchor
+      fields:
+        - name: anchor_id
+          data_type: uuid
+        - name: designation
+          description: The unique resonant name of the anchor.
+          data_type: character varying
+        - name: stability_threshold
+          data_type: numeric
+```
+
+Notice how the PostgreSQL `COMMENT` metadata appears as `description` fields in the YAML output. Without these comments, an LLM would have no way to know that `oscill_rate` is "the frequency of energy vibration" or that `syn_link_01` "maps the entanglement between two different vortex anchors."
+
+## Provide this context to your LLM
+
+Once your LLM has this context, it can understand the semantic meaning of your data. Try asking the LLM questions that require "understanding" the comments rather than the table names:
+
+1. "Which energy anchor is currently at risk of collapsing?" (Requires joining vortex_anchor to flux_telemetry and comparing stability_threshold to entropy_delta).
+2. "What is the average vibration frequency of Obsidian-Nine over the last hour?" (Requires mapping "vibration frequency" to oscill_rate).
+3. "List all pairs of nodes that have a high ability to share energy." (Requires identifying that conductivity_ratio in syn_link_01 represents "sharing energy").
