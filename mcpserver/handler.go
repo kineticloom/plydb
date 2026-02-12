@@ -66,6 +66,7 @@ func makeQueryHandler(cfg *queryengine.Config, engine *queryengine.QueryEngine) 
 			Content: []mcp.Content{
 				&mcp.TextContent{Text: text},
 			},
+			StructuredContent: result,
 		}, nil, nil
 	}
 }
