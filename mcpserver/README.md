@@ -1,6 +1,8 @@
 # MCP Server
 
-An MCP (Model Context Protocol) server that exposes tools allowing AI assistants to query configured data sources via SQL (`query`) and retrieve their semantic context (`get_semantic_context`).
+An MCP (Model Context Protocol) server that provides tools allowing AI
+assistants to query configured data sources via SQL (`query`) and retrieve their
+semantic context (`get_semantic_context`).
 
 ## Usage
 
@@ -29,13 +31,17 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{},
   | ./plydb mcp --transport stdio --config config.json
 ```
 
-NOTE: with stdio transort, the server will wait for Ctrl+C (or SIGINT) after processing piped input, rather than exiting immediately. For testing, you can use `timeout` to automatically shut the process down after a preset delay.
+NOTE: with stdio transort, the server will wait for Ctrl+C (or SIGINT) after
+processing piped input, rather than exiting immediately. For testing, you can
+use `timeout` to automatically shut the process down after a preset delay.
 
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}' | timeout 2 ./plydb mcp --config ...
 ```
 
-Or send SIGINT after piping. For real MCP clients that manage the server subprocess, this is the expected behavior - the client kills the process when done.
+Or send SIGINT after piping. For real MCP clients that manage the server
+subprocess, this is the expected behavior - the client kills the process when
+done.
 
 ## HTTP Transport
 
@@ -66,9 +72,13 @@ curl -X POST http://localhost:9090 \
 
 ## Tool: `get_semantic_context`
 
-Returns the semantic context of the configured data sources in [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI) YAML format. The output includes dataset schemas, field types, descriptions, and dimensions.
+Returns the semantic context of the configured data sources in
+[Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
+YAML format. The output includes dataset schemas, field types, descriptions, and
+dimensions.
 
-At startup, the MCP server auto-scans all configured data sources to construct the semantic model.
+At startup, the MCP server auto-scans all configured data sources to construct
+the semantic model.
 
 ### Input
 
@@ -84,24 +94,25 @@ Executes a SQL query against the configured data sources.
 
 ### Input
 
-| Field | Type   | Description                        |
-|-------|--------|------------------------------------|
-| `sql` | string | The SQL query to execute           |
+| Field | Type   | Description              |
+| ----- | ------ | ------------------------ |
+| `sql` | string | The SQL query to execute |
 
-Tables must be referenced as fully-qualified 3-part names: `catalog.schema.table`.
+Tables must be referenced as fully-qualified 3-part names:
+`catalog.schema.table`.
 
 ### Output
 
 JSON object with fields:
 
-| Field          | Type     | Description                              |
-|----------------|----------|------------------------------------------|
-| `success`      | boolean  | Whether the query succeeded              |
-| `columns`      | string[] | Column names                             |
-| `column_types` | string[] | Column type names                        |
-| `rows`         | any[][]  | Row data                                 |
-| `row_count`    | integer  | Number of rows returned                  |
-| `truncated`    | boolean  | Whether results were truncated           |
-| `message`      | string   | Human-readable message (errors, limits)  |
+| Field          | Type     | Description                             |
+| -------------- | -------- | --------------------------------------- |
+| `success`      | boolean  | Whether the query succeeded             |
+| `columns`      | string[] | Column names                            |
+| `column_types` | string[] | Column type names                       |
+| `rows`         | any[][]  | Row data                                |
+| `row_count`    | integer  | Number of rows returned                 |
+| `truncated`    | boolean  | Whether results were truncated          |
+| `message`      | string   | Human-readable message (errors, limits) |
 
 Results are limited to 2,048 rows and 50,000 characters of JSON output.

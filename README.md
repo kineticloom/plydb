@@ -1,14 +1,19 @@
-# PlyDB: The Unified Database Gateway for AI Agents
+# PlyDB: The Universal Database Gateway for AI Agents
 
-Unlock the power of AI-driven analytics.
+PlyDB bridges the gap between your AI agents and your fragmented data sources.
 
-PlyDB is a lightweight
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io) gateway that
-bridges your AI agents with your data. It provides a single, unified SQL
-interface to query across databases and files - including Postgres, MySQL, CSV,
-Excel, and Parquet - effortlessly.
+PlyDB's [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
+interface provides a single controlled access point for AI agents to query
+databases and flat files, such as Postgres, MySQL, CSV, Excel, and Parquet, with
+SQL, wherever the data lives.
 
-Get up and running in minutes without complex infrastructure dependencies.
+PlyDB is:
+
+- **Fast:** Get up and running in minutes.
+- **Simple:** No complex infrastructure or heavy dependencies.
+- **Versatile:** Connect your agents to the data they need, wherever it lives.
+
+---
 
 ```
  ┌─────────────────┐ SQL ┌──────────────────────────────────────┐
@@ -16,24 +21,20 @@ Get up and running in minutes without complex infrastructure dependencies.
  │(Claude, ChatGPT,│◀────│                                      │
  │ etc.)           │     │  ┌─────────────────────────────────┐ │
  └─────────────────┘     │  │          Query Engine           │ │
-                         │  │   (Planning, Optimization &     │ │
-                         │  │         Execution)              │ │
-                         │  └──────────────┬──────────────────┘ │
-                         │                 │                    │
-                         │    ┌────────────┼────────────┐       │
-                         │    ▼            ▼            ▼       │
-                         │ ┌─────────┐ ┌─────────┐   ┌───────┐  │
-                         │ │Postgres │ │  MySQL  │   │ Files │  │
-                         │ │Connector│ │Connector│   │CSV/etc│  │
-                         │ └───┬─────┘ └────┬────┘   └───┬───┘  │
+                         │  │   (Access control, Planning,    │ │
+                         │  │    Optimization & Execution)    │ │
+                         │  └───────────────┬─────────────────┘ │
+                         │                  │                   │
+                         │     ┌────────────┼────────────┐      │
                          └─────┼────────────┼────────────┼──────┘
                                ▼            ▼            ▼
-                         ┌──────────┐ ┌──────────┐ ┌──────────┐
-                         │PostgreSQL│ │  MySQL   │ │S3/Local  │
-                         │ Database │ │ Database │ │  Files   │
-                         └──────────┘ └──────────┘ └──────────┘
-
+                          ┌──────────┐ ┌──────────┐ ┌──────────┐
+                          │PostgreSQL│ │  MySQL   │ │ S3/Local │
+                          │ Database │ │ Database │ │  Files   │
+                          └──────────┘ └──────────┘ └──────────┘
 ```
+
+---
 
 ## Why PlyDB?
 
@@ -42,9 +43,10 @@ Get up and running in minutes without complex infrastructure dependencies.
   autonomously. Agents use MCP tools to discover tables, inspect schemas, and
   understand your data's semantics.
 - **Zero ETL (Query In-Place):** Eliminate the need for expensive and brittle
-  ETL pipelines. PlyDB lets you query your data exactly where it lives-whether
-  it's a production database, a cloud-hosted spreadsheet, or a data lake.
-- **Cross-Source Queries** - Join tables across MySQL, PostgreSQL, CSV, and more
+  ETL pipelines. PlyDB lets your agents query your data exactly where it lives -
+  whether it's a production database, a cloud-hosted spreadsheet, or a data
+  lake.
+- **Cross-Source Queries:** Join tables across MySQL, PostgreSQL, CSV, and more
   in a single query
 - **Operational Simplicity:** Designed to be up and running in minutes without
   additional infrastructure dependencies.
@@ -59,7 +61,7 @@ Get up and running in minutes without complex infrastructure dependencies.
 
 ## Use Cases
 
-Because PlyDB exposes schema metadata and relational power via MCP, capable AI
+Because PlyDB provides schema metadata and relational power via MCP, capable AI
 agents can perform iterative reasoning - querying data, finding patterns,
 generating visualizations, and recommending specific business actions.
 
@@ -137,20 +139,32 @@ guides:
 - [OpenCode](https://opencode.ai/docs/mcp-servers/)
 - [Gemini](https://geminicli.com/docs/tools/mcp-server/)
 
+## Build
+
+To build a `plydb` binary:
+
+```sh
+go build .
+```
+
 ## Testing
 
-Run unit tests for a package
+To run unit tests for a package:
 
-```
+```sh
 go test ./somepackage/...
 ```
 
-Run integration tests for a package (requires Docker)
+To run integration tests for a package (requires Docker):
 
-```
+```sh
 go test -tags=integration -v -timeout 300s ./somepackage/...
 ```
 
 ## Contributing
+
+TODO
+
+## License
 
 TODO

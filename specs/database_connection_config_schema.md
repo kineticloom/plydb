@@ -1,13 +1,19 @@
-This specification defines a JSON-based schema for managing a heterogeneous registry of data sources. It supports traditional networked databases, local flat files, and cloud-hosted objects (S3) with support for shared credential profiles and globbing patterns.
+# Database connections schema
+
+This specification defines a JSON-based schema for managing a heterogeneous
+registry of data sources. It supports traditional networked databases, local
+flat files, and cloud-hosted objects (S3) with support for shared credential
+profiles and globbing patterns.
 
 ---
 
 ## 1. Structural Overview
 
-The DCM is composed of two primary top-level objects:
+The schema is composed of two primary top-level objects:
 
 1. **`credentials`**: A map of authentication profiles used by cloud providers.
-2. **`databases`**: A map of data source configurations where the key is a unique identifier.
+2. **`databases`**: A map of data source configurations where the key is a
+   unique identifier.
 
 ---
 
@@ -15,45 +21,51 @@ The DCM is composed of two primary top-level objects:
 
 ### 2.1 The `credentials` Object
 
-Stores shared authentication metadata to prevent redundancy across multiple sources.
+Stores shared authentication metadata to prevent redundancy across multiple
+sources.
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `access_key_env` | String | Name of the environment variable for the Access Key ID. |
+| Field            | Type   | Description                                                 |
+| ---------------- | ------ | ----------------------------------------------------------- |
+| `access_key_env` | String | Name of the environment variable for the Access Key ID.     |
 | `secret_key_env` | String | Name of the environment variable for the Secret Access Key. |
 
 ### 2.2 The `databases` Object
 
-Each entry in this map contains common metadata and type-specific connection details.
+Each entry in this map contains common metadata and type-specific connection
+details.
 
 #### A. Common Fields (All Types)
 
-* **`metadata`**: Object containing `name` (String) and `description` (String).
-* **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`, or `s3`.
+- **`metadata`**: Object containing `name` (String) and `description` (String).
+- **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`, or
+  `s3`.
 
 #### B. Networked Database Fields (`type: "postgresql" | "mysql" | etc.`)
 
-* **`host`**: Server address.
-* **`port`**: Network port (Integer).
-* **`database_name`**: The target schema/database name.
-* **`username`**: Login identity.
-* **`password_env_var`**: Name of the env var holding the secret.
+- **`host`**: Server address.
+- **`port`**: Network port (Integer).
+- **`database_name`**: The target schema/database name.
+- **`username`**: Login identity.
+- **`password_env_var`**: Name of the env var holding the secret.
 
 #### C. Local File Fields (`type: "file"`)
 
-* **`path`**: Unix-style path to the file.
-* **`format`**: (Optional if inferred from extension) `csv`, `xlsx`, `parquet`, `json`.
-* **`delimiter`**: (CSV only) The separator character.
-* **`header_row`**: (CSV/XLSX) Boolean; indicates if row 1 is the header.
-* **`sheet_name`**: (XLSX only) The tab to read.
+- **`path`**: Unix-style path to the file.
+- **`format`**: (Optional if inferred from extension) `csv`, `xlsx`, `parquet`,
+  `json`.
+- **`delimiter`**: (CSV only) The separator character.
+- **`header_row`**: (CSV/XLSX) Boolean; indicates if row 1 is the header.
+- **`sheet_name`**: (XLSX only) The tab to read.
 
 #### D. S3 Cloud Storage Fields (`type: "s3"`)
 
-* **`uri`**: S3 URI (e.g., `s3://bucket/path/`). Supports globbing patterns (`*`, `?`, `[]`).
-* **`credential_profile`**: Key matching an entry in the top-level `credentials` map.
-* **`region`**: AWS region (e.g., `us-east-1`).
-* **`format`**: **Required.** The file format (`csv`, `parquet`, etc.).
-* **`delimiter` / `header_row` / `sheet_name**`: Same as Local File fields.
+- **`uri`**: S3 URI (e.g., `s3://bucket/path/`). Supports globbing patterns
+  (`*`, `?`, `[]`).
+- **`credential_profile`**: Key matching an entry in the top-level `credentials`
+  map.
+- **`region`**: AWS region (e.g., `us-east-1`).
+- **`format`**: **Required.** The file format (`csv`, `parquet`, etc.).
+- **`delimiter` / `header_row` / `sheet_name**`: Same as Local File fields.
 
 ---
 
@@ -116,7 +128,6 @@ Each entry in this map contains common metadata and type-specific connection det
     }
   }
 }
-
 ```
 
 ---
@@ -124,4 +135,5 @@ Each entry in this map contains common metadata and type-specific connection det
 ## 4. Operational Logic
 
 1. **Lookup**: Retrieve the database config using the map key.
-2. **Auth Resolution**: If `type` is `s3`, retrieve the `credential_profile`. Fetch the environment variables mapped in that profile.
+2. **Auth Resolution**: If `type` is `s3`, retrieve the `credential_profile`.
+   Fetch the environment variables mapped in that profile.

@@ -62,7 +62,7 @@ export PLYDB_PG_PASSWORD=plydb
 
 ## How It Works with AI Agents
 
-When PlyDB runs as an MCP server, it exposes a `get_semantic_context` tool
+When PlyDB runs as an MCP server, it provides a `get_semantic_context` tool
 alongside the `query` tool. An AI agent (Claude, ChatGPT, etc.) can call
 `get_semantic_context` at any time to retrieve a full semantic model of the
 configured data sources. The agent then uses this context to understand

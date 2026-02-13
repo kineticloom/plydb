@@ -58,7 +58,7 @@ This tutorial uses two CSV files that ship with the repository under
 
 ### 3. Review the config file
 
-The config file tells PlyDB which data sources to expose. Open
+The config file tells PlyDB which data sources to allow. Open
 `examples/connect_to_csv_files/config.json`:
 
 ```json
@@ -91,9 +91,9 @@ The config file tells PlyDB which data sources to expose. Open
 }
 ```
 
-Each key under `databases` becomes a **catalog** in SQL. CSV files are exposed
-as a table named `"table"` under the `default` schema, so the fully-qualified
-table names are:
+Each key under `databases` becomes a **catalog** in SQL. CSV files are
+registered as a table named `"table"` under the `default` schema, so the
+fully-qualified table names are:
 
 - `customers.default."table"` — the customers data
 - `orders.default."table"` — the orders data
@@ -125,8 +125,8 @@ depends on your OS:
 > Edit Config**.
 
 Add (or merge) the following into the config file. Replace
-`/absolute/path/to/plydb` with the actual absolute path to your
-cloned repository:
+`/absolute/path/to/plydb` with the actual absolute path to your cloned
+repository:
 
 ```json
 {
