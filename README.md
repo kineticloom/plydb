@@ -129,7 +129,7 @@ More examples of configuring data sources:
 
 - [Query CSV files](examples/connect_to_csv_files/README.md)
 - [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
-- [Semantic context scanning](examples/semantic_context_scanning/README.md)
+- [Providing semantic context](examples/semantic_context_scanning/README.md)
 
 PlyDB uses the [Model Context Protocol](https://modelcontextprotocol.io) and
 works with any MCP-compatible client. For other agents, see their MCP setup
