@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/kineticloom/plydb/queryengine"
 )
 
 func RunQuery(args []string) {
@@ -15,7 +15,7 @@ func RunQuery(args []string) {
 	skipPreprocess := fs.Bool("skip-query-preprocessing", false, "skip query preprocessing (table reference rewriting)")
 	debug := fs.Bool("debug", false, "print the query after preprocessing")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, `Usage: nexus query <sql> [flags]
+		fmt.Fprintln(os.Stderr, `Usage: plydb query <sql> [flags]
 
 Arguments:
   <sql>    SQL query to execute

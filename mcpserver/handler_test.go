@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kineticloom/plydb/queryengine"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/ypt/experiment-nexus/queryengine"
 )
 
 // startTestServer creates an MCP server, connects a client, and returns the client session.

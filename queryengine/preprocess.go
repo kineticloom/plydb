@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kineticloom/plydb/sqlwalk"
 	pg_query "github.com/pganalyze/pg_query_go/v6"
-	"github.com/ypt/experiment-nexus/sqlwalk"
 )
 
 // PreprocessQuery parses a SQL query, validates that all table references are

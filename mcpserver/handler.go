@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kineticloom/plydb/queryengine"
+	"github.com/kineticloom/plydb/semanticcontext"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/ypt/experiment-nexus/queryengine"
-	"github.com/ypt/experiment-nexus/semanticcontext"
 	"go.yaml.in/yaml/v4"
 )
 
@@ -21,8 +21,10 @@ type QueryInput struct {
 // NewServer creates an MCP server with the query and semantic context tools registered.
 func NewServer(cfg *queryengine.Config, engine *queryengine.QueryEngine, model *semanticcontext.SemanticModelFile) *mcp.Server {
 	server := mcp.NewServer(&mcp.Implementation{
-		Name:    "nexus",
-		Version: "0.1.0",
+		Title:      "PlyDB",
+		Name:       "PlyDB",
+		Version:    "0.1.0",
+		WebsiteURL: "https://github.com/kineticloom/plydb",
 	}, nil)
 
 	mcp.AddTool(server, &mcp.Tool{

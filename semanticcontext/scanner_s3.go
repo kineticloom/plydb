@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/kineticloom/plydb/queryengine"
 )
 
 // scanS3 uses DESCRIBE SELECT to discover columns from an S3 URI

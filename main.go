@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ypt/experiment-nexus/cmd"
+	"github.com/kineticloom/plydb/cmd"
 )
 
-const usage = `Usage: nexus <command> [arguments] [flags]
+const usage = `Usage: plydb <command> [arguments] [flags]
 
 Commands:
   query          Execute a SQL query
   scan-context   Scan all data sources and output semantic context as YAML
   mcp            Start an MCP server exposing a SQL query tool
 
-Run "nexus <command> -h" for command-specific usage.
+Run "plydb <command> -h" for command-specific usage.
 `
 
 func main() {

@@ -21,8 +21,8 @@
       "host": "localhost",
       "port": 5432,
       "database_name": "store",
-      "username": "nexus",
-      "password_env_var": "NEXUS_PG_PASSWORD"
+      "username": "plydb",
+      "password_env_var": "PLYDB_PG_PASSWORD"
     }
   }
 }

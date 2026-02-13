@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ypt/experiment-nexus/semanticcontext"
+	"github.com/kineticloom/plydb/semanticcontext"
 	"go.yaml.in/yaml/v4"
 )
 
@@ -14,7 +14,7 @@ func RunScanContext(args []string) {
 	fs := flag.NewFlagSet("scan-context", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to the connection config JSON file")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, `Usage: nexus scan-context [flags]
+		fmt.Fprintln(os.Stderr, `Usage: plydb scan-context [flags]
 
 Flags:`)
 		fs.PrintDefaults()

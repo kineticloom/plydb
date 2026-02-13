@@ -5,7 +5,7 @@ An MCP (Model Context Protocol) server that exposes tools allowing AI assistants
 ## Usage
 
 ```bash
-nexus mcp --config <path> [--transport stdio|http] [--addr host:port]
+plydb mcp --config <path> [--transport stdio|http] [--addr host:port]
 ```
 
 ### Flags
@@ -19,20 +19,20 @@ nexus mcp --config <path> [--transport stdio|http] [--addr host:port]
 The default transport. The server communicates via JSON-RPC over stdin/stdout.
 
 ```bash
-nexus mcp --config config.json
+plydb mcp --config config.json
 ```
 
 ### Manual Verification
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{},"clientInfo":{"name":"test"},"protocolVersion":"2025-03-26"}}' \
-  | ./nexus mcp --transport stdio --config config.json
+  | ./plydb mcp --transport stdio --config config.json
 ```
 
 NOTE: with stdio transort, the server will wait for Ctrl+C (or SIGINT) after processing piped input, rather than exiting immediately. For testing, you can use `timeout` to automatically shut the process down after a preset delay.
 
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}' | timeout 2 ./nexus mcp --config ...
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}' | timeout 2 ./plydb mcp --config ...
 ```
 
 Or send SIGINT after piping. For real MCP clients that manage the server subprocess, this is the expected behavior - the client kills the process when done.
@@ -42,7 +42,7 @@ Or send SIGINT after piping. For real MCP clients that manage the server subproc
 Starts a Streamable HTTP server.
 
 ```bash
-nexus mcp --config config.json --transport http --addr localhost:9090
+plydb mcp --config config.json --transport http --addr localhost:9090
 ```
 
 ### Manual Verification

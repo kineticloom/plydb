@@ -1,8 +1,8 @@
-# Nexus: The Unified Database Gateway for AI Agents
+# PlyDB: The Unified Database Gateway for AI Agents
 
 Unlock the power of AI-driven analytics.
 
-Nexus is a lightweight
+PlyDB is a lightweight
 [Model Context Protocol (MCP)](https://modelcontextprotocol.io) gateway that
 bridges your AI agents with your data. It provides a single, unified SQL
 interface to query across databases and files - including Postgres, MySQL, CSV,
@@ -12,7 +12,7 @@ Get up and running in minutes without complex infrastructure dependencies.
 
 ```
  ┌─────────────────┐ SQL ┌──────────────────────────────────────┐
- │     AI Agent    │────▶│               Nexus                  │
+ │     AI Agent    │────▶│               PlyDB                  │
  │(Claude, ChatGPT,│◀────│                                      │
  │ etc.)           │     │  ┌─────────────────────────────────┐ │
  └─────────────────┘     │  │          Query Engine           │ │
@@ -35,14 +35,14 @@ Get up and running in minutes without complex infrastructure dependencies.
 
 ```
 
-## Why Nexus?
+## Why PlyDB?
 
 - **Agentic Data Analysis:** Unleash the full potential of AI agents by allowing
   them to write sophisticated SQL and perform complex data analysis
   autonomously. Agents use MCP tools to discover tables, inspect schemas, and
   understand your data's semantics.
 - **Zero ETL (Query In-Place):** Eliminate the need for expensive and brittle
-  ETL pipelines. Nexus lets you query your data exactly where it lives-whether
+  ETL pipelines. PlyDB lets you query your data exactly where it lives-whether
   it's a production database, a cloud-hosted spreadsheet, or a data lake.
 - **Cross-Source Queries** - Join tables across MySQL, PostgreSQL, CSV, and more
   in a single query
@@ -51,7 +51,7 @@ Get up and running in minutes without complex infrastructure dependencies.
 - **Deploy Anywhere:** Run it locally for personal productivity or deploy it as
   a stateless service in the cloud (AWS, GCP, Azure) to power enterprise-grade
   agentic workflows.
-- **Open Source & Extensible:** Built on an open-source foundation, Nexus
+- **Open Source & Extensible:** Built on an open-source foundation, PlyDB
   ensures transparency, security, and no vendor lock-in. Easily extend the
   gateway with custom connectors or contribute to the community-driven core.
 
@@ -59,7 +59,7 @@ Get up and running in minutes without complex infrastructure dependencies.
 
 ## Use Cases
 
-Because Nexus exposes schema metadata and relational power via MCP, capable AI
+Because PlyDB exposes schema metadata and relational power via MCP, capable AI
 agents can perform iterative reasoning - querying data, finding patterns,
 generating visualizations, and recommending specific business actions.
 
@@ -105,7 +105,7 @@ by zip code"
 
 ## Supported Data Sources
 
-Nexus abstracts the complexity of different storage formats into a single
+PlyDB abstracts the complexity of different storage formats into a single
 relational view:
 
 | Category               | Supported Sources                 |
@@ -115,9 +115,9 @@ relational view:
 | **Cloud / SaaS** (WIP) | Google Sheets, S3                 |
 | **Data Lake** (WIP)    | Apache Iceberg, Delta Lake        |
 
-## Connecting AI agents to Nexus
+## Connecting AI agents to PlyDB
 
-To connect an AI agent to Nexus, follow the step-by-step tutorial for your
+To connect an AI agent to PlyDB, follow the step-by-step tutorial for your
 preferred client:
 
 - **[Claude Desktop](examples/connect_to_claude_desktop/README.md)** - full
@@ -129,7 +129,7 @@ More examples of configuring data sources:
 - [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
 - [Semantic context scanning](examples/semantic_context_scanning/README.md)
 
-Nexus uses the [Model Context Protocol](https://modelcontextprotocol.io) and
+PlyDB uses the [Model Context Protocol](https://modelcontextprotocol.io) and
 works with any MCP-compatible client. For other agents, see their MCP setup
 guides:
 

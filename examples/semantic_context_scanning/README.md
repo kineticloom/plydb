@@ -1,8 +1,8 @@
 # Semantic Context Scanning
 
-This example demonstrates how Nexus uses PostgreSQL `COMMENT` metadata to give
+This example demonstrates how PlyDB uses PostgreSQL `COMMENT` metadata to give
 AI agents the semantic context they need to understand your data. When an agent
-calls the `get_semantic_context` MCP tool, Nexus introspects the configured data
+calls the `get_semantic_context` MCP tool, PlyDB introspects the configured data
 sources and returns a structured YAML description of every table, column, and
 relationship — including any human-written comments that explain what the data
 actually means.
@@ -13,7 +13,7 @@ The schema here tracks a fictional multidimensional power grid. The terminology
 is intentionally esoteric (e.g. `vortex_anchor`, `flux_telemetry`,
 `syn_link_01`) so an LLM cannot rely on "common sense" to generate queries.
 
-PostgreSQL `COMMENT` statements provide the semantic mapping. Nexus extracts
+PostgreSQL `COMMENT` statements provide the semantic mapping. PlyDB extracts
 these comments alongside column types and foreign keys, producing structured
 YAML that follows the
 [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
@@ -28,7 +28,7 @@ domain and write correct SQL.
 ## Prerequisites
 
 - Docker installed and running
-- Nexus binary built (`go build -o nexus .` from the project root)
+- PlyDB binary built (`go build .` from the project root)
 
 ## Setup
 
@@ -39,9 +39,9 @@ Start and pre-seed the database with the esoteric schema and data:
 ```bash
 docker run -d \
   --rm \
-  --name nexus-postgres \
-  -e POSTGRES_USER=nexus \
-  -e POSTGRES_PASSWORD=nexus \
+  --name plydb-postgres \
+  -e POSTGRES_USER=plydb \
+  -e POSTGRES_PASSWORD=plydb \
   -e POSTGRES_DB=grid \
   -p 5432:5432 \
   -v $PWD/examples/semantic_context_scanning/seed.sql:/docker-entrypoint-initdb.d/seed.sql \
@@ -51,18 +51,18 @@ docker run -d \
 If needed, access the database via psql like so:
 
 ```bash
-docker exec -it nexus-postgres psql -U nexus -d grid
+docker exec -it plydb-postgres psql -U plydb -d grid
 ```
 
 ### 2. Set the Password Environment Variable
 
 ```bash
-export NEXUS_PG_PASSWORD=nexus
+export PLYDB_PG_PASSWORD=plydb
 ```
 
 ## How It Works with AI Agents
 
-When Nexus runs as an MCP server, it exposes a `get_semantic_context` tool
+When PlyDB runs as an MCP server, it exposes a `get_semantic_context` tool
 alongside the `query` tool. An AI agent (Claude, ChatGPT, etc.) can call
 `get_semantic_context` at any time to retrieve a full semantic model of the
 configured data sources. The agent then uses this context to understand
@@ -100,7 +100,7 @@ You can also preview what the `get_semantic_context` tool returns by using the
 `scan-context` CLI command directly:
 
 ```bash
-./nexus scan-context --config examples/semantic_context_scanning/config.json
+./plydb scan-context --config examples/semantic_context_scanning/config.json
 ```
 
 This outputs the same OSI YAML that the MCP tool returns to agents:

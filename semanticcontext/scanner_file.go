@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/kineticloom/plydb/queryengine"
 )
 
 // scanFile uses DESCRIBE SELECT to discover columns from a local file

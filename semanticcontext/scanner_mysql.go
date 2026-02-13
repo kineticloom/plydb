@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/kineticloom/plydb/queryengine"
 )
 
 // scanMySQL queries information_schema.columns for all user tables in the

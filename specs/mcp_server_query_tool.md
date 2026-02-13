@@ -32,7 +32,7 @@ Limits:
 - A query engine has already been implemented in the queryengine package
 - Queries should go through pre-processing as specified in specs/query_pre_processing.md. The foundational functionality is already implemented in the queryengine package and used in cmd/query.go
 - The cli should be updated with a new command to start the mcp server.
-- We require support for both STDIO and Streamable HTTP transport for the MCP server. Let this be configurable at the cli's entrypoint. e.g. `nexus mcp --transport stdio --config /path/to/config.json`
+- We require support for both STDIO and Streamable HTTP transport for the MCP server. Let this be configurable at the cli's entrypoint. e.g. `plydb mcp --transport stdio --config /path/to/config.json`
 
 ## Out of scope
 

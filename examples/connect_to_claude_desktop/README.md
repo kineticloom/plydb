@@ -1,7 +1,7 @@
-# Connecting Claude Desktop to Nexus
+# Connecting Claude Desktop to PlyDB
 
 This tutorial walks you through connecting
-[Claude Desktop](https://claude.ai/download) to Nexus so that Claude can
+[Claude Desktop](https://claude.ai/download) to PlyDB so that Claude can
 autonomously query your data using SQL. By the end you will have Claude
 answering natural-language questions against a pair of CSV files — no database
 server required.
@@ -13,21 +13,21 @@ server required.
 
 ## Quick Start
 
-### 1. Build Nexus
+### 1. Build PlyDB
 
 Clone the repository (if you haven't already) and build the binary:
 
 ```bash
-git clone https://github.com/ypt/experiment-nexus.git
-cd experiment-nexus
-go build -o nexus .
+git clone https://github.com/kineticloom/plydb.git
+cd plydb
+go build .
 ```
 
-After the build completes you should have a `nexus` binary in the project root.
+After the build completes you should have a `plydb` binary in the project root.
 Verify it works:
 
 ```bash
-./nexus --help
+./plydb --help
 ```
 
 ### 2. Understand the sample data
@@ -58,7 +58,7 @@ This tutorial uses two CSV files that ship with the repository under
 
 ### 3. Review the config file
 
-The config file tells Nexus which data sources to expose. Open
+The config file tells PlyDB which data sources to expose. Open
 `examples/connect_to_csv_files/config.json`:
 
 ```json
@@ -104,7 +104,7 @@ Before connecting Claude Desktop, you can verify everything works from the
 command line:
 
 ```bash
-./nexus query \
+./plydb query \
   'SELECT * FROM customers.default."table" LIMIT 3' \
   --config examples/connect_to_csv_files/config.json
 ```
@@ -125,35 +125,35 @@ depends on your OS:
 > Edit Config**.
 
 Add (or merge) the following into the config file. Replace
-`/absolute/path/to/experiment-nexus` with the actual absolute path to your
+`/absolute/path/to/plydb` with the actual absolute path to your
 cloned repository:
 
 ```json
 {
   "mcpServers": {
-    "nexus": {
-      "command": "/absolute/path/to/experiment-nexus/nexus",
+    "plydb": {
+      "command": "/absolute/path/to/plydb/plydb",
       "args": [
         "mcp",
         "--config",
-        "/absolute/path/to/experiment-nexus/examples/connect_to_csv_files/config.json"
+        "/absolute/path/to/plydb/examples/connect_to_csv_files/config.json"
       ]
     }
   }
 }
 ```
 
-For example, if you cloned the repo to `~/projects/experiment-nexus`:
+For example, if you cloned the repo to `~/projects/plydb`:
 
 ```json
 {
   "mcpServers": {
-    "nexus": {
-      "command": "/Users/you/projects/experiment-nexus/nexus",
+    "plydb": {
+      "command": "/Users/you/projects/plydb/plydb",
       "args": [
         "mcp",
         "--config",
-        "/Users/you/projects/experiment-nexus/examples/connect_to_csv_files/config.json"
+        "/Users/you/projects/plydb/examples/connect_to_csv_files/config.json"
       ]
     }
   }
@@ -161,26 +161,26 @@ For example, if you cloned the repo to `~/projects/experiment-nexus`:
 ```
 
 > **Important:** All paths must be **absolute**. Relative paths will not work
-> because Claude Desktop does not run from the Nexus project directory.
+> because Claude Desktop does not run from the PlyDB project directory.
 
 ### 6. Restart Claude Desktop
 
 Quit Claude Desktop completely and reopen it. On the new-chat screen you should
 see a **hammer icon** (tools) in the bottom-right of the message input area.
-Click it to confirm that the `query` and `get_semantic_context` tools from Nexus
+Click it to confirm that the `query` and `get_semantic_context` tools from PlyDB
 are listed.
 
 If the tools don't appear, check the MCP server logs:
 
 | OS      | Log path                                     |
 | ------- | -------------------------------------------- |
-| macOS   | `~/Library/Logs/Claude/mcp-server-nexus.log` |
-| Windows | `%APPDATA%\Claude\logs\mcp-server-nexus.log` |
+| macOS   | `~/Library/Logs/Claude/mcp-server-plydb.log` |
+| Windows | `%APPDATA%\Claude\logs\mcp-server-plydb.log` |
 
 ### 7. Try it out
 
 Start a new conversation in Claude Desktop and try the prompts below. Claude
-will use the Nexus MCP tools to discover schemas and run SQL against your CSV
+will use the PlyDB MCP tools to discover schemas and run SQL against your CSV
 files autonomously.
 
 ---
@@ -240,6 +240,6 @@ summary of trends across the dataset.
   [semantic context scanning example](../semantic_context_scanning/README.md) to
   learn how to annotate your data sources with descriptions that help AI agents
   understand your schema.
-- **Other AI agents:** Nexus works with any MCP-compatible client. See the main
+- **Other AI agents:** PlyDB works with any MCP-compatible client. See the main
   [README](../../README.md) for links to setup guides for ChatGPT, OpenCode, and
   Gemini.

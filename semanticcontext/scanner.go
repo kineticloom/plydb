@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/kineticloom/plydb/queryengine"
 )
 
 // AutoScanProvider scans all configured data sources and produces a semantic model.

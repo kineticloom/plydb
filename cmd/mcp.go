@@ -9,9 +9,9 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/kineticloom/plydb/mcpserver"
+	"github.com/kineticloom/plydb/semanticcontext"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/ypt/experiment-nexus/mcpserver"
-	"github.com/ypt/experiment-nexus/semanticcontext"
 )
 
 func RunMCP(args []string) {
@@ -20,7 +20,7 @@ func RunMCP(args []string) {
 	transport := fs.String("transport", "stdio", "transport type: stdio or http")
 	addr := fs.String("addr", "localhost:8080", "address for HTTP transport")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, `Usage: nexus mcp [flags]
+		fmt.Fprintln(os.Stderr, `Usage: plydb mcp [flags]
 
 Start an MCP server exposing a SQL query tool.
 
@@ -53,7 +53,7 @@ Flags:`)
 	switch *transport {
 	case "stdio":
 		// Use a pipe to decouple stdin EOF from the MCP server's read loop.
-		// Without this, when stdin is a pipe (e.g. echo '...' | nexus mcp),
+		// Without this, when stdin is a pipe (e.g. echo '...' | plydb mcp),
 		// EOF arrives immediately after the last message and races with
 		// response writes — the SDK rejects writes once it detects EOF on
 		// the read side, so responses are never sent.

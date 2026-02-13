@@ -1,4 +1,4 @@
-module github.com/ypt/experiment-nexus
+module github.com/kineticloom/plydb
 
 go 1.24.4
 

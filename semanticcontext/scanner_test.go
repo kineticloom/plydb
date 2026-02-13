@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	_ "github.com/duckdb/duckdb-go/v2"
-	"github.com/ypt/experiment-nexus/queryengine"
+	"github.com/kineticloom/plydb/queryengine"
 )
 
 // duckDBQuerier wraps a *sql.DB to satisfy MetadataQuerier.
