@@ -56,10 +56,25 @@ This tutorial uses two CSV files that ship with the repository under
 | 5   | 5           | Gadget    | 2      | 2026-02-08 |
 | 6   | 4           | Widget    | 1      | 2026-02-10 |
 
-### 3. Review the config file
+### 3. Set up a PlyDB config file
 
-The config file tells PlyDB which data sources to allow. Open
-`examples/connect_to_csv_files/config.json`:
+The config file tells PlyDB which data sources to allow.
+
+Make a copy of the example config file to edit for this demo.
+
+```sh
+mkdir demo_sandbox
+cp examples/connect_to_csv_files/config.json demo_sandbox/my_config.json
+```
+
+> **Important:** All paths must be **absolute**. Relative paths will not work
+> because Claude Desktop does not run from the PlyDB project directory.
+
+So that Claude Desktop knows the exact location of your files, we will need to
+make a slight edit `demo_sandbox/my_config.json` - changing the `path` values
+from relative paths to absolute paths.
+
+It should look something like this when you're done editing it:
 
 ```json
 {
@@ -71,10 +86,8 @@ The config file tells PlyDB which data sources to allow. Open
         "description": "Customer contact information."
       },
       "type": "file",
-      "path": "examples/connect_to_csv_files/customers.csv",
-      "format": "csv",
-      "delimiter": ",",
-      "header_row": true
+      "path": "/absolute/path/to/plydb/examples/connect_to_csv_files/customers.csv",
+      "format": "csv"
     },
     "orders": {
       "metadata": {
@@ -82,16 +95,14 @@ The config file tells PlyDB which data sources to allow. Open
         "description": "Customer order history."
       },
       "type": "file",
-      "path": "examples/connect_to_csv_files/orders.csv",
-      "format": "csv",
-      "delimiter": ",",
-      "header_row": true
+      "path": "/absolute/path/to/plydb/examples/connect_to_csv_files/orders.csv",
+      "format": "csv"
     }
   }
 }
 ```
 
-Each key under `databases` becomes a **catalog** in SQL. CSV files are
+Each key under `databases` is mapped to a **catalog** in SQL. CSV files are
 registered as a table named `"table"` under the `default` schema, so the
 fully-qualified table names are:
 
@@ -106,7 +117,7 @@ command line:
 ```bash
 ./plydb query \
   'SELECT * FROM customers.default."table" LIMIT 3' \
-  --config examples/connect_to_csv_files/config.json
+  --config demo_sandbox/my_config.json
 ```
 
 You should see tab-separated output with the first three customers.
@@ -136,24 +147,7 @@ repository:
       "args": [
         "mcp",
         "--config",
-        "/absolute/path/to/plydb/examples/connect_to_csv_files/config.json"
-      ]
-    }
-  }
-}
-```
-
-For example, if you cloned the repo to `~/projects/plydb`:
-
-```json
-{
-  "mcpServers": {
-    "plydb": {
-      "command": "/Users/you/projects/plydb/plydb",
-      "args": [
-        "mcp",
-        "--config",
-        "/Users/you/projects/plydb/examples/connect_to_csv_files/config.json"
+        "/absolute/path/to/plydb/demo_sandbox/my_config.json"
       ]
     }
   }
@@ -166,11 +160,10 @@ For example, if you cloned the repo to `~/projects/plydb`:
 ### 6. Restart Claude Desktop
 
 Quit Claude Desktop completely and reopen it. On the new-chat screen you should
-see a **hammer icon** (tools) in the bottom-right of the message input area.
-Click it to confirm that the `query` and `get_semantic_context` tools from PlyDB
-are listed.
+see a **Plus (+) icon** on the bottom-left of the message input area. Click it,
+and look under **Connectors** to confirm that the `plydb` is listed and enabled.
 
-If the tools don't appear, check the MCP server logs:
+If `plydb` does not appear, check the MCP server logs:
 
 | OS      | Log path                                     |
 | ------- | -------------------------------------------- |

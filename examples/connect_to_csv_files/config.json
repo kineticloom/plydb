@@ -8,9 +8,7 @@
       },
       "type": "file",
       "path": "examples/connect_to_csv_files/customers.csv",
-      "format": "csv",
-      "delimiter": ",",
-      "header_row": true
+      "format": "csv"
     },
     "orders": {
       "metadata": {
@@ -19,9 +17,7 @@
       },
       "type": "file",
       "path": "examples/connect_to_csv_files/orders.csv",
-      "format": "csv",
-      "delimiter": ",",
-      "header_row": true
+      "format": "csv"
     }
   }
 }
