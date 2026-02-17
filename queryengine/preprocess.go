@@ -8,12 +8,18 @@ import (
 	pg_query "github.com/pganalyze/pg_query_go/v6"
 )
 
+// ValidateFunc is a function that validates a parsed SQL AST.
+// It is called after parsing and before table name rewriting.
+type ValidateFunc func(*pg_query.ParseResult) error
+
 // PreprocessQuery parses a SQL query, validates that all table references are
 // fully qualified 3-part names (catalog.schema.table) matching a configured
 // database, and rewrites file/S3 references to DuckDB-native form.
 // PostgreSQL and MySQL references are left unchanged (they are already
 // attached as DuckDB catalogs).
-func PreprocessQuery(query string, cfg *Config) (string, error) {
+// An optional ValidateFunc can be provided to run additional validation on
+// the parsed AST before rewriting.
+func PreprocessQuery(query string, cfg *Config, validators ...ValidateFunc) (string, error) {
 	parsed, err := pg_query.Parse(query)
 	if err != nil {
 		return "", fmt.Errorf("parse error: %w", err)
@@ -21,15 +27,26 @@ func PreprocessQuery(query string, cfg *Config) (string, error) {
 
 	refs := sqlwalk.Extract(parsed)
 
-	renames := make(map[sqlwalk.TableName]sqlwalk.TableName)
-	funcReplacements := make(map[sqlwalk.TableName]sqlwalk.FuncReplace)
-
 	for _, ref := range refs.Tables {
 		if ref.Catalog == "" || ref.Schema == "" || ref.Name == "" {
 			return "", fmt.Errorf("table reference %q is not fully qualified (expected catalog.schema.table)",
 				formatRef(ref))
 		}
+	}
 
+	for _, v := range validators {
+		if v == nil {
+			continue
+		}
+		if err := v(parsed); err != nil {
+			return "", fmt.Errorf("validation error: %w", err)
+		}
+	}
+
+	renames := make(map[sqlwalk.TableName]sqlwalk.TableName)
+	funcReplacements := make(map[sqlwalk.TableName]sqlwalk.FuncReplace)
+
+	for _, ref := range refs.Tables {
 		dbCfg, ok := cfg.Databases[ref.Catalog]
 		if !ok {
 			return "", fmt.Errorf("unknown catalog %q in table reference %q",

@@ -59,12 +59,15 @@ func makeSemanticContextHandler(yamlStr string) mcp.ToolHandlerFor[any, any] {
 
 // makeQueryHandler returns a typed tool handler for the query tool.
 func makeQueryHandler(cfg *queryengine.Config, engine *queryengine.QueryEngine) mcp.ToolHandlerFor[QueryInput, any] {
+	policy := queryengine.ReadOnlyPolicy(cfg)
+	validator := queryengine.NewPolicyValidator(policy)
+
 	return func(ctx context.Context, req *mcp.CallToolRequest, input QueryInput) (*mcp.CallToolResult, any, error) {
 		if input.SQL == "" {
 			return nil, nil, fmt.Errorf("sql is required")
 		}
 
-		preprocessed, err := queryengine.PreprocessQuery(input.SQL, cfg)
+		preprocessed, err := queryengine.PreprocessQuery(input.SQL, cfg, validator)
 		if err != nil {
 			return nil, nil, fmt.Errorf("preprocessing query: %w", err)
 		}

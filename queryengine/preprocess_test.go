@@ -1,8 +1,11 @@
 package queryengine
 
 import (
+	"fmt"
 	"strings"
 	"testing"
+
+	pg_query "github.com/pganalyze/pg_query_go/v6"
 )
 
 func testConfig() *Config {
@@ -200,7 +203,84 @@ func TestPreprocessQuery_ErrorInvalidSQL(t *testing.T) {
 	}
 }
 
-func mustPreprocess(t *testing.T, query string, cfg *Config) (string, error) {
+func mustPreprocess(t *testing.T, query string, cfg *Config, validators ...ValidateFunc) (string, error) {
 	t.Helper()
-	return PreprocessQuery(query, cfg)
+	return PreprocessQuery(query, cfg, validators...)
+}
+
+func TestPreprocessQuery_WithValidatorPass(t *testing.T) {
+	cfg := testConfig()
+	validator := func(parsed *pg_query.ParseResult) error {
+		return nil
+	}
+	result, err := PreprocessQuery("SELECT 1", cfg, validator)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result != "SELECT 1" {
+		t.Errorf("expected %q, got %q", "SELECT 1", result)
+	}
+}
+
+func TestPreprocessQuery_WithValidatorFail(t *testing.T) {
+	cfg := testConfig()
+	validator := func(parsed *pg_query.ParseResult) error {
+		return fmt.Errorf("query not allowed")
+	}
+	_, err := PreprocessQuery("SELECT 1", cfg, validator)
+	if err == nil {
+		t.Fatal("expected error from validator")
+	}
+	if !strings.Contains(err.Error(), "validation error") {
+		t.Errorf("expected 'validation error', got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "query not allowed") {
+		t.Errorf("expected wrapped error message, got: %v", err)
+	}
+}
+
+func TestPreprocessQuery_NilValidator(t *testing.T) {
+	cfg := testConfig()
+	result, err := PreprocessQuery("SELECT 1", cfg, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result != "SELECT 1" {
+		t.Errorf("expected %q, got %q", "SELECT 1", result)
+	}
+}
+
+func TestPreprocessQuery_MultipleValidators(t *testing.T) {
+	cfg := testConfig()
+	var called []int
+	v1 := func(_ *pg_query.ParseResult) error { called = append(called, 1); return nil }
+	v2 := func(_ *pg_query.ParseResult) error { called = append(called, 2); return nil }
+	v3 := func(_ *pg_query.ParseResult) error { called = append(called, 3); return nil }
+
+	_, err := PreprocessQuery("SELECT 1", cfg, v1, v2, v3)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(called) != 3 || called[0] != 1 || called[1] != 2 || called[2] != 3 {
+		t.Errorf("expected all validators called in order [1 2 3], got %v", called)
+	}
+}
+
+func TestPreprocessQuery_MultipleValidatorsStopsOnError(t *testing.T) {
+	cfg := testConfig()
+	var called []int
+	v1 := func(_ *pg_query.ParseResult) error { called = append(called, 1); return nil }
+	v2 := func(_ *pg_query.ParseResult) error { called = append(called, 2); return fmt.Errorf("v2 failed") }
+	v3 := func(_ *pg_query.ParseResult) error { called = append(called, 3); return nil }
+
+	_, err := PreprocessQuery("SELECT 1", cfg, v1, v2, v3)
+	if err == nil {
+		t.Fatal("expected error from second validator")
+	}
+	if !strings.Contains(err.Error(), "v2 failed") {
+		t.Errorf("expected 'v2 failed' in error, got: %v", err)
+	}
+	if len(called) != 2 || called[0] != 1 || called[1] != 2 {
+		t.Errorf("expected validators [1 2] called before failure, got %v", called)
+	}
 }

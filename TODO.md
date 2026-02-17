@@ -12,14 +12,15 @@ needs to be done:
 
 ## Short to mid term priorities
 
-### FEAT - PlyDB enforced access controls
+### FEAT - PlyDB read-write access controls
 
 See specs/table_access_policy.md and sqlwalk.Validate for foundations. End user
-code paths will need to be wired up and tested. Data sources should be read-only
-by default. Due to duckdb constraints, some types of data sources will only
-support read-only (e.g. CSV), while others may support read-write (e.g.
-Postgres). The configuration interface for end users may need some discovery and
-thought - to find a good balance between ease of use and flexibility.
+code paths will need to be wired up and tested. Data sources are currently
+hardcoded to read-only by default. Due to duckdb constraints, some types of data
+sources will only support read-only (e.g. CSV), while others may support
+read-write (e.g. Postgres). The configuration interface for end users may need
+some discovery and thought - to find a good balance between ease of use and
+flexibility.
 
 ### FEAT - Reduce friction of install and config of PlyDB with AI agents
 

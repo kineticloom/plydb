@@ -43,7 +43,9 @@ Flags:`)
 	query := sqlQuery
 	var err error
 	if !*skipPreprocess {
-		query, err = queryengine.PreprocessQuery(query, cfg)
+		policy := queryengine.ReadOnlyPolicy(cfg)
+		validator := queryengine.NewPolicyValidator(policy)
+		query, err = queryengine.PreprocessQuery(query, cfg, validator)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error preprocessing query: %v\n", err)
 			os.Exit(1)
