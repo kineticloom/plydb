@@ -1,6 +1,7 @@
 # PlyDB: The Universal Database Gateway for AI Agents
 
-PlyDB bridges the gap between your AI agents and your fragmented data sources.
+PlyDB securely bridges the gap between your AI agents and your fragmented data
+sources.
 
 PlyDB's [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
 interface provides a single controlled access point for AI agents to query
@@ -9,9 +10,11 @@ SQL, wherever the data lives.
 
 PlyDB is:
 
-- **Fast:** Get up and running in minutes.
-- **Simple:** No complex infrastructure or heavy dependencies.
-- **Versatile:** Connect your agents to the data they need, wherever it lives.
+- **Simple:** Get up and running in minutes. No complex infrastructure or heavy
+  dependencies. Connect your agents to the data they need, wherever it lives -
+  no ETL required.
+- **Secure:** You choose which data sources your agents are allowed to access.
+  Read-only by default.
 
 ---
 
@@ -36,7 +39,7 @@ PlyDB is:
 
 ---
 
-## Why PlyDB?
+## Empowerment Meets Security
 
 - **Agentic Data Analysis:** Unleash the full potential of AI agents by allowing
   them to write sophisticated SQL and perform complex data analysis
@@ -46,6 +49,10 @@ PlyDB is:
   ETL pipelines. PlyDB lets your agents query your data exactly where it lives -
   whether it's a production database, a cloud-hosted spreadsheet, or a data
   lake.
+- **Read-Only Guardrails:** PlyDB is a read-only "look, don't touch" system by
+  default. Your AI can analyze information and find patterns, but it cannot
+  delete, edit, or alter your original records unless you explicitly allow it
+  to.
 - **Cross-Source Queries:** Join tables across MySQL, PostgreSQL, CSV, and more
   in a single query
 - **Operational Simplicity:** Designed to be up and running in minutes without
@@ -59,11 +66,10 @@ PlyDB is:
 
 ---
 
-## Use Cases
+## Turning Data into Decisions
 
-Because PlyDB provides schema metadata and relational power via MCP, capable AI
-agents can perform iterative reasoning - querying data, finding patterns,
-generating visualizations, and recommending specific business actions.
+When your AI agent has a secure, real-time view of your data, it evolves from a
+chatbot into a **Strategic Partner**.
 
 ### Strategic Sales & Retention
 
