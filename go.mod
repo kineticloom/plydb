@@ -1,6 +1,6 @@
 module github.com/kineticloom/plydb
 
-go 1.24.4
+go 1.26.0
 
 require (
 	github.com/docker/go-connections v0.6.0
