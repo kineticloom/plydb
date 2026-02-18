@@ -1,20 +1,19 @@
 # PlyDB: The Universal Database Gateway for AI Agents
 
 PlyDB securely bridges the gap between your AI agents and your fragmented data
-sources.
-
-PlyDB's [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
-interface provides a single controlled access point for AI agents to query
+sources. It provides a single controlled access point for AI agents to query
 databases and flat files, such as Postgres, MySQL, CSV, Excel, and Parquet, with
 SQL, wherever the data lives.
 
 PlyDB is:
 
-- **Simple:** Get up and running in minutes. No complex infrastructure or heavy
-  dependencies. Connect your agents to the data they need, wherever it lives -
-  no ETL required.
+- **Simple:** Get up and running in minutes on your personal computer. No
+  complex infrastructure or heavy dependencies. Connect your agents to the data
+  they need, wherever it lives - no data movement (ETL) required.
 - **Secure:** You choose which data sources your agents are allowed to access.
   Read-only by default.
+- **Versatile** Integrate as either a CLI or
+  [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
 ---
 
@@ -43,8 +42,8 @@ PlyDB is:
 
 - **Agentic Data Analysis:** Unleash the full potential of AI agents by allowing
   them to write sophisticated SQL and perform complex data analysis
-  autonomously. Agents use MCP tools to discover tables, inspect schemas, and
-  understand your data's semantics.
+  autonomously. Agents can use either the PlyDB CLI or MCP server to discover
+  tables, inspect schemas, and understand your data's semantics.
 - **Zero ETL (Query In-Place):** Eliminate the need for expensive and brittle
   ETL pipelines. PlyDB lets your agents query your data exactly where it lives -
   whether it's a production database, a cloud-hosted spreadsheet, or a data
@@ -123,19 +122,13 @@ relational view:
 | **Cloud / SaaS** (WIP) | Google Sheets, S3                 |
 | **Data Lake** (WIP)    | Apache Iceberg, Delta Lake        |
 
-## Connecting AI agents to PlyDB
+## Connecting AI agents to PlyDB via MCP
 
-To connect an AI agent to PlyDB, follow the step-by-step tutorial for your
-preferred client:
+To connect an AI agent to PlyDB via MCP, follow the step-by-step tutorial for
+your preferred client:
 
 - **[Claude Desktop](examples/connect_to_claude_desktop/README.md)** - full
   walkthrough querying CSV files in Claude Desktop via MCP
-
-More examples of configuring data sources:
-
-- [Query CSV files](examples/connect_to_csv_files/README.md)
-- [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
-- [Providing semantic context](examples/semantic_context_scanning/README.md)
 
 PlyDB uses the [Model Context Protocol](https://modelcontextprotocol.io) and
 works with any MCP-compatible client. For other agents, see their MCP setup
@@ -144,6 +137,18 @@ guides:
 - [ChatGPT](https://platform.openai.com/docs/guides/developer-mode)
 - [OpenCode](https://opencode.ai/docs/mcp-servers/)
 - [Gemini](https://geminicli.com/docs/tools/mcp-server/)
+
+## Connecting AI agents to PlyDB via CLI
+
+TODO
+
+## Configuring data sources
+
+Examples of configuring data sources:
+
+- [Query CSV files](examples/connect_to_csv_files/README.md)
+- [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
+- [Providing semantic context](examples/semantic_context_scanning/README.md)
 
 ## Build
 
@@ -155,16 +160,16 @@ go build .
 
 ## Testing
 
-To run unit tests for a package:
+To run unit tests:
 
 ```sh
-go test ./somepackage/...
+go test ./...
 ```
 
-To run integration tests for a package (requires Docker):
+To run integration tests (requires Docker):
 
 ```sh
-go test -tags=integration -v -timeout 300s ./somepackage/...
+go test -tags=integration -v -timeout 300s ./...
 ```
 
 ## Contributing

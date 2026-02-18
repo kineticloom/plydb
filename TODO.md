@@ -12,6 +12,11 @@ needs to be done:
 
 ## Short to mid term priorities
 
+### DOCS - PlyDB CLI Skill
+
+Add Skill for users that choose to integrate PlyDB with their AI agent via CLI
+instead of MCP.
+
 ### FEAT - PlyDB read-write access controls
 
 See specs/table_access_policy.md and sqlwalk.Validate for foundations. End user
@@ -24,16 +29,21 @@ flexibility.
 
 ### FEAT - Reduce friction of install and config of PlyDB with AI agents
 
-The current process involves editing a handful of json config files in a text
-editor. This isn't ideal for less technical users. Look into better distribution
-and config options. See mcpb https://github.com/modelcontextprotocol/mcpb which
-seems to be Claude's answer to this challenge, however it fairly new and it
-remains to be seen if the ecosystem has embraced this standard.
+The current MCP setup process involves editing a handful of json config files in
+a text editor. This isn't ideal for less technical users. Look into better
+distribution and config options. See mcpb
+https://github.com/modelcontextprotocol/mcpb which seems to be Claude's answer
+to this challenge, however it fairly new and it remains to be seen if the
+ecosystem has embraced this standard.
+
+Note, there is also an alternative way for agents to use PlyDB - via CLI,
+instead of MCP.
 
 Related to:
 
 - [Dynamic data source configuration](#feat---dynamic-data-source-configuration)
 - [Auto-updates](#feat---auto-updates)
+- [PlyDB CLI Skill](#docs---plydb-cli-skill)
 
 ### FEAT - Auto-updates
 
@@ -102,11 +112,11 @@ A first step here is to better understand users need for this.
 
 ### FEAT - Providing semantic context for large datasets
 
-Currently the MCP tool `get_semantic_contex` returns semantic context for all
-tables and columns on connected databases and files. However, this may be less
-than ideal for scenarios where there are a large number of tables or columns -
-hundreds to thousands. Before prioritizing this, we should first monitor whether
-this is a concern that real users are surfacing.
+Currently fetching semantic context returns semantic context for all tables and
+columns on connected databases and files. However, this may be less than ideal
+for scenarios where there are a large number of tables or columns - hundreds to
+thousands. Before prioritizing this, we should first monitor whether this is a
+concern that real users are surfacing.
 
 ### FEAT - Dynamic data source configuration
 
