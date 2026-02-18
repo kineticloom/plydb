@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kineticloom/plydb/queryengine"
+	"github.com/kineticloom/plydb/queryresult"
 	"github.com/kineticloom/plydb/semanticcontext"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go.yaml.in/yaml/v4"
@@ -81,12 +82,12 @@ func makeQueryHandler(cfg *queryengine.Config, engine *queryengine.QueryEngine) 
 		}
 		defer rows.Close()
 
-		result, err := buildQueryResult(rows)
+		result, err := queryresult.BuildQueryResult(rows)
 		if err != nil {
 			return nil, nil, fmt.Errorf("building result: %w", err)
 		}
 
-		text, err := marshalResult(result)
+		text, err := queryresult.MarshalResult(result)
 		if err != nil {
 			return nil, nil, fmt.Errorf("marshaling result: %w", err)
 		}

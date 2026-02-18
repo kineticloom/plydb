@@ -60,7 +60,7 @@ docker exec -it plydb-postgres psql -U plydb -d grid
 export PLYDB_PG_PASSWORD=plydb
 ```
 
-## How It Works with AI Agents
+## Getting Semantic Context via MCP
 
 When PlyDB runs as an MCP server, it provides a `get_semantic_context` tool
 alongside the `query` tool. An AI agent (Claude, ChatGPT, etc.) can call
@@ -94,10 +94,10 @@ Try asking an agent connected to this data source:
 Without the semantic context from `COMMENT` metadata, an agent would have no way
 to connect these natural-language concepts to the underlying column names.
 
-## Inspecting the Semantic Context via CLI
+## Getting Semantic Context via CLI
 
-You can also preview what the `get_semantic_context` tool returns by using the
-`scan-context` CLI command directly:
+Instead of MCP, you or an AI agent can also get the semantic context via the
+PlyDB CLI `scan-context` command directly:
 
 ```bash
 ./plydb scan-context --config examples/semantic_context_scanning/config.json

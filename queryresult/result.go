@@ -1,4 +1,4 @@
-package mcpserver
+package queryresult
 
 import (
 	"database/sql"
@@ -7,24 +7,24 @@ import (
 )
 
 const (
-	maxRows  = 2048
-	maxChars = 50000
+	MaxRows  = 2048
+	MaxChars = 50000
 )
 
 // QueryResult is the structured result returned by the query tool.
 type QueryResult struct {
-	Success     bool              `json:"success"`
-	Columns     []string          `json:"columns,omitempty"`
-	ColumnTypes []string          `json:"column_types,omitempty"`
-	Rows        [][]any           `json:"rows,omitempty"`
-	RowCount    int               `json:"row_count"`
-	Truncated   bool              `json:"truncated"`
-	Message     string            `json:"message,omitempty"`
+	Success     bool     `json:"success"`
+	Columns     []string `json:"columns,omitempty"`
+	ColumnTypes []string `json:"column_types,omitempty"`
+	Rows        [][]any  `json:"rows,omitempty"`
+	RowCount    int      `json:"row_count"`
+	Truncated   bool     `json:"truncated"`
+	Message     string   `json:"message,omitempty"`
 }
 
-// buildQueryResult scans sql.Rows into a QueryResult.
-// It stops after maxRows and enforces maxChars on the JSON representation.
-func buildQueryResult(rows *sql.Rows) (*QueryResult, error) {
+// BuildQueryResult scans sql.Rows into a QueryResult.
+// It stops after MaxRows and enforces MaxChars on the JSON representation.
+func BuildQueryResult(rows *sql.Rows) (*QueryResult, error) {
 	cols, err := rows.Columns()
 	if err != nil {
 		return nil, fmt.Errorf("reading columns: %w", err)
@@ -49,7 +49,7 @@ func buildQueryResult(rows *sql.Rows) (*QueryResult, error) {
 	}
 
 	for rows.Next() {
-		if len(allRows) >= maxRows {
+		if len(allRows) >= MaxRows {
 			truncated = true
 			break
 		}
@@ -75,7 +75,7 @@ func buildQueryResult(rows *sql.Rows) (*QueryResult, error) {
 		Truncated:   truncated,
 	}
 	if truncated {
-		result.Message = fmt.Sprintf("Results truncated to %d rows", maxRows)
+		result.Message = fmt.Sprintf("Results truncated to %d rows", MaxRows)
 	}
 
 	// Enforce character limit via binary search.
@@ -83,7 +83,7 @@ func buildQueryResult(rows *sql.Rows) (*QueryResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("marshaling result: %w", err)
 	}
-	if len(data) > maxChars {
+	if len(data) > MaxChars {
 		result = truncateToFit(result)
 	}
 
@@ -91,7 +91,7 @@ func buildQueryResult(rows *sql.Rows) (*QueryResult, error) {
 }
 
 // truncateToFit uses binary search to find the maximum number of rows
-// that fit within maxChars when marshaled to JSON.
+// that fit within MaxChars when marshaled to JSON.
 func truncateToFit(result *QueryResult) *QueryResult {
 	lo, hi := 0, len(result.Rows)
 	for lo < hi {
@@ -102,7 +102,7 @@ func truncateToFit(result *QueryResult) *QueryResult {
 		candidate.Truncated = true
 		candidate.Message = fmt.Sprintf("Results truncated to %d rows to fit within character limit", mid)
 		data, err := json.Marshal(&candidate)
-		if err != nil || len(data) > maxChars {
+		if err != nil || len(data) > MaxChars {
 			hi = mid - 1
 		} else {
 			lo = mid
@@ -126,8 +126,8 @@ func normalizeValue(v any) any {
 	}
 }
 
-// marshalResult marshals a QueryResult to a JSON string, sorted keys.
-func marshalResult(result *QueryResult) (string, error) {
+// MarshalResult marshals a QueryResult to a JSON string.
+func MarshalResult(result *QueryResult) (string, error) {
 	data, err := json.Marshal(result)
 	if err != nil {
 		return "", fmt.Errorf("marshaling result: %w", err)
@@ -135,11 +135,10 @@ func marshalResult(result *QueryResult) (string, error) {
 	return string(data), nil
 }
 
-// errorResult creates a QueryResult representing an error.
-func errorResult(msg string) *QueryResult {
+// ErrorResult creates a QueryResult representing an error.
+func ErrorResult(msg string) *QueryResult {
 	return &QueryResult{
 		Success: false,
 		Message: msg,
 	}
 }
-

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/kineticloom/plydb/queryengine"
+	"github.com/kineticloom/plydb/queryresult"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -52,7 +53,7 @@ func TestBuildQueryResult(t *testing.T) {
 	}
 	defer rows.Close()
 
-	result, err := buildQueryResult(rows)
+	result, err := queryresult.BuildQueryResult(rows)
 	if err != nil {
 		t.Fatalf("buildQueryResult error: %v", err)
 	}
@@ -83,7 +84,7 @@ func TestBuildQueryResultMultipleRows(t *testing.T) {
 	}
 	defer rows.Close()
 
-	result, err := buildQueryResult(rows)
+	result, err := queryresult.BuildQueryResult(rows)
 	if err != nil {
 		t.Fatalf("buildQueryResult error: %v", err)
 	}
@@ -99,20 +100,20 @@ func TestBuildQueryResultMultipleRows(t *testing.T) {
 func TestBuildQueryResultRowLimitTruncation(t *testing.T) {
 	_, engine := newTestEngine(t)
 
-	query := fmt.Sprintf("SELECT * FROM generate_series(1, %d) AS t(n)", maxRows+100)
+	query := fmt.Sprintf("SELECT * FROM generate_series(1, %d) AS t(n)", queryresult.MaxRows+100)
 	rows, err := engine.Query(context.Background(), query)
 	if err != nil {
 		t.Fatalf("query error: %v", err)
 	}
 	defer rows.Close()
 
-	result, err := buildQueryResult(rows)
+	result, err := queryresult.BuildQueryResult(rows)
 	if err != nil {
 		t.Fatalf("buildQueryResult error: %v", err)
 	}
 
-	if result.RowCount != maxRows {
-		t.Fatalf("expected %d rows, got %d", maxRows, result.RowCount)
+	if result.RowCount != queryresult.MaxRows {
+		t.Fatalf("expected %d rows, got %d", queryresult.MaxRows, result.RowCount)
 	}
 	if !result.Truncated {
 		t.Fatal("expected truncated")
@@ -130,7 +131,7 @@ func TestBuildQueryResultCharLimitTruncation(t *testing.T) {
 	}
 	defer rows.Close()
 
-	result, err := buildQueryResult(rows)
+	result, err := queryresult.BuildQueryResult(rows)
 	if err != nil {
 		t.Fatalf("buildQueryResult error: %v", err)
 	}
@@ -144,8 +145,8 @@ func TestBuildQueryResultCharLimitTruncation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal error: %v", err)
 	}
-	if len(data) > maxChars {
-		t.Fatalf("JSON output %d chars exceeds limit %d", len(data), maxChars)
+	if len(data) > queryresult.MaxChars {
+		t.Fatalf("JSON output %d chars exceeds limit %d", len(data), queryresult.MaxChars)
 	}
 	if result.RowCount < 1 {
 		t.Fatal("expected at least 1 row after char truncation")
@@ -161,7 +162,7 @@ func TestBuildQueryResultColumnTypes(t *testing.T) {
 	}
 	defer rows.Close()
 
-	result, err := buildQueryResult(rows)
+	result, err := queryresult.BuildQueryResult(rows)
 	if err != nil {
 		t.Fatalf("buildQueryResult error: %v", err)
 	}
@@ -201,7 +202,7 @@ func TestQueryHandlerSuccess(t *testing.T) {
 		t.Fatalf("expected TextContent, got %T", result.Content[0])
 	}
 
-	var qr QueryResult
+	var qr queryresult.QueryResult
 	if err := json.Unmarshal([]byte(textContent.Text), &qr); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/kineticloom/plydb/queryengine"
+	"github.com/kineticloom/plydb/queryresult"
 )
 
 func RunQuery(args []string) {
@@ -63,48 +64,15 @@ Flags:`)
 	}
 	defer rows.Close()
 
-	cols, err := rows.Columns()
+	result, err := queryresult.BuildQueryResult(rows)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error reading columns: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error building result: %v\n", err)
 		os.Exit(1)
 	}
-
-	// Print header.
-	for i, col := range cols {
-		if i > 0 {
-			fmt.Print("\t")
-		}
-		fmt.Print(col)
-	}
-	fmt.Println()
-
-	// Print rows.
-	vals := make([]interface{}, len(cols))
-	ptrs := make([]interface{}, len(cols))
-	for i := range vals {
-		ptrs[i] = &vals[i]
-	}
-
-	for rows.Next() {
-		if err := rows.Scan(ptrs...); err != nil {
-			fmt.Fprintf(os.Stderr, "error scanning row: %v\n", err)
-			os.Exit(1)
-		}
-		for i, v := range vals {
-			if i > 0 {
-				fmt.Print("\t")
-			}
-			if b, ok := v.([]byte); ok {
-				fmt.Print(string(b))
-			} else {
-				fmt.Print(v)
-			}
-		}
-		fmt.Println()
-	}
-
-	if err := rows.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "error iterating rows: %v\n", err)
+	text, err := queryresult.MarshalResult(result)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error marshaling result: %v\n", err)
 		os.Exit(1)
 	}
+	fmt.Println(text)
 }

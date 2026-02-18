@@ -67,12 +67,20 @@ Join orders from PostgreSQL with the product catalog from CSV to see total reven
 Expected output:
 
 ```
-product	category	total_quantity	total_revenue
-Thingamajig	Electronics	4	199.96
-Gadget	Electronics	3	74.97
-Widget	Hardware	7	69.93
-Sprocket	Hardware	10	27.5
-Doohickey	Hardware	1	4.5
+{
+  "success": true,
+  "columns": ["product", "category", "total_quantity", "total_revenue"],
+  "column_types": ["VARCHAR", "VARCHAR", "HUGEINT", "DOUBLE"],
+  "rows": [
+    ["Thingamajig", "Electronics", 4, 199.96],
+    ["Gadget", "Electronics", 3, 74.97],
+    ["Widget", "Hardware", 7, 69.93],
+    ["Sprocket", "Hardware", 10, 27.5],
+    ["Doohickey", "Hardware", 1, 4.5]
+  ],
+  "row_count": 5,
+  "truncated": false
+}
 ```
 
 ### Example 2: MCP Server over stdio

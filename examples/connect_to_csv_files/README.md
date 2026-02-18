@@ -24,6 +24,106 @@ customer id:
    ON c.id = o.customer_id"
 ```
 
+Expected output:
+
+```
+{
+  "success": true,
+  "columns": [
+    "id",
+    "name",
+    "email",
+    "city",
+    "id",
+    "customer_id",
+    "product",
+    "amount",
+    "order_date"
+  ],
+  "column_types": [
+    "BIGINT",
+    "VARCHAR",
+    "VARCHAR",
+    "VARCHAR",
+    "BIGINT",
+    "BIGINT",
+    "VARCHAR",
+    "BIGINT",
+    "DATE"
+  ],
+  "rows": [
+    [
+      1,
+      "Alice",
+      "alice@example.com",
+      "Seattle",
+      4,
+      1,
+      "Doohickey",
+      3,
+      "2026-02-05T00:00:00Z"
+    ],
+    [
+      2,
+      "Bob",
+      "bob@example.com",
+      "Portland",
+      3,
+      2,
+      "Widget",
+      5,
+      "2026-02-01T00:00:00Z"
+    ],
+    [
+      3,
+      "Carol",
+      "carol@example.com",
+      "Seattle",
+      2,
+      3,
+      "Gadget",
+      1,
+      "2026-01-20T00:00:00Z"
+    ],
+    [
+      4,
+      "Dave",
+      "dave@example.com",
+      "Denver",
+      6,
+      4,
+      "Widget",
+      1,
+      "2026-02-10T00:00:00Z"
+    ],
+    [
+      5,
+      "Eve",
+      "eve@example.com",
+      "Portland",
+      5,
+      5,
+      "Gadget",
+      2,
+      "2026-02-08T00:00:00Z"
+    ],
+    [
+      1,
+      "Alice",
+      "alice@example.com",
+      "Seattle",
+      1,
+      1,
+      "Widget",
+      2,
+      "2026-01-15T00:00:00Z"
+    ]
+  ],
+  "row_count": 6,
+  "truncated": false
+}
+```
+
 ## Next Steps
 
 - **Add a database:** See the
