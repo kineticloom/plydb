@@ -40,18 +40,21 @@ build-skills: dist/skills/plydb-skill.zip
 # Targets
 # -----------------------------------------------------------------------------
 
-dist/plydb_linux_amd64: $(go_files)
-	@mkdir -p $(@D)
-	docker run --rm --platform linux/amd64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
+# TODO: Cross-platform compiling is not quite working because of duckdb. 
+# Instead, use VM's (i.e. Github Actions) to build platform specific versions of plydb-skill.zip
 
-dist/plydb_linux_arm64: $(go_files)
-	@mkdir -p $(@D)
-	docker run --rm --platform linux/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
+# dist/plydb_linux_amd64: $(go_files)
+# 	@mkdir -p $(@D)
+# 	docker run --rm --platform linux/amd64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
 
-dist/plydb_darwin_arm64: $(go_files)
-	@mkdir -p $(@D)
-# 	docker run --rm --platform darwin/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
-	GOOS=darwin GOARCH=arm64 go build -o $@ .
+# dist/plydb_linux_arm64: $(go_files)
+# 	@mkdir -p $(@D)
+# 	docker run --rm --platform linux/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
+
+# dist/plydb_darwin_arm64: $(go_files)
+# 	@mkdir -p $(@D)
+# # 	docker run --rm --platform darwin/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
+# 	GOOS=darwin GOARCH=arm64 go build -o $@ .
 
 # Not working
 # dist/plydb_windows_amd64: $(go_files)
@@ -62,12 +65,11 @@ dist/plydb: $(go_files)
 	@mkdir -p $(@D)
 	go build -o $@ .
 
-# TODO: add other architectures
-dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f) dist/plydb_darwin_arm64
+# NOTE: this only builds for a single OS and architecture
+dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f) dist/plydb
 	@mkdir -p $(@D)
 	cp -r skills/plydb dist/skills/
-	cp dist/plydb_darwin_arm64 dist/skills/plydb/assets/
-# 	cp dist/plydb_windows_amd64 dist/skills/plydb/assets/
+	cp dist/plydb dist/skills/plydb/assets/
 	touch $@
 
 dist/skills/plydb-skill.zip: dist/skills/.plydb-skill-built.sentinel
