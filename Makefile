@@ -40,19 +40,18 @@ build-skills: dist/skills/plydb-skill.zip
 # Targets
 # -----------------------------------------------------------------------------
 
-# Not working
-# dist/plydb_linux_amd64: $(go_files)
-# 	@mkdir -p $(@D)
-# 	GOOS=linux GOARCH=amd64 go build -o dist/plydb_linux_amd64 .
+dist/plydb_linux_amd64: $(go_files)
+	@mkdir -p $(@D)
+	docker run --rm --platform linux/amd64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
 
-# Not working
-# dist/plydb_linux_arm64: $(go_files)
-# 	@mkdir -p $(@D)
-# 	GOOS=linux GOARCH=arm64 go build -o dist/plydb_linux_arm64 .
+dist/plydb_linux_arm64: $(go_files)
+	@mkdir -p $(@D)
+	docker run --rm --platform linux/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
 
 dist/plydb_darwin_arm64: $(go_files)
 	@mkdir -p $(@D)
-	GOOS=darwin GOARCH=arm64 go build -o dist/plydb_darwin_arm64 .
+# 	docker run --rm --platform darwin/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
+	GOOS=darwin GOARCH=arm64 go build -o $@ .
 
 # Not working
 # dist/plydb_windows_amd64: $(go_files)
@@ -61,7 +60,7 @@ dist/plydb_darwin_arm64: $(go_files)
 
 dist/plydb: $(go_files)
 	@mkdir -p $(@D)
-	go build -o dist/plydb .
+	go build -o $@ .
 
 # TODO: add other architectures
 dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f) dist/plydb_darwin_arm64
