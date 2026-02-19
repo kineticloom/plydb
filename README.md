@@ -122,25 +122,36 @@ relational view:
 | **Cloud / SaaS** (WIP) | Google Sheets, S3                 |
 | **Data Lake** (WIP)    | Apache Iceberg, Delta Lake        |
 
-## Connecting AI agents to PlyDB via MCP
+## AI agents + PlyDB via MCP
 
-To connect an AI agent to PlyDB via MCP, follow the step-by-step tutorial for
-your preferred client:
+To connect an AI agent to PlyDB via [MCP](https://modelcontextprotocol.io),
+download a
+[pre-built PlyDB binary](https://github.com/kineticloom/plydb/releases) for your
+operating system (or build PlyDB from code) and follow your specific agent's
+instructions for configuring MCP:
 
-- **[Claude Desktop](examples/connect_to_claude_desktop/README.md)** - full
-  walkthrough querying CSV files in Claude Desktop via MCP
-
-PlyDB uses the [Model Context Protocol](https://modelcontextprotocol.io) and
-works with any MCP-compatible client. For other agents, see their MCP setup
-guides:
-
+- [Claude Desktop](examples/connect_to_claude_desktop/README.md) - full tutorial
+  querying CSV files in Claude Desktop via MCP
 - [ChatGPT](https://platform.openai.com/docs/guides/developer-mode)
 - [OpenCode](https://opencode.ai/docs/mcp-servers/)
 - [Gemini](https://geminicli.com/docs/tools/mcp-server/)
 
-## Connecting AI agents to PlyDB via CLI
+## AI agents + PlyDB via CLI Agent Skill
 
-TODO
+For a simpler, more dynamic alternative to MCP, AI agents can also use PlyDB via
+the `plydb` CLI when provided context on how to do so via an
+[Agent Skill](https://agentskills.io).
+
+Download the Agent Skill bundle
+([plydb-skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
+your specific agent's instructions for installing skills:
+
+- [Claude](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#claude-ai)
+- [Claude Code](https://code.claude.com/docs/en/skills)
+- [Codex](https://developers.openai.com/codex/skills)
+- [Gemini CLI](https://geminicli.com/docs/cli/skills/)
+- [OpenClaw](https://docs.openclaw.ai/tools/skills)
+- [OpenCode](https://opencode.ai/docs/skills/)
 
 ## Configuring data sources
 
@@ -149,28 +160,6 @@ Examples of configuring data sources:
 - [Query CSV files](examples/connect_to_csv_files/README.md)
 - [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
 - [Providing semantic context](examples/semantic_context_scanning/README.md)
-
-## Build
-
-To build a `plydb` binary:
-
-```sh
-go build .
-```
-
-## Testing
-
-To run unit tests:
-
-```sh
-go test ./...
-```
-
-To run integration tests (requires Docker):
-
-```sh
-go test -tags=integration -v -timeout 300s ./...
-```
 
 ## Contributing
 

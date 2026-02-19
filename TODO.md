@@ -12,11 +12,6 @@ needs to be done:
 
 ## Short to mid term priorities
 
-### DOCS - PlyDB CLI Skill
-
-Add Skill for users that choose to integrate PlyDB with their AI agent via CLI
-instead of MCP.
-
 ### FEAT - PlyDB read-write access controls
 
 See specs/table_access_policy.md and sqlwalk.Validate for foundations. End user
@@ -142,3 +137,10 @@ auth, multi-tenancy, control plane, but there may be others.
 Most likely best left out of scope for PlyDB and best handled by an
 organization's established practices - e.g. Cloud auth, ssh tunneling, zero
 trust networking solutions, etc.
+
+## Completed
+
+### DOCS - PlyDB CLI Skill
+
+Add Skill for users that choose to integrate PlyDB with their AI agent via CLI
+instead of MCP.

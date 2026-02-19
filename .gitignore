@@ -59,4 +59,6 @@ Temporary Items
 
 .claude
 plydb
+!plydb/
 demo_sandbox/
+dist/
