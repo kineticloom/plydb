@@ -54,7 +54,7 @@ jobs:
           cp -r skills/plydb/. dist/skills/plydb/
           cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} dist/skills/plydb/assets/plydb
           cd dist/skills
-          zip -X -r plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
+          zip -X -r ../plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
 
       - name: Package skill (Windows)
         if: matrix.goos == 'windows'
@@ -63,7 +63,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist/skills/plydb/assets
           Copy-Item -Recurse -Force skills/plydb/. dist/skills/plydb/
           Copy-Item dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe dist/skills/plydb/assets/plydb.exe
-          Compress-Archive -Path dist/skills/plydb -DestinationPath dist/skills/plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip
+          Compress-Archive -Path dist/skills/plydb -DestinationPath dist/plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -71,7 +71,7 @@ jobs:
           name: assets-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
             dist/plydb_*
-            dist/skills/plydb-skill-*.zip
+            dist/plydb-skill-*.zip
 
   release:
     name: Create Release
