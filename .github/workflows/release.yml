@@ -1,0 +1,99 @@
+name: Build Skills
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+          - goos: linux
+            goarch: arm64
+            runner: ubuntu-24.04-arm
+          - goos: darwin
+            goarch: arm64
+            runner: macos-latest
+          - goos: windows
+            goarch: amd64
+            runner: windows-latest
+          # windows/arm64 omitted: not yet supported by duckdb-go-bindings
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # Binary is named with platform suffix for use as a standalone release asset.
+      # Inside the skill zip it is renamed to plain 'plydb'/'plydb.exe' so that
+      # SKILL.md commands (./plydb ...) work without modification.
+      - name: Build binary
+        shell: bash
+        run: |
+          mkdir -p dist
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            go build -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe .
+          else
+            go build -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} .
+          fi
+
+      - name: Package skill (Linux/macOS)
+        if: matrix.goos != 'windows'
+        run: |
+          mkdir -p dist/skills/plydb/assets
+          cp -r skills/plydb/. dist/skills/plydb/
+          cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} dist/skills/plydb/assets/plydb
+          cd dist/skills
+          zip -X -r plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
+
+      - name: Package skill (Windows)
+        if: matrix.goos == 'windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/skills/plydb/assets
+          Copy-Item -Recurse -Force skills/plydb/. dist/skills/plydb/
+          Copy-Item dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe dist/skills/plydb/assets/plydb.exe
+          Compress-Archive -Path dist/skills/plydb -DestinationPath dist/skills/plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: assets-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/plydb_*
+            dist/skills/plydb-skill-*.zip
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/assets
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            dist/assets/*
+        env:
+          GH_TOKEN: ${{ github.token }}

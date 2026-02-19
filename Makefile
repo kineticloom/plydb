@@ -40,32 +40,16 @@ build-skills: dist/skills/plydb-skill.zip
 # Targets
 # -----------------------------------------------------------------------------
 
-# TODO: Cross-platform compiling is not quite working because of duckdb. 
-# Instead, use VM's (i.e. Github Actions) to build platform specific versions of plydb-skill.zip
-
-# dist/plydb_linux_amd64: $(go_files)
-# 	@mkdir -p $(@D)
-# 	docker run --rm --platform linux/amd64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
-
-# dist/plydb_linux_arm64: $(go_files)
-# 	@mkdir -p $(@D)
-# 	docker run --rm --platform linux/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
-
-# dist/plydb_darwin_arm64: $(go_files)
-# 	@mkdir -p $(@D)
-# # 	docker run --rm --platform darwin/arm64 -v $(PWD):/src -w /src golang:1.26 go build -o $@ .
-# 	GOOS=darwin GOARCH=arm64 go build -o $@ .
-
-# Not working
-# dist/plydb_windows_amd64: $(go_files)
-# 	@mkdir -p $(@D)
-# 	GOOS=windows GOARCH=amd64 go build -o dist/plydb_windows_amd64 .
+# Multi-platform builds are handled by GitHub Actions using native runners.
+# See .github/workflows/build-skills.yml for linux-amd64, linux-arm64,
+# darwin-arm64, and windows-amd64 builds.
+# Note: windows-arm64 is omitted - not yet supported by duckdb-go-bindings.
 
 dist/plydb: $(go_files)
 	@mkdir -p $(@D)
 	go build -o $@ .
 
-# NOTE: this only builds for a single OS and architecture
+# NOTE: this builds for the local OS and architecture only
 dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f) dist/plydb
 	@mkdir -p $(@D)
 	cp -r skills/plydb dist/skills/
