@@ -49,10 +49,6 @@ Related to:
 
 - [Reduce friction of install and config of PlyDB with AI agents](#feat---reduce-friction-of-install-and-config-of-plydb-with-ai-agents)
 
-### FEAT - Build and release binaries
-
-Release binaries to GitHub. Remember to look into signing best practices.
-
 ### DOCS - Licensing
 
 Decide on licensing approach and update repo with appropriate docs.
@@ -144,3 +140,7 @@ trust networking solutions, etc.
 
 Add Skill for users that choose to integrate PlyDB with their AI agent via CLI
 instead of MCP.
+
+### FEAT - Build and release binaries
+
+Release binaries to GitHub. Remember to look into signing best practices.
