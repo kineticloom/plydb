@@ -17,6 +17,21 @@ PlyDB is:
 
 ---
 
+## Demo
+
+Claude Desktop + PlyDB + Revenue Data
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/1d11208f-502e-4436-865b-7413196ed861" width="400" controls muted autoplay loop>
+  </video>
+</div>
+
+PlyDB can connect with a wide [variety of data sources](#supported-data-sources) and integrate with any AI agent that supports [CLI tools](#ai-agents--plydb-via-cli-agent-skill) or [MCP](#ai-agents--plydb-via-mcp).
+
+---
+
+## Where PlyDB fits
+
 ```
  ┌─────────────────┐ SQL ┌──────────────────────────────────────┐
  │     AI Agent    │────▶│               PlyDB                  │
