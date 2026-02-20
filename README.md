@@ -19,21 +19,21 @@ PlyDB is:
 
 ## Demo
 
-Claude Desktop + PlyDB + Revenue Data
+PlyDB can connect with a wide [variety of data sources](#supported-data-sources)
+and integrate with any AI agent that supports
+[CLI tools](#ai-agents--plydb-via-cli-agent-skill) or
+[MCP](#ai-agents--plydb-via-mcp).
+
+Here is a demo with Claude Desktop + PlyDB + Revenue Data:
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/1d11208f-502e-4436-865b-7413196ed861" width="400" controls muted autoplay loop>
   </video>
 </div>
 
-PlyDB can connect with a wide [variety of data sources](#supported-data-sources)
-and integrate with any AI agent that supports
-[CLI tools](#ai-agents--plydb-via-cli-agent-skill) or
-[MCP](#ai-agents--plydb-via-mcp).
-
 ---
 
-## Where PlyDB fits
+## Where does PlyDB fit in?
 
 ```
  ┌─────────────────┐ SQL ┌──────────────────────────────────────┐
@@ -56,7 +56,9 @@ and integrate with any AI agent that supports
 
 ---
 
-## Empowerment Meets Security
+## Why PlyDB?
+
+Empowerment + Security.
 
 - **Agentic Data Analysis:** Unleash the full potential of AI agents by allowing
   them to write sophisticated SQL and perform complex data analysis
@@ -83,10 +85,11 @@ and integrate with any AI agent that supports
 
 ---
 
-## Turning Data into Decisions
+## Example Use Cases
 
-When your AI agent has a secure, real-time view of your data, it evolves from a
-chatbot into a **Strategic Partner**.
+When your AI agent has a secure, real-time view of your data, it evolves from
+just a chatbot into a **Strategic Partner**. Stop getting lost in data and
+dashboards, and start finding actionable insights.
 
 ### Strategic Sales & Retention
 
