@@ -53,20 +53,27 @@ Related to:
 
 Decide on licensing approach and update repo with appropriate docs.
 
-### FEAT - Connecting to Cloud storage systems (S3, Iceberg)
-
-Some foundations for this are in place, but this functionality has not yet been
-tested and validated as working.
-
 ## Backlog priority
 
 Stories are in the backlog because the need or requirements are not yet clear.
 They're documented here so we can monitor and prioritize them for action as we
 learn more. They're listed in no particular order.
 
-### TECH DEBT - Add a Makefile
+### FEAT - Connecting to data lakes (Iceberg, Delta)
 
-To encapsulate common dev or release tasks
+Update data source config file spec, implement connection logic, update examples
+and docs.
+
+### FEAT - Connecting to DuckDB
+
+Update data source config file spec, implement connection logic, update examples
+and docs.
+
+### FEAT - Connecting to SQLite
+
+Update data source config file spec, implement connection logic, update examples
+and docs.
+
 
 ### FEAT - Revisit logging
 
@@ -117,9 +124,14 @@ cases where the user will want to configure data sources on the fly during run
 time. Web UI, and or MCP tool? Note: Because AI agents can execute tools
 autonomously, we will need to consider security if we go the MCP tool route.
 
+Note: Dynamic reconfiguration is already supported for agents using PlyDB via
+CLI instead of MCP. With a CLI, agents or users can reconfigure the data source
+config file, fetch semantic context, and query on the fly.
+
 Related to:
 
 - [Reduce friction of install and config of PlyDB with AI agents](#feat---reduce-friction-of-install-and-config-of-plydb-with-ai-agents)
+- [PlyDB CLI Skill](#docs---plydb-cli-skill)
 
 ### FEAT - Requirements for usage as a remote service
 
@@ -144,3 +156,7 @@ instead of MCP.
 ### FEAT - Build and release binaries
 
 Release binaries to GitHub. Remember to look into signing best practices.
+
+### TECH DEBT - Add a Makefile
+
+To encapsulate common dev or release tasks

@@ -26,7 +26,10 @@ Claude Desktop + PlyDB + Revenue Data
   </video>
 </div>
 
-PlyDB can connect with a wide [variety of data sources](#supported-data-sources) and integrate with any AI agent that supports [CLI tools](#ai-agents--plydb-via-cli-agent-skill) or [MCP](#ai-agents--plydb-via-mcp).
+PlyDB can connect with a wide [variety of data sources](#supported-data-sources)
+and integrate with any AI agent that supports
+[CLI tools](#ai-agents--plydb-via-cli-agent-skill) or
+[MCP](#ai-agents--plydb-via-mcp).
 
 ---
 
@@ -130,12 +133,12 @@ by zip code"
 PlyDB abstracts the complexity of different storage formats into a single
 relational view:
 
-| Category               | Supported Sources                 |
-| :--------------------- | :-------------------------------- |
-| **SQL Databases**      | PostgreSQL, MySQL, SQLite         |
-| **File Formats**       | CSV, JSON, Parquet, Excel (.xlsx) |
-| **Cloud / SaaS** (WIP) | Google Sheets, S3                 |
-| **Data Lake** (WIP)    | Apache Iceberg, Delta Lake        |
+| Category                | Supported Sources                                     |
+| :---------------------- | :---------------------------------------------------- |
+| **SQL Databases**       | PostgreSQL, MySQL, SQLite (planned), DuckDB (planned) |
+| **File Formats**        | CSV, JSON, Parquet, Excel (.xlsx)                     |
+| **Object Storage**      | S3                                                    |
+| **Data Lake** (planned) | Apache Iceberg, Delta Lake                            |
 
 ## AI agents + PlyDB via MCP
 
