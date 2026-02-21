@@ -10,7 +10,7 @@ file.
 Implementation notes
 
 - The mcp server implementation is at cmd/mcp.go
-- The cli in main.go has a scan-context command that can provide an example
+- The cli in main.go has a semantic-context command that can provide an example
   implementation of parts of this
 - For now keep things simple by just scanning and loading the semantic context
   data into memory just once, during mcp server startup.

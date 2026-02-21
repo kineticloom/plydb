@@ -97,10 +97,10 @@ to connect these natural-language concepts to the underlying column names.
 ## Getting Semantic Context via CLI
 
 Instead of MCP, you or an AI agent can also get the semantic context via the
-PlyDB CLI `scan-context` command directly:
+PlyDB CLI `semantic-context` command directly:
 
 ```bash
-./plydb scan-context --config examples/semantic_context_scanning/config.json
+./plydb semantic-context --config examples/semantic_context_scanning/config.json
 ```
 
 This outputs the same OSI YAML that the MCP tool returns to agents:

@@ -11,10 +11,10 @@ import (
 )
 
 func RunScanContext(args []string) {
-	fs := flag.NewFlagSet("scan-context", flag.ExitOnError)
+	fs := flag.NewFlagSet("semantic-context", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to the connection config JSON file")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, `Usage: plydb scan-context [flags]
+		fmt.Fprintln(os.Stderr, `Usage: plydb semantic-context [flags]
 
 Flags:`)
 		fs.PrintDefaults()

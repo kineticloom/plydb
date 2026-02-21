@@ -10,10 +10,10 @@ import (
 const usage = `Usage: plydb <command> [arguments] [flags]
 
 Commands:
-  query          Execute a SQL query
-  scan-context   Scan all data sources and output semantic context as YAML
-  mcp            Start an MCP server exposing a SQL query tool
-  version        Print version information
+  query              Execute a SQL query
+  semantic-context   Scan all data sources and output semantic context as YAML
+  mcp                Start an MCP server exposing a SQL query tool
+  version            Print version information
 
 Run "plydb <command> -h" for command-specific usage.
 `
@@ -27,7 +27,7 @@ func main() {
 	switch os.Args[1] {
 	case "query":
 		cmd.RunQuery(os.Args[2:])
-	case "scan-context":
+	case "semantic-context":
 		cmd.RunScanContext(os.Args[2:])
 	case "mcp":
 		cmd.RunMCP(os.Args[2:])

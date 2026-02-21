@@ -42,5 +42,5 @@ column types and foreign keys as structured YAML that follows the
 specification.
 
 ```sh
-./plydb scan-context --config path/to/config/file/config.json
+./plydb semantic-context --config path/to/config/file/config.json
 ```
