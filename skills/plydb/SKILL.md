@@ -44,3 +44,31 @@ specification.
 ```sh
 ./plydb semantic-context --config path/to/config/file/config.json
 ```
+
+#### Enriching auto-scanned context with overlays
+
+When the database lacks comments or you need to add relationships and metrics
+not captured from source metadata, use `--semantic-context-overlay` to supply
+one or more OSI YAML files that are merged on top of the auto-scanned model:
+
+```sh
+./plydb semantic-context \
+  --config path/to/config/file/config.json \
+  --semantic-context-overlay path/to/overlay.yaml
+```
+
+The flag is repeatable; overlays are applied in the order given:
+
+```sh
+./plydb semantic-context \
+  --config path/to/config/file/config.json \
+  --semantic-context-overlay base_overlay.yaml \
+  --semantic-context-overlay team_overlay.yaml
+```
+
+The same flag is available on `plydb mcp --semantic-context-overlay overlay.yaml`.
+
+Overlay files must be valid OSI YAML. Overlays can add descriptions to existing
+datasets and fields, define relationships between existing datasets, and add or
+update metrics. They cannot introduce new datasets or fields — only enrich what
+was already discovered by the auto-scanner.

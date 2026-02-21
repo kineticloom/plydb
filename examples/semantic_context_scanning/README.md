@@ -164,3 +164,50 @@ Notice how the PostgreSQL `COMMENT` metadata appears as `description` fields in
 the YAML output. Without these comments, an LLM would have no way to know that
 `oscill_rate` is "the frequency of energy vibration" or that `syn_link_01` "maps
 the entanglement between two different vortex anchors."
+
+## Layering Additional Semantic Context
+
+Auto-scanning captures what the database already knows. The
+`--semantic-context-overlay` flag lets you supply one or more OSI YAML files
+that enrich the auto-scanned model with additional descriptions, relationships,
+and metrics — without changing the source database.
+
+**Constraints:** overlays cannot add new datasets (tables) or new fields
+(columns). They only enrich what was already discovered by the scanner.
+
+### Example overlay
+
+The file [`overlay.yaml`](overlay.yaml) in this directory is a ready-to-use
+example. It adds a description to `flux_telemetry.anchor_ref`, defines the
+relationship between `flux_telemetry` and `vortex_anchor`, and adds an
+`avg_entropy` metric.
+
+### CLI usage
+
+```bash
+./plydb semantic-context \
+  --config examples/semantic_context_scanning/config.json \
+  --semantic-context-overlay examples/semantic_context_scanning/overlay.yaml
+```
+
+The flag is repeatable — multiple overlays are applied in order:
+
+```bash
+./plydb semantic-context \
+  --config examples/semantic_context_scanning/config.json \
+  --semantic-context-overlay base_overlay.yaml \
+  --semantic-context-overlay team_overlay.yaml
+```
+
+### MCP usage
+
+The same flag works with `plydb mcp`:
+
+```bash
+./plydb mcp \
+  --config examples/semantic_context_scanning/config.json \
+  --semantic-context-overlay examples/semantic_context_scanning/overlay.yaml
+```
+
+When an agent calls `get_semantic_context`, it receives the enriched model with
+the overlay applied.

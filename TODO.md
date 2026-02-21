@@ -85,29 +85,6 @@ Column hiding, column masking, PII scanning. TBD whether which parts of this
 should be in scope or out of scope for PlyDB. There are general purpose tools
 that do this that can be plugged into the system next to PlyDB.
 
-### FEAT - Semantic context layering
-
-Currently PlyDB automatically scans for semantic context, using table schema,
-and table and column `COMMENT` metadata to construct and provide data compliant
-with the
-[Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
-spec to AI agents.
-
-This is an ok foundation for an AI agent to start understanding the semantics of
-the data sources, however there may be cases where additional business semantics
-need to be provided that are not available to be automatically scanned.
-
-For example, if a library's database of books has a `checked_out_date` column,
-but does not have an `is_overdue` column, we need a mechanism to provide the
-additional context that "a book is overdue if it was checked out more than 2
-weeks ago".
-
-There are mechanisms in OSI to provide these semantics. However, PlyDB does not
-_yet_ have a means of loading user customized OSI. A first pass could be to
-layer the auto scanned OSI data with user provided customized OSI data.
-
-A first step here is to better understand users need for this.
-
 ### FEAT - Providing semantic context for large datasets
 
 Currently fetching semantic context returns semantic context for all tables and
@@ -160,3 +137,26 @@ Release binaries to GitHub. Remember to look into signing best practices.
 ### TECH DEBT - Add a Makefile
 
 To encapsulate common dev or release tasks
+
+### FEAT - Semantic context layering
+
+Currently PlyDB automatically scans for semantic context, using table schema,
+and table and column `COMMENT` metadata to construct and provide data compliant
+with the
+[Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
+spec to AI agents.
+
+This is an ok foundation for an AI agent to start understanding the semantics of
+the data sources, however there may be cases where additional business semantics
+need to be provided that are not available to be automatically scanned.
+
+For example, if a library's database of books has a `checked_out_date` column,
+but does not have an `is_overdue` column, we need a mechanism to provide the
+additional context that "a book is overdue if it was checked out more than 2
+weeks ago".
+
+There are mechanisms in OSI to provide these semantics. However, PlyDB does not
+_yet_ have a means of loading user customized OSI. A first pass could be to
+layer the auto scanned OSI data with user provided customized OSI data.
+
+A first step here is to better understand users need for this.

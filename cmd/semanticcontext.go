@@ -13,6 +13,8 @@ import (
 func RunScanContext(args []string) {
 	fs := flag.NewFlagSet("semantic-context", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to the connection config JSON file")
+	var overlayFiles stringSliceFlag
+	fs.Var(&overlayFiles, "semantic-context-overlay", "path to an Open Semantic Interchage OSI (https://github.com/open-semantic-interchange/OSI) YAML overlay file (repeatable)")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, `Usage: plydb semantic-context [flags]
 
@@ -35,6 +37,15 @@ Flags:`)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error scanning context: %v\n", err)
 		os.Exit(1)
+	}
+
+	if len(overlayFiles) > 0 {
+		overlay := semanticcontext.NewOverlayProvider([]string(overlayFiles))
+		model, err = overlay.Provide(context.Background(), model)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error applying overlay: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	enc := yaml.NewEncoder(os.Stdout)

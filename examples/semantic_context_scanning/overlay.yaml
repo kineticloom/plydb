@@ -1,0 +1,27 @@
+semantic_model:
+  name: Grid overlay
+  datasets:
+    - name: grid.public.flux_telemetry
+      description: >
+        Time-series log of multidimensional energy fluctuations. Each row
+        captures a single telemetry reading from a vortex anchor.
+      fields:
+        - name: anchor_ref
+          description: Foreign key to vortex_anchor.anchor_id.
+    - name: grid.public.vortex_anchor
+      fields:
+        - name: anchor_id
+          description: Unique identifier for this stability point.
+  relationships:
+    - name: flux_telemetry_anchor
+      left:
+        dataset: grid.public.flux_telemetry
+        field: anchor_ref
+      right:
+        dataset: grid.public.vortex_anchor
+        field: anchor_id
+  metrics:
+    - name: avg_entropy
+      description: Average rate of energy decay across all telemetry readings.
+      expression:
+        sql: AVG(entropy_delta)

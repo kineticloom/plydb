@@ -19,6 +19,8 @@ func RunMCP(args []string) {
 	configPath := fs.String("config", "", "path to the connection config JSON file")
 	transport := fs.String("transport", "stdio", "transport type: stdio or http")
 	addr := fs.String("addr", "localhost:8080", "address for HTTP transport")
+	var overlayFiles stringSliceFlag
+	fs.Var(&overlayFiles, "semantic-context-overlay", "path to an Open Semantic Interchange OSI (https://github.com/open-semantic-interchange/OSI) YAML overlay file (repeatable)")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, `Usage: plydb mcp [flags]
 
@@ -43,6 +45,15 @@ Flags:`)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error scanning semantic context: %v\n", err)
 		os.Exit(1)
+	}
+
+	if len(overlayFiles) > 0 {
+		overlay := semanticcontext.NewOverlayProvider([]string(overlayFiles))
+		model, err = overlay.Provide(context.Background(), model)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error applying overlay: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	server := mcpserver.NewServer(cfg, engine, model)

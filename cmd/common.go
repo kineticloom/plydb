@@ -8,6 +8,16 @@ import (
 	"github.com/kineticloom/plydb/queryengine"
 )
 
+// stringSliceFlag is a repeatable string flag (implements flag.Value).
+// Use with fs.Var to allow --flag val1 --flag val2 patterns.
+type stringSliceFlag []string
+
+func (f *stringSliceFlag) String() string { return strings.Join(*f, ",") }
+func (f *stringSliceFlag) Set(s string) error {
+	*f = append(*f, s)
+	return nil
+}
+
 // reorderArgs moves flag-like tokens (--key / --key=val / -key) before
 // positional args so that Go's flag package can parse them all.
 func reorderArgs(args []string) []string {
