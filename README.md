@@ -143,13 +143,41 @@ relational view:
 | **Object Storage**      | S3                                                    |
 | **Data Lake** (planned) | Apache Iceberg, Delta Lake                            |
 
+---
+
+## Installation
+
+### Quick install (macOS / Linux)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/kineticloom/plydb/main/install.sh | sh
+```
+
+### Quick install (Windows — PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/kineticloom/plydb/main/install.ps1 | iex
+```
+
+### Options
+
+| Variable            | Description                            | Default        |
+| :------------------ | :------------------------------------- | :------------- |
+| `PLYDB_INSTALL_DIR` | Where to place the binary              | `~/.local/bin` |
+| `PLYDB_VERSION`     | Version tag to install (e.g. `v0.1.0`) | latest         |
+
+### Manual download
+
+Pre-built binaries for all platforms are available on the
+[Releases](https://github.com/kineticloom/plydb/releases) page.
+
+---
+
 ## AI agents + PlyDB via MCP
 
 To connect an AI agent to PlyDB via [MCP](https://modelcontextprotocol.io),
-download a
-[pre-built PlyDB binary](https://github.com/kineticloom/plydb/releases) for your
-operating system (or build PlyDB from code) and follow your specific agent's
-instructions for configuring MCP:
+install PlyDB using the [quick install](#installation) above (or build from
+source) and follow your specific agent's instructions for configuring MCP:
 
 - [Claude Desktop](examples/connect_to_claude_desktop/README.md) - full tutorial
   querying CSV files in Claude Desktop via MCP
