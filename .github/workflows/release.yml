@@ -39,10 +39,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
+          LDFLAGS="-X github.com/kineticloom/plydb/cmd.Version=${{ github.ref_name }} -X github.com/kineticloom/plydb/cmd.Commit=${{ github.sha }} -X github.com/kineticloom/plydb/cmd.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            go build -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe .
+            go build -ldflags "$LDFLAGS" -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe .
           else
-            go build -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} .
+            go build -ldflags "$LDFLAGS" -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} .
           fi
 
       - name: Package skill (Linux/macOS)

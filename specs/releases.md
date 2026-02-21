@@ -61,3 +61,26 @@ Binaries are built natively (no cross-compilation) using the following runners:
 `make build-skills` builds a skill zip for the local OS/architecture only,
 useful for development and testing. It does not produce the platform-named
 binaries used in releases.
+
+---
+
+## 5. Version Embedding
+
+Release binaries have version metadata injected at build time via `-ldflags`:
+
+| Variable         | Source                  | Example                |
+| ---------------- | ----------------------- | ---------------------- |
+| `main.Version`   | `github.ref_name`       | `v1.2.3`               |
+| `main.Commit`    | `github.sha`            | `a1b2c3d4...`          |
+| `main.BuildDate` | `date -u` at build time | `2026-01-15T10:30:00Z` |
+
+Local builds without ldflags (e.g. `go build .` or `go run .`) will show `dev` /
+`none` / `unknown` for these fields.
+
+To inspect the version of a binary:
+
+```sh
+plydb version
+plydb --version
+plydb -v
+```
