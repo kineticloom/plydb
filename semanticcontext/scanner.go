@@ -87,20 +87,18 @@ func columnsToDataset(catalog, schema, table string, cols []columnInfo, descript
 
 	for _, c := range cols {
 		f := Field{
-			Name:     c.Column,
-			DataType: c.DataType,
+			Name: c.Column,
+			Expression: &Expression{
+				Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: c.Column}},
+			},
 		}
 		if c.Comment != "" {
 			f.Description = c.Comment
 		}
-		ds.Fields = append(ds.Fields, f)
-
 		if isTimeLike(c.DataType) {
-			ds.Dimensions = append(ds.Dimensions, Dimension{
-				Name:   c.Column,
-				IsTime: true,
-			})
+			f.Dimension = &Dimension{IsTime: true}
 		}
+		ds.Fields = append(ds.Fields, f)
 	}
 
 	return ds

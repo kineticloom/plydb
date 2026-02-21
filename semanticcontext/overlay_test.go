@@ -30,20 +30,43 @@ func baseModel() *SemanticModelFile {
 					Description: "User table",
 					Source:      "catalog.public.users",
 					Fields: []Field{
-						{Name: "id", DataType: "integer"},
-						{Name: "name", DataType: "varchar"},
-						{Name: "created_at", DataType: "timestamp"},
-					},
-					Dimensions: []Dimension{
-						{Name: "created_at", IsTime: true},
+						{
+							Name: "id",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "id"}},
+							},
+						},
+						{
+							Name: "name",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "name"}},
+							},
+						},
+						{
+							Name: "created_at",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "created_at"}},
+							},
+							Dimension: &Dimension{IsTime: true},
+						},
 					},
 				},
 				{
 					Name:   "catalog.public.orders",
 					Source: "catalog.public.orders",
 					Fields: []Field{
-						{Name: "order_id", DataType: "integer"},
-						{Name: "user_id", DataType: "integer"},
+						{
+							Name: "order_id",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "order_id"}},
+							},
+						},
+						{
+							Name: "user_id",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "user_id"}},
+							},
+						},
 					},
 				},
 			},
@@ -51,7 +74,9 @@ func baseModel() *SemanticModelFile {
 				{
 					Name:        "existing_metric",
 					Description: "An existing metric",
-					Expression:  Expression{SQL: "COUNT(*)"},
+					Expression: Expression{
+						Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "COUNT(*)"}},
+					},
 				},
 			},
 		},
@@ -170,9 +195,11 @@ func TestApplyOverlay_RelationshipAdded(t *testing.T) {
 		SemanticModel: SemanticModel{
 			Relationships: []Relationship{
 				{
-					Name:  "users_orders",
-					Left:  JoinSide{Dataset: "catalog.public.users", Field: "id"},
-					Right: JoinSide{Dataset: "catalog.public.orders", Field: "user_id"},
+					Name:        "users_orders",
+					From:        "catalog.public.users",
+					To:          "catalog.public.orders",
+					FromColumns: []string{"id"},
+					ToColumns:   []string{"user_id"},
 				},
 			},
 		},
@@ -192,9 +219,11 @@ func TestApplyOverlay_RelationshipIgnoredWhenSideMissing(t *testing.T) {
 		SemanticModel: SemanticModel{
 			Relationships: []Relationship{
 				{
-					Name:  "bad_relationship",
-					Left:  JoinSide{Dataset: "catalog.public.users", Field: "id"},
-					Right: JoinSide{Dataset: "catalog.public.nonexistent", Field: "user_id"},
+					Name:        "bad_relationship",
+					From:        "catalog.public.users",
+					To:          "catalog.public.nonexistent",
+					FromColumns: []string{"id"},
+					ToColumns:   []string{"user_id"},
 				},
 			},
 		},
@@ -213,7 +242,9 @@ func TestApplyOverlay_MetricAdded(t *testing.T) {
 				{
 					Name:        "new_metric",
 					Description: "A new metric",
-					Expression:  Expression{SQL: "SUM(amount)"},
+					Expression: Expression{
+						Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "SUM(amount)"}},
+					},
 				},
 			},
 		},
@@ -232,7 +263,9 @@ func TestApplyOverlay_MetricUpdated(t *testing.T) {
 				{
 					Name:        "existing_metric",
 					Description: "Updated description",
-					Expression:  Expression{SQL: "COUNT(DISTINCT id)"},
+					Expression: Expression{
+						Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "COUNT(DISTINCT id)"}},
+					},
 				},
 			},
 		},
@@ -244,8 +277,9 @@ func TestApplyOverlay_MetricUpdated(t *testing.T) {
 	if result.SemanticModel.Metrics[0].Description != "Updated description" {
 		t.Errorf("metric description = %q, want %q", result.SemanticModel.Metrics[0].Description, "Updated description")
 	}
-	if result.SemanticModel.Metrics[0].Expression.SQL != "COUNT(DISTINCT id)" {
-		t.Errorf("metric expression = %q, want %q", result.SemanticModel.Metrics[0].Expression.SQL, "COUNT(DISTINCT id)")
+	got := result.SemanticModel.Metrics[0].Expression.Dialects[0].Expression
+	if got != "COUNT(DISTINCT id)" {
+		t.Errorf("metric expression = %q, want %q", got, "COUNT(DISTINCT id)")
 	}
 }
 
@@ -277,16 +311,16 @@ func TestOverlayProvider_MultipleFiles(t *testing.T) {
 
 func TestApplyOverlay_DimensionFromOverlay(t *testing.T) {
 	base := baseModel()
+	// Apply an overlay that sets a dimension on the "user_id" field of orders.
 	overlay := &SemanticModelFile{
 		SemanticModel: SemanticModel{
 			Datasets: []Dataset{
 				{
 					Name: "catalog.public.orders",
-					Dimensions: []Dimension{
-						// "user_id" is an existing field — should be added as dimension.
-						{Name: "user_id", IsTime: false},
+					Fields: []Field{
+						{Name: "user_id", Dimension: &Dimension{IsTime: false}},
 						// "nonexistent" is not a field — should be ignored.
-						{Name: "nonexistent", IsTime: false},
+						{Name: "nonexistent", Dimension: &Dimension{IsTime: false}},
 					},
 				},
 			},
@@ -302,11 +336,25 @@ func TestApplyOverlay_DimensionFromOverlay(t *testing.T) {
 		}
 	}
 
-	// Should have exactly 1 dimension (user_id added; nonexistent ignored).
-	if len(orderDS.Dimensions) != 1 {
-		t.Errorf("dimension count = %d, want 1", len(orderDS.Dimensions))
+	// user_id field should have a dimension; nonexistent field should be ignored.
+	var userIDField *Field
+	for _, f := range orderDS.Fields {
+		if f.Name == "user_id" {
+			userIDField = &f
+			break
+		}
 	}
-	if len(orderDS.Dimensions) > 0 && orderDS.Dimensions[0].Name != "user_id" {
-		t.Errorf("dimension name = %q, want %q", orderDS.Dimensions[0].Name, "user_id")
+	if userIDField == nil {
+		t.Fatal("user_id field not found")
+	}
+	if userIDField.Dimension == nil {
+		t.Error("user_id field should have a dimension set by overlay")
+	}
+
+	// No field named "nonexistent" should exist.
+	for _, f := range orderDS.Fields {
+		if f.Name == "nonexistent" {
+			t.Error("nonexistent field should not appear in result")
+		}
 	}
 }

@@ -14,14 +14,16 @@ semantic_model:
           description: Unique identifier for this stability point.
   relationships:
     - name: flux_telemetry_anchor
-      left:
-        dataset: grid.public.flux_telemetry
-        field: anchor_ref
-      right:
-        dataset: grid.public.vortex_anchor
-        field: anchor_id
+      from: grid.public.flux_telemetry
+      to: grid.public.vortex_anchor
+      from_columns:
+        - anchor_ref
+      to_columns:
+        - anchor_id
   metrics:
     - name: avg_entropy
       description: Average rate of energy decay across all telemetry readings.
       expression:
-        sql: AVG(entropy_delta)
+        dialects:
+          - dialect: ANSI_SQL
+            expression: AVG(entropy_delta)

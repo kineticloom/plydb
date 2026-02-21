@@ -411,17 +411,13 @@ func TestIntegrationPostgres(t *testing.T) {
 
 		empDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.employees")
 
-		// Verify data types are populated for each field.
+		// Verify each field has an expression with the column name.
 		for _, f := range empDS.Fields {
-			if f.DataType == "" {
-				t.Errorf("field %q has empty DataType", f.Name)
+			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+				t.Errorf("field %q has empty Expression", f.Name)
+			} else if f.Expression.Dialects[0].Expression != f.Name {
+				t.Errorf("field %q expression = %q, want %q", f.Name, f.Expression.Dialects[0].Expression, f.Name)
 			}
-		}
-
-		// Salary should be numeric.
-		salaryField := findField(t, empDS.Fields, "salary")
-		if salaryField.DataType != "numeric" {
-			t.Errorf("salary DataType = %q, want %q", salaryField.DataType, "numeric")
 		}
 	})
 
@@ -436,22 +432,18 @@ func TestIntegrationPostgres(t *testing.T) {
 
 		empDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.employees")
 
-		// hired_at is a timestamp → should appear as a time dimension.
-		found := false
-		for _, dim := range empDS.Dimensions {
-			if dim.Name == "hired_at" && dim.IsTime {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("expected hired_at time dimension, got dimensions: %+v", empDS.Dimensions)
+		// hired_at is a timestamp → should have a time dimension on the field.
+		hiredAt := findField(t, empDS.Fields, "hired_at")
+		if hiredAt.Dimension == nil || !hiredAt.Dimension.IsTime {
+			t.Errorf("expected hired_at to have time dimension, got %+v", hiredAt.Dimension)
 		}
 
-		// departments has no time columns → no dimensions.
+		// departments has no time columns → no fields with dimensions.
 		deptDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.departments")
-		if len(deptDS.Dimensions) != 0 {
-			t.Errorf("expected 0 dimensions for departments, got %+v", deptDS.Dimensions)
+		for _, f := range deptDS.Fields {
+			if f.Dimension != nil {
+				t.Errorf("expected no dimensions for departments, but field %q has %+v", f.Name, f.Dimension)
+			}
 		}
 	})
 
@@ -590,9 +582,10 @@ func TestIntegrationMySQL(t *testing.T) {
 
 		empDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.employees")
 
+		// Verify each field has an expression with the column name.
 		for _, f := range empDS.Fields {
-			if f.DataType == "" {
-				t.Errorf("field %q has empty DataType", f.Name)
+			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+				t.Errorf("field %q has empty Expression", f.Name)
 			}
 		}
 	})
@@ -608,15 +601,9 @@ func TestIntegrationMySQL(t *testing.T) {
 
 		empDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.employees")
 
-		found := false
-		for _, dim := range empDS.Dimensions {
-			if dim.Name == "hired_at" && dim.IsTime {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("expected hired_at time dimension, got dimensions: %+v", empDS.Dimensions)
+		hiredAt := findField(t, empDS.Fields, "hired_at")
+		if hiredAt.Dimension == nil || !hiredAt.Dimension.IsTime {
+			t.Errorf("expected hired_at to have time dimension, got %+v", hiredAt.Dimension)
 		}
 	})
 

@@ -8,8 +8,6 @@ import (
 )
 
 func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
-	boolPtr := func(b bool) *bool { return &b }
-
 	model := SemanticModelFile{
 		SemanticModel: SemanticModel{
 			Name:        "Test Model",
@@ -20,27 +18,44 @@ func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 					Description: "User accounts",
 					Source:      "catalog.schema.users",
 					Fields: []Field{
-						{Name: "id", DataType: "INTEGER", Nullable: boolPtr(false)},
-						{Name: "name", DataType: "VARCHAR"},
-						{Name: "created_at", DataType: "TIMESTAMP"},
-					},
-					Dimensions: []Dimension{
-						{Name: "created_at", IsTime: true},
+						{
+							Name: "id",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "id"}},
+							},
+						},
+						{
+							Name: "name",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "name"}},
+							},
+						},
+						{
+							Name: "created_at",
+							Expression: &Expression{
+								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "created_at"}},
+							},
+							Dimension: &Dimension{IsTime: true},
+						},
 					},
 				},
 			},
 			Relationships: []Relationship{
 				{
-					Name:  "user_orders",
-					Left:  JoinSide{Dataset: "catalog.schema.users", Field: "id"},
-					Right: JoinSide{Dataset: "catalog.schema.orders", Field: "user_id"},
+					Name:        "user_orders",
+					From:        "catalog.schema.users",
+					To:          "catalog.schema.orders",
+					FromColumns: []string{"id"},
+					ToColumns:   []string{"user_id"},
 				},
 			},
 			Metrics: []Metric{
 				{
 					Name:        "total_revenue",
 					Description: "Sum of all order amounts",
-					Expression:  Expression{SQL: "SUM(orders.amount)"},
+					Expression: Expression{
+						Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "SUM(orders.amount)"}},
+					},
 				},
 			},
 		},
@@ -60,11 +75,12 @@ func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 		"description: A test semantic model",
 		"datasets:",
 		"source: catalog.schema.users",
-		"data_type: INTEGER",
-		"nullable: false",
 		"is_time: true",
 		"relationships:",
-		"dataset: catalog.schema.users",
+		"from: catalog.schema.users",
+		"to: catalog.schema.orders",
+		"from_columns:",
+		"to_columns:",
 		"metrics:",
 		"total_revenue",
 		"SUM(orders.amount)",
@@ -90,7 +106,8 @@ func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 	if len(ds.Fields) != 3 {
 		t.Errorf("round-trip fields count = %d, want 3", len(ds.Fields))
 	}
-	if ds.Fields[0].Nullable == nil || *ds.Fields[0].Nullable != false {
-		t.Errorf("round-trip nullable not preserved")
+	// created_at should have dimension preserved.
+	if ds.Fields[2].Dimension == nil || !ds.Fields[2].Dimension.IsTime {
+		t.Errorf("round-trip dimension not preserved on created_at")
 	}
 }

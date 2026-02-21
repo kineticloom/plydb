@@ -99,32 +99,14 @@ func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 			if overlayField.Description != "" {
 				fields[fi].Description = overlayField.Description
 			}
+			if overlayField.Dimension != nil {
+				fields[fi].Dimension = overlayField.Dimension
+			}
+			if overlayField.Expression != nil {
+				fields[fi].Expression = overlayField.Expression
+			}
 		}
 		ds.Fields = fields
-
-		// Dimensions: only add/update if the dimension name matches an existing field name.
-		existingDimIdx := make(map[string]int, len(ds.Dimensions))
-		for i, dim := range ds.Dimensions {
-			existingDimIdx[dim.Name] = i
-		}
-		dims := make([]Dimension, len(ds.Dimensions))
-		copy(dims, ds.Dimensions)
-
-		for _, overlayDim := range overlayDS.Dimensions {
-			if _, fieldExists := fieldIdx[overlayDim.Name]; !fieldExists {
-				// Dimension name must match an existing field — ignore.
-				continue
-			}
-			if di, exists := existingDimIdx[overlayDim.Name]; exists {
-				// Update existing dimension.
-				dims[di] = overlayDim
-			} else {
-				// Add new dimension.
-				existingDimIdx[overlayDim.Name] = len(dims)
-				dims = append(dims, overlayDim)
-			}
-		}
-		ds.Dimensions = dims
 
 		datasets[idx] = ds
 	}
@@ -136,9 +118,9 @@ func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 	copy(relationships, base.SemanticModel.Relationships)
 
 	for _, rel := range overlay.SemanticModel.Relationships {
-		_, leftOK := datasetIdx[rel.Left.Dataset]
-		_, rightOK := datasetIdx[rel.Right.Dataset]
-		if leftOK && rightOK {
+		_, fromOK := datasetIdx[rel.From]
+		_, toOK := datasetIdx[rel.To]
+		if fromOK && toOK {
 			relationships = append(relationships, rel)
 		}
 	}

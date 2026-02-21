@@ -67,21 +67,23 @@ func TestScanFile_CSV(t *testing.T) {
 	}
 
 	expectedFields := []struct {
-		name     string
-		dataType string
+		name       string
+		expression string
 	}{
-		{"id", "BIGINT"},
-		{"name", "VARCHAR"},
-		{"price", "DOUBLE"},
-		{"in_stock", "BOOLEAN"},
+		{"id", "id"},
+		{"name", "name"},
+		{"price", "price"},
+		{"in_stock", "in_stock"},
 	}
 	for i, want := range expectedFields {
 		got := ds.Fields[i]
 		if got.Name != want.name {
 			t.Errorf("field[%d].Name = %q, want %q", i, got.Name, want.name)
 		}
-		if got.DataType != want.dataType {
-			t.Errorf("field[%d].DataType = %q, want %q", i, got.DataType, want.dataType)
+		if got.Expression == nil || len(got.Expression.Dialects) == 0 {
+			t.Errorf("field[%d].Expression is empty", i)
+		} else if got.Expression.Dialects[0].Expression != want.expression {
+			t.Errorf("field[%d].Expression = %q, want %q", i, got.Expression.Dialects[0].Expression, want.expression)
 		}
 	}
 }
@@ -183,12 +185,21 @@ func TestColumnsToDataset(t *testing.T) {
 		t.Errorf("fields[1].Description = %q, want %q", ds.Fields[1].Description, "User name")
 	}
 
-	// Should have one time dimension for created_at.
-	if len(ds.Dimensions) != 1 {
-		t.Fatalf("dimensions count = %d, want 1", len(ds.Dimensions))
+	// created_at should have a time dimension on the field.
+	if ds.Fields[2].Dimension == nil || !ds.Fields[2].Dimension.IsTime {
+		t.Errorf("fields[2].Dimension should have IsTime=true, got %+v", ds.Fields[2].Dimension)
 	}
-	if ds.Dimensions[0].Name != "created_at" || !ds.Dimensions[0].IsTime {
-		t.Errorf("dimension = %+v, want created_at with IsTime=true", ds.Dimensions[0])
+
+	// id should not have a dimension.
+	if ds.Fields[0].Dimension != nil {
+		t.Errorf("fields[0].Dimension should be nil, got %+v", ds.Fields[0].Dimension)
+	}
+
+	// All fields should have expressions.
+	for i, f := range ds.Fields {
+		if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+			t.Errorf("fields[%d].Expression is empty", i)
+		}
 	}
 }
 
@@ -214,15 +225,15 @@ func TestScanFile_TimeDimensions(t *testing.T) {
 
 	ds := datasets[0]
 
-	// Check that order_date is detected as a time dimension.
+	// Check that order_date field has a time dimension.
 	found := false
-	for _, dim := range ds.Dimensions {
-		if dim.Name == "order_date" && dim.IsTime {
+	for _, f := range ds.Fields {
+		if f.Name == "order_date" && f.Dimension != nil && f.Dimension.IsTime {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Errorf("expected order_date time dimension, got dimensions: %+v", ds.Dimensions)
+		t.Errorf("expected order_date field with time dimension, got fields: %+v", ds.Fields)
 	}
 }

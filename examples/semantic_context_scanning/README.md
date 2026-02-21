@@ -114,23 +114,37 @@ semantic_model:
       source: grid.public.flux_telemetry
       fields:
         - name: telemetry_id
-          data_type: integer
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: telemetry_id
         - name: anchor_ref
-          data_type: uuid
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: anchor_ref
         - name: recorded_at
-          data_type: timestamp with time zone
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: recorded_at
+          dimension:
+            is_time: true
         - name: oscill_rate
           description:
             The frequency of energy vibration. Optimal range is between 400 and
             600 mHz.
-          data_type: double precision
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: oscill_rate
         - name: entropy_delta
           description:
             The rate of energy decay. Positive values indicate system leakage.
-          data_type: double precision
-      dimensions:
-        - name: recorded_at
-          is_time: true
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: entropy_delta
     - name: grid.public.syn_link_01
       description:
         Maps the entanglement between two different vortex anchors. High
@@ -138,13 +152,25 @@ semantic_model:
       source: grid.public.syn_link_01
       fields:
         - name: link_id
-          data_type: integer
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: link_id
         - name: alpha_node
-          data_type: uuid
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: alpha_node
         - name: beta_node
-          data_type: uuid
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: beta_node
         - name: conductivity_ratio
-          data_type: numeric
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: conductivity_ratio
     - name: grid.public.vortex_anchor
       description:
         Primary stability points for aetheric harvesting. Anchors must remain
@@ -152,12 +178,21 @@ semantic_model:
       source: grid.public.vortex_anchor
       fields:
         - name: anchor_id
-          data_type: uuid
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: anchor_id
         - name: designation
           description: The unique resonant name of the anchor.
-          data_type: character varying
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: designation
         - name: stability_threshold
-          data_type: numeric
+          expression:
+            dialects:
+              - dialect: ANSI_SQL
+                expression: stability_threshold
 ```
 
 Notice how the PostgreSQL `COMMENT` metadata appears as `description` fields in
