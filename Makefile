@@ -45,15 +45,14 @@ build-skills: dist/skills/plydb-skill.zip
 # darwin-arm64, and windows-amd64 builds.
 # Note: windows-arm64 is omitted - not yet supported by duckdb-go-bindings.
 
+# NOTE: this builds for the local OS and architecture only
 dist/plydb: $(go_files)
 	@mkdir -p $(@D)
 	go build -o $@ .
 
-# NOTE: this builds for the local OS and architecture only
-dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f) dist/plydb
+dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f)
 	@mkdir -p $(@D)
 	cp -r skills/plydb dist/skills/
-	cp dist/plydb dist/skills/plydb/assets/
 	touch $@
 
 dist/skills/plydb-skill.zip: dist/skills/.plydb-skill-built.sentinel

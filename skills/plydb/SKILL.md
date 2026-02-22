@@ -5,12 +5,14 @@ description: Skill for using the PlyDB CLI to perform SQL analysis of connected 
 
 # PlyDB CLI skill
 
-The `plydb` CLI can be used to query across heterogenous data sources. Look in
-`assets/` for a pre-built binary for your OS and architecture.
+The `plydb` CLI can be used to query across heterogenous data sources.
 
 ## Dependencies
 
-The `plydb` binary must be available.
+The `plydb` binary must be available on the system.
+
+If it is not, installation instructions can be found
+[here](https://github.com/kineticloom/plydb?tab=readme-ov-file#installation)
 
 ## Instructions
 
@@ -26,7 +28,7 @@ Once you have a data source config file, PlyDB can query across all of the
 configured data sources. Use fully qualified table names: catalog.schema.table.
 
 ```sh
-./plydb query \
+plydb query \
   --config path/to/config/file/config.json \
   "SELECT * FROM customers.default.customers c
    JOIN orders.default.orders o
@@ -42,7 +44,7 @@ column types and foreign keys as structured YAML that follows the
 specification.
 
 ```sh
-./plydb semantic-context --config path/to/config/file/config.json
+plydb semantic-context --config path/to/config/file/config.json
 ```
 
 #### Enriching auto-scanned context with overlays
@@ -52,7 +54,7 @@ not captured from source metadata, use `--semantic-context-overlay` to supply
 one or more OSI YAML files that are merged on top of the auto-scanned model:
 
 ```sh
-./plydb semantic-context \
+plydb semantic-context \
   --config path/to/config/file/config.json \
   --semantic-context-overlay path/to/overlay.yaml
 ```
@@ -60,15 +62,13 @@ one or more OSI YAML files that are merged on top of the auto-scanned model:
 The flag is repeatable; overlays are applied in the order given:
 
 ```sh
-./plydb semantic-context \
+plydb semantic-context \
   --config path/to/config/file/config.json \
   --semantic-context-overlay base_overlay.yaml \
   --semantic-context-overlay team_overlay.yaml
 ```
 
-The same flag is available on `plydb mcp --semantic-context-overlay overlay.yaml`.
-
 Overlay files must be valid OSI YAML. Overlays can add descriptions to existing
 datasets and fields, define relationships between existing datasets, and add or
-update metrics. They cannot introduce new datasets or fields — only enrich what
+update metrics. They cannot introduce new datasets or fields - only enrich what
 was already discovered by the auto-scanner.

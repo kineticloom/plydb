@@ -1,26 +1,23 @@
 # Releases
 
 Releases are created by pushing a version tag to `main`. GitHub Actions then
-builds platform-specific binaries and skill zips, and publishes them as assets
-on a GitHub Release.
+builds platform-specific binaries and publishes them as assets on a GitHub
+Release, along with a single platform-independent Agent Skill zip.
 
 ---
 
 ## 1. Release Assets
 
-Each release contains 8 assets — a standalone binary and a Claude Code skill zip
-for each supported platform:
+Each release contains 5 assets — a standalone binary archive for each supported
+platform, plus one Agent Skill zip:
 
-| Asset                           | Description                               |
-| ------------------------------- | ----------------------------------------- |
-| `plydb_linux_amd64`             | Standalone CLI binary                     |
-| `plydb_linux_arm64`             | Standalone CLI binary                     |
-| `plydb_darwin_arm64`            | Standalone CLI binary                     |
-| `plydb_windows_amd64.exe`       | Standalone CLI binary                     |
-| `plydb-skill-linux-amd64.zip`   | Claude Code skill (binary bundled inside) |
-| `plydb-skill-linux-arm64.zip`   | Claude Code skill (binary bundled inside) |
-| `plydb-skill-darwin-arm64.zip`  | Claude Code skill (binary bundled inside) |
-| `plydb-skill-windows-amd64.zip` | Claude Code skill (binary bundled inside) |
+| Asset                        | Description                        |
+| ---------------------------- | ---------------------------------- |
+| `plydb_linux_amd64.tar.gz`   | Archive with standalone CLI binary |
+| `plydb_linux_arm64.tar.gz`   | Archive with standalone CLI binary |
+| `plydb_darwin_arm64.tar.gz`  | Archive with standalone CLI binary |
+| `plydb_windows_amd64.tar.gz` | Archive with standalone CLI binary |
+| `plydb-skill.zip`            | Agent Skill (no binary)            |
 
 > **Note:** `windows-arm64` is omitted — not yet supported by
 > duckdb-go-bindings.
@@ -37,9 +34,10 @@ git push origin v1.0.0
 This triggers `.github/workflows/release.yml`, which:
 
 1. Builds each platform binary natively on a GitHub-hosted runner
-2. Packages each binary into a platform-specific skill zip
-3. Creates a GitHub Release named after the tag with auto-generated notes
-4. Attaches all 8 assets to the release
+2. Archives each binary as a `.tar.gz` (preserving executable permissions)
+3. Packages the skill files (no binary) into a single `plydb-skill.zip`
+4. Creates a GitHub Release named after the tag with auto-generated notes
+5. Attaches all 5 assets to the release
 
 ---
 

@@ -32,9 +32,6 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Binary is named with platform suffix for use as a standalone release asset.
-      # Inside the skill zip it is renamed to plain 'plydb'/'plydb.exe' so that
-      # SKILL.md commands (./plydb ...) work without modification.
       - name: Build binary
         shell: bash
         run: |
@@ -45,19 +42,6 @@ jobs:
           else
             go build -ldflags "$LDFLAGS" -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} .
           fi
-
-      - name: Package skill
-        shell: bash
-        run: |
-          mkdir -p dist/skills/plydb/assets
-          cp -r skills/plydb/. dist/skills/plydb/
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe dist/skills/plydb/assets/plydb.exe
-          else
-            cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} dist/skills/plydb/assets/plydb
-          fi
-          cd dist/skills
-          7z a -tzip ../plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
 
       - name: Package binary archive
         shell: bash
@@ -79,7 +63,6 @@ jobs:
           name: assets-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
             dist/plydb_*.tar.gz
-            dist/plydb-skill-*.zip
 
   release:
     name: Create Release
@@ -95,6 +78,11 @@ jobs:
         with:
           path: dist/assets
           merge-multiple: true
+
+      - name: Package skill
+        run: |
+          cd skills
+          zip -X -r ../dist/assets/plydb-skill.zip plydb
 
       - name: Create GitHub Release
         run: |
