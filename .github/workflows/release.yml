@@ -64,12 +64,26 @@ jobs:
           Copy-Item dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe dist/skills/plydb/assets/plydb.exe
           Compress-Archive -Path dist/skills/plydb -DestinationPath dist/plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip
 
+      - name: Package binary archive
+        shell: bash
+        run: |
+          cd dist
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            cp plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe plydb.exe
+            tar czf plydb_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz plydb.exe
+            rm plydb.exe
+          else
+            cp plydb_${{ matrix.goos }}_${{ matrix.goarch }} plydb
+            tar czf plydb_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz plydb
+            rm plydb
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: assets-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
-            dist/plydb_*
+            dist/plydb_*.tar.gz
             dist/plydb-skill-*.zip
 
   release:
@@ -86,10 +100,6 @@ jobs:
         with:
           path: dist/assets
           merge-multiple: true
-
-      - name: Restore executable permissions
-        run: |
-          chmod +x dist/assets/plydb_linux_* dist/assets/plydb_darwin_* || true
 
       - name: Create GitHub Release
         run: |

@@ -79,6 +79,7 @@ resolve_version() {
 
 main() {
   need curl
+  need tar
 
   os="$(detect_os)"
 
@@ -91,12 +92,11 @@ main() {
   version="$(resolve_version)"
   install_dir="${PLYDB_INSTALL_DIR:-$HOME/.local/bin}"
 
-  # Windows (Git Bash / MSYS2 / Cygwin)
+  asset="${BINARY}_${os}_${arch}.tar.gz"
+
   if [ "$os" = "windows" ]; then
-    asset="${BINARY}_${os}_${arch}.exe"
     dest="${install_dir}/${BINARY}.exe"
   else
-    asset="${BINARY}_${os}_${arch}"
     dest="${install_dir}/${BINARY}"
   fi
 
@@ -108,8 +108,11 @@ main() {
   echo
 
   mkdir -p "$install_dir"
-  curl -fsSL -o "$dest" "$url" || die "download failed — check that release ${version} has asset ${asset}"
-  chmod +x "$dest"
+
+  tmpfile="$(mktemp)"
+  trap 'rm -f "$tmpfile"' EXIT
+  curl -fsSL -o "$tmpfile" "$url" || die "download failed — check that release ${version} has asset ${asset}"
+  tar xzf "$tmpfile" -C "$install_dir"
 
   echo "PlyDB ${version} installed successfully."
   echo

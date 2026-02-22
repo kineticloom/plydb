@@ -36,7 +36,7 @@ if ($env:PLYDB_VERSION) {
 # ── download ─────────────────────────────────────────────────────────────────
 
 $InstallDir = if ($env:PLYDB_INSTALL_DIR) { $env:PLYDB_INSTALL_DIR } else { "$HOME\.local\bin" }
-$Asset = "${Binary}_windows_${Arch}.exe"
+$Asset = "${Binary}_windows_${Arch}.tar.gz"
 $Dest = Join-Path $InstallDir "${Binary}.exe"
 $Url = "https://github.com/$Repo/releases/download/$Version/$Asset"
 
@@ -47,10 +47,14 @@ Write-Host ""
 
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 
+$TmpFile = [System.IO.Path]::GetTempFileName()
 try {
-    Invoke-WebRequest -Uri $Url -OutFile $Dest -UseBasicParsing
+    Invoke-WebRequest -Uri $Url -OutFile $TmpFile -UseBasicParsing
+    tar xzf $TmpFile -C $InstallDir
 } catch {
     throw "Download failed — check that release $Version has asset $Asset"
+} finally {
+    Remove-Item -Force -ErrorAction SilentlyContinue $TmpFile
 }
 
 Write-Host "PlyDB $Version installed successfully."
