@@ -46,23 +46,18 @@ jobs:
             go build -ldflags "$LDFLAGS" -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} .
           fi
 
-      - name: Package skill (Linux/macOS)
-        if: matrix.goos != 'windows'
+      - name: Package skill
+        shell: bash
         run: |
           mkdir -p dist/skills/plydb/assets
           cp -r skills/plydb/. dist/skills/plydb/
-          cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} dist/skills/plydb/assets/plydb
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe dist/skills/plydb/assets/plydb.exe
+          else
+            cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} dist/skills/plydb/assets/plydb
+          fi
           cd dist/skills
           zip -X -r ../plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
-
-      - name: Package skill (Windows)
-        if: matrix.goos == 'windows'
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path dist/skills/plydb/assets
-          Copy-Item -Recurse -Force skills/plydb/. dist/skills/plydb/
-          Copy-Item dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe dist/skills/plydb/assets/plydb.exe
-          Compress-Archive -Path dist/skills/plydb -DestinationPath dist/plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip
 
       - name: Package binary archive
         shell: bash
