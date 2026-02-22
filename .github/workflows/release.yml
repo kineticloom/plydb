@@ -87,6 +87,10 @@ jobs:
           path: dist/assets
           merge-multiple: true
 
+      - name: Restore executable permissions
+        run: |
+          chmod +x dist/assets/plydb_linux_* dist/assets/plydb_darwin_* || true
+
       - name: Create GitHub Release
         run: |
           gh release create ${{ github.ref_name }} \
