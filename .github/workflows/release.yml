@@ -57,7 +57,7 @@ jobs:
             cp dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} dist/skills/plydb/assets/plydb
           fi
           cd dist/skills
-          zip -X -r ../plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
+          7z a -tzip ../plydb-skill-${{ matrix.goos }}-${{ matrix.goarch }}.zip plydb
 
       - name: Package binary archive
         shell: bash
