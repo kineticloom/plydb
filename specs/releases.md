@@ -17,7 +17,7 @@ platform, plus one Agent Skill zip:
 | `plydb_linux_arm64.tar.gz`   | Archive with standalone CLI binary |
 | `plydb_darwin_arm64.tar.gz`  | Archive with standalone CLI binary |
 | `plydb_windows_amd64.tar.gz` | Archive with standalone CLI binary |
-| `plydb-skill.zip`            | Agent Skill (no binary)            |
+| `plydb_skill.zip`            | Agent Skill (no binary)            |
 
 > **Note:** `windows-arm64` is omitted — not yet supported by
 > duckdb-go-bindings.
@@ -35,7 +35,7 @@ This triggers `.github/workflows/release.yml`, which:
 
 1. Builds each platform binary natively on a GitHub-hosted runner
 2. Archives each binary as a `.tar.gz` (preserving executable permissions)
-3. Packages the skill files (no binary) into a single `plydb-skill.zip`
+3. Packages the skill files (no binary) into a single `plydb_skill.zip`
 4. Creates a GitHub Release named after the tag with auto-generated notes
 5. Attaches all 5 assets to the release
 

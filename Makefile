@@ -34,7 +34,7 @@ integration-test:
 build: dist/plydb
 
 .PHONY: build-skills
-build-skills: dist/skills/plydb-skill.zip
+build-skills: dist/plydb_skill.zip
 
 # -----------------------------------------------------------------------------
 # Targets
@@ -50,11 +50,6 @@ dist/plydb: $(go_files)
 	@mkdir -p $(@D)
 	go build -o $@ .
 
-dist/skills/.plydb-skill-built.sentinel: $(shell find skills/plydb -type f)
+dist/plydb_skill.zip: $(shell find skills/plydb -type f)
 	@mkdir -p $(@D)
-	cp -r skills/plydb dist/skills/
-	touch $@
-
-dist/skills/plydb-skill.zip: dist/skills/.plydb-skill-built.sentinel
-	@mkdir -p $(@D)
-	cd dist/skills; zip -X -r plydb-skill.zip plydb
+	cd skills; zip -X -r ../dist/plydb_skill.zip plydb

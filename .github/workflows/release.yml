@@ -1,4 +1,4 @@
-name: Build Skills
+name: Create Release
 
 on:
   push:
@@ -82,7 +82,7 @@ jobs:
       - name: Package skill
         run: |
           cd skills
-          zip -X -r ../dist/assets/plydb-skill.zip plydb
+          zip -X -r ../dist/assets/plydb_skill.zip plydb
 
       - name: Create GitHub Release
         run: |

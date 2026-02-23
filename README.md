@@ -192,7 +192,7 @@ the `plydb` CLI when provided context on how to do so via an
 [Agent Skill](https://agentskills.io).
 
 Download the Agent Skill bundle
-([plydb-skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
+([plydb_skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
 your specific agent's instructions for installing skills:
 
 - [Claude](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#claude-ai)

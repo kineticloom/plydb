@@ -4,7 +4,7 @@ This folder contains an Agent Skill for PlyDB that follows the
 [Agent Skills specification](https://agentskills.io)
 
 They are bundled for distribution via `make build-skills`, which outputs a
-`plydb-skill.zip` file.
+`plydb_skill.zip` file.
 
 Agent specific installation instructions:
 
