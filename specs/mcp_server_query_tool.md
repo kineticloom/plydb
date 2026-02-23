@@ -34,9 +34,8 @@ Limits:
 
 ## Implementation notes
 
-- Connection configuration is spec'd in
-  specs/database_connection_config_schema.md, and there is already parsing and
-  database connection logic in the queryengine package
+- Connection configuration is spec'd in specs/config_schema.md, and there is
+  already parsing and database connection logic in the queryengine package
 - A query engine has already been implemented in the queryengine package
 - Queries should go through pre-processing as specified in
   specs/query_pre_processing.md. The foundational functionality is already

@@ -16,9 +16,8 @@ references.
 Catalog name values:
 
 The catalog name value is from the database connection configuration described
-in the database connection configuration spec
-(specs/database_connection_config_schema.md) - it should be one of the keys
-under the "databases" key.
+in the database connection configuration spec (specs/config_schema.md) - it
+should be one of the keys under the "databases" key.
 
 Schema name values:
 

@@ -19,8 +19,7 @@ If it is not, installation instructions can be found
 ### Configure data sources
 
 First, the data sources to make available to PlyDB must be configured in a
-config file as per the specification in
-`references\database_connection_config_schema.md`.
+config file as per the specification in `references\config_schema.md`.
 
 ### Query with SQL
 
@@ -72,3 +71,28 @@ Overlay files must be valid OSI YAML. Overlays can add descriptions to existing
 datasets and fields, define relationships between existing datasets, and add or
 update metrics. They cannot introduce new datasets or fields - only enrich what
 was already discovered by the auto-scanner.
+
+#### Embedding overlays in the config file
+
+Overlays can also be specified in the config file under `semanticContext.overlays`
+instead of (or in addition to) the CLI flag:
+
+```json
+{
+  "databases": { ... },
+  "semanticContext": {
+    "overlays": [
+      "path/to/base_overlay.yaml",
+      "path/to/team_overlay.yaml"
+    ]
+  }
+}
+```
+
+With overlays in the config, no extra flags are needed:
+
+```sh
+plydb semantic-context --config path/to/config.json
+```
+
+Config-file overlays are applied before any `--semantic-context-overlay` flags.

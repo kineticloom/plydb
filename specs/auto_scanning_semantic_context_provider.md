@@ -5,7 +5,7 @@ context about the semantics of underlying connected data sources made available
 by the service so the AI has context to write SQL queries.
 
 For an example of types of data sources, see the spec for configuration of data
-sources in specs/database_connection_config_schema.md.
+sources in specs/config_schema.md.
 
 At a high level, the auto scanning semantic context provider should:
 
