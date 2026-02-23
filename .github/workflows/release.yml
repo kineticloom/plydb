@@ -32,30 +32,14 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Build binary
+      - name: Install make (Windows)
+        if: matrix.goos == 'windows'
         shell: bash
-        run: |
-          mkdir -p dist
-          LDFLAGS="-X github.com/kineticloom/plydb/cmd.Version=${{ github.ref_name }} -X github.com/kineticloom/plydb/cmd.Commit=${{ github.sha }} -X github.com/kineticloom/plydb/cmd.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            go build -ldflags "$LDFLAGS" -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe .
-          else
-            go build -ldflags "$LDFLAGS" -o dist/plydb_${{ matrix.goos }}_${{ matrix.goarch }} .
-          fi
+        run: choco install make -y
 
-      - name: Package binary archive
+      - name: Build and package release binary
         shell: bash
-        run: |
-          cd dist
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            cp plydb_${{ matrix.goos }}_${{ matrix.goarch }}.exe plydb.exe
-            tar czf plydb_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz plydb.exe
-            rm plydb.exe
-          else
-            cp plydb_${{ matrix.goos }}_${{ matrix.goarch }} plydb
-            tar czf plydb_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz plydb
-            rm plydb
-          fi
+        run: make package-release VERSION=${{ github.ref_name }} COMMIT=${{ github.sha }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -81,8 +65,8 @@ jobs:
 
       - name: Package skill
         run: |
-          cd skills
-          zip -X -r ../dist/assets/plydb_skill.zip plydb
+          make build-skill
+          cp dist/plydb_skill.zip dist/assets/plydb_skill.zip
 
       - name: Create GitHub Release
         run: |

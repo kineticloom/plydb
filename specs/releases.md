@@ -56,9 +56,20 @@ Binaries are built natively (no cross-compilation) using the following runners:
 
 ## 4. Local Build
 
-`make build-skills` builds a skill zip for the local OS/architecture only,
-useful for development and testing. It does not produce the platform-named
-binaries used in releases.
+The Makefile provides targets that mirror the CI build pipeline:
+
+| Command                                   | Output                              |
+| ----------------------------------------- | ----------------------------------- |
+| `make build`                              | `dist/plydb[.exe]` — VERSION=dev    |
+| `make package-release`                    | `dist/plydb_<os>_<arch>.tar.gz`     |
+| `make build-skill`                        | `dist/plydb_skill.zip`              |
+
+`GOOS` and `GOARCH` default to the current machine. `VERSION` and `COMMIT`
+default to `dev` / `none` unless overridden on the command line:
+
+```sh
+make package-release VERSION=v0.0.0-test COMMIT=abc1234
+```
 
 ---
 
@@ -72,8 +83,10 @@ Release binaries have version metadata injected at build time via `-ldflags`:
 | `main.Commit`    | `github.sha`            | `a1b2c3d4...`          |
 | `main.BuildDate` | `date -u` at build time | `2026-01-15T10:30:00Z` |
 
-Local builds without ldflags (e.g. `go build .` or `go run .`) will show `dev` /
-`none` / `unknown` for these fields.
+Builds via `make build` without overrides embed `dev` / `none` for
+`Version` and `Commit`, but a real timestamp for `BuildDate`. A bare
+`go build .` or `go run .` uses the hardcoded defaults in `cmd/version.go` and
+shows `dev` / `none` / `unknown`.
 
 To inspect the version of a binary:
 
