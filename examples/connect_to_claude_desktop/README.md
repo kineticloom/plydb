@@ -13,22 +13,9 @@ server required.
 
 ## Quick Start
 
-### 1. Build PlyDB
+### 1. Install or Build PlyDB
 
-Clone the repository (if you haven't already) and build the binary:
-
-```bash
-git clone https://github.com/kineticloom/plydb.git
-cd plydb
-go build .
-```
-
-After the build completes you should have a `plydb` binary in the project root.
-Verify it works:
-
-```bash
-./plydb --help
-```
+[Install or build](/README.md#installation) `plydb` if you have not already.
 
 ### 2. Understand the sample data
 
@@ -115,7 +102,7 @@ Before connecting Claude Desktop, you can verify everything works from the
 command line:
 
 ```bash
-./plydb query \
+plydb query \
   'SELECT * FROM customers.default."table" LIMIT 3' \
   --config demo_sandbox/my_config.json
 ```
@@ -135,15 +122,11 @@ depends on your OS:
 > **Tip:** You can also open it from Claude Desktop via **Settings > Developer >
 > Edit Config**.
 
-Add (or merge) the following into the config file. Replace
-`/absolute/path/to/plydb` with the actual absolute path to your cloned
-repository:
-
 ```json
 {
   "mcpServers": {
     "plydb": {
-      "command": "/absolute/path/to/plydb/plydb",
+      "command": "plydb",
       "args": [
         "mcp",
         "--config",

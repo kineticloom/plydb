@@ -28,7 +28,7 @@ domain and write correct SQL.
 ## Prerequisites
 
 - Docker installed and running
-- PlyDB binary built (`go build .` from the project root)
+- [Install or build](/README.md#installation) `plydb` if you have not already.
 
 ## Setup
 
@@ -100,7 +100,7 @@ Instead of MCP, you or an AI agent can also get the semantic context via the
 PlyDB CLI `semantic-context` command directly:
 
 ```bash
-./plydb semantic-context --config examples/semantic_context_scanning/config.json
+plydb semantic-context --config examples/semantic_context_scanning/config.json
 ```
 
 This outputs the same OSI YAML that the MCP tool returns to agents:
@@ -220,7 +220,7 @@ relationship between `flux_telemetry` and `vortex_anchor`, and adds an
 ### CLI usage
 
 ```bash
-./plydb semantic-context \
+plydb semantic-context \
   --config examples/semantic_context_scanning/config.json \
   --semantic-context-overlay examples/semantic_context_scanning/overlay.yaml
 ```
@@ -228,7 +228,7 @@ relationship between `flux_telemetry` and `vortex_anchor`, and adds an
 The flag is repeatable — multiple overlays are applied in order:
 
 ```bash
-./plydb semantic-context \
+plydb semantic-context \
   --config examples/semantic_context_scanning/config.json \
   --semantic-context-overlay base_overlay.yaml \
   --semantic-context-overlay team_overlay.yaml
@@ -239,7 +239,7 @@ The flag is repeatable — multiple overlays are applied in order:
 The same flag works with `plydb mcp`:
 
 ```bash
-./plydb mcp \
+plydb mcp \
   --config examples/semantic_context_scanning/config.json \
   --semantic-context-overlay examples/semantic_context_scanning/overlay.yaml
 ```

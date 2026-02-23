@@ -171,13 +171,22 @@ irm https://raw.githubusercontent.com/kineticloom/plydb/main/install.ps1 | iex
 Pre-built binaries for all platforms are available on the
 [Releases](https://github.com/kineticloom/plydb/releases) page.
 
+### Build from source
+
+```sh
+make build
+```
+
 ---
 
 ## AI agents + PlyDB via MCP
 
-To connect an AI agent to PlyDB via [MCP](https://modelcontextprotocol.io),
-install PlyDB using the [quick install](#installation) above (or build from
-source) and follow your specific agent's instructions for configuring MCP:
+AI agents can connect to PlyDB via [MCP](https://modelcontextprotocol.io).
+
+If you have not yet installed PlyDB, first install PlyDB (we recommend using the
+[quick install](#installation) process).
+
+Then follow your specific agent's instructions for configuring MCP:
 
 - [Claude Desktop](examples/connect_to_claude_desktop/README.md) - full tutorial
   querying CSV files in Claude Desktop via MCP
@@ -191,7 +200,10 @@ For a simpler, more dynamic alternative to MCP, AI agents can also use PlyDB via
 the `plydb` CLI when provided context on how to do so via an
 [Agent Skill](https://agentskills.io).
 
-Download the Agent Skill bundle
+If you have not yet installed PlyDB, first install PlyDB (we recommend using the
+[quick install](#installation) process).
+
+Then download the Agent Skill bundle
 ([plydb_skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
 your specific agent's instructions for installing skills:
 

@@ -1,18 +1,20 @@
 # Connect to CSV + PostgreSQL
 
-This example demonstrates querying across a local CSV file and a PostgreSQL database using PlyDB.
+This example demonstrates querying across a local CSV file and a PostgreSQL
+database using PlyDB.
 
 ## Data Sources
 
 - **products** (CSV) — Product catalog with id, name, category, and price.
 - **store** (PostgreSQL) — Store database with `customers` and `orders` tables.
 
-Orders reference `product_id` which maps to the CSV product catalog, so you can join across both sources in a single query.
+Orders reference `product_id` which maps to the CSV product catalog, so you can
+join across both sources in a single query.
 
 ## Prerequisites
 
 - Docker installed and running
-- PlyDB binary built (`go build .` from the project root)
+- [Install or build](/README.md#installation) `plydb` if you have not already.
 
 ## Setup
 
@@ -48,10 +50,11 @@ export PLYDB_PG_PASSWORD=plydb
 
 ### Example 1: Cross-Source Query with the CLI
 
-Join orders from PostgreSQL with the product catalog from CSV to see total revenue per product:
+Join orders from PostgreSQL with the product catalog from CSV to see total
+revenue per product:
 
 ```bash
-./plydb query \
+plydb query \
   "SELECT
       p.name AS product,
       p.category,
@@ -88,15 +91,17 @@ Expected output:
 Start the MCP server with the stdio transport:
 
 ```bash
-./plydb mcp --config examples/connect_to_csv_and_postgres/config.json --transport stdio
+plydb mcp --config examples/connect_to_csv_and_postgres/config.json --transport stdio
 ```
 
-The server reads JSON-RPC messages from stdin. In another terminal (or by piping input), send an `initialize` request followed by a `tools/call` request:
+The server reads JSON-RPC messages from stdin. In another terminal (or by piping
+input), send an `initialize` request followed by a `tools/call` request:
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"demo","version":"0.1.0"}}}
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query","arguments":{"sql":"SELECT c.name, c.city, p.name AS product, o.quantity, o.order_date FROM store.public.orders o JOIN store.public.customers c ON o.customer_id = c.id JOIN products.default.\"table\" p ON o.product_id = p.id ORDER BY o.order_date DESC LIMIT 5"}}}' \
-  | ./plydb mcp --config examples/connect_to_csv_and_postgres/config.json --transport stdio
+  | plydb mcp --config examples/connect_to_csv_and_postgres/config.json --transport stdio
 ```
 
-The server responds with JSON-RPC messages on stdout. The `tools/call` response contains a `QueryResult` JSON object with columns, rows, and metadata.
+The server responds with JSON-RPC messages on stdout. The `tools/call` response
+contains a `QueryResult` JSON object with columns, rows, and metadata.

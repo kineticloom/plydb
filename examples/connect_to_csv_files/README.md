@@ -2,7 +2,7 @@
 
 This is a simple example that connects two CSV files as data sources.
 
-Build `plydb` if you don't have it already.
+[Install or build](/README.md#installation) `plydb` if you have not already.
 
 ```sh
 go build .
@@ -17,7 +17,7 @@ For example, here's a query that returns data from the two CSV's joined on
 customer id:
 
 ```
-./plydb query \
+plydb query \
   --config examples/connect_to_csv_files/config.json \
   "SELECT * FROM customers.default.customers c
    JOIN orders.default.orders o
