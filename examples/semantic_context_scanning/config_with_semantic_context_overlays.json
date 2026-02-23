@@ -1,0 +1,22 @@
+{
+  "credentials": {},
+  "databases": {
+    "grid": {
+      "metadata": {
+        "name": "Grid",
+        "description": "Multidimensional power grid with vortex anchors and flux telemetry."
+      },
+      "type": "postgresql",
+      "host": "localhost",
+      "port": 5432,
+      "database_name": "grid",
+      "username": "plydb",
+      "password_env_var": "PLYDB_PG_PASSWORD"
+    }
+  },
+  "semanticContext": {
+    "overlays": [
+      "examples/semantic_context_scanning/overlay.yaml"
+    ]
+  }
+}

@@ -20,10 +20,16 @@ const (
 	S3         DatabaseType = "s3"
 )
 
+// SemanticContextConfig holds semantic context configuration.
+type SemanticContextConfig struct {
+	Overlays []string `json:"overlays,omitempty"`
+}
+
 // Config is the top-level configuration for the query engine.
 type Config struct {
-	Credentials map[string]Credential     `json:"credentials"`
-	Databases   map[string]DatabaseConfig `json:"databases"`
+	Credentials     map[string]Credential     `json:"credentials"`
+	Databases       map[string]DatabaseConfig `json:"databases"`
+	SemanticContext SemanticContextConfig     `json:"semanticContext,omitempty"`
 }
 
 // Credential holds environment variable names for cloud authentication.

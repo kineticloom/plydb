@@ -50,8 +50,9 @@ Flags:`)
 		os.Exit(1)
 	}
 
-	if len(overlayFiles) > 0 {
-		overlay := semanticcontext.NewOverlayProvider([]string(overlayFiles))
+	allOverlays := append(cfg.SemanticContext.Overlays, []string(overlayFiles)...)
+	if len(allOverlays) > 0 {
+		overlay := semanticcontext.NewOverlayProvider(allOverlays)
 		model, err = overlay.Provide(context.Background(), model)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error applying overlay: %v\n", err)

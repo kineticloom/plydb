@@ -9,11 +9,13 @@ profiles and globbing patterns.
 
 ## 1. Structural Overview
 
-The schema is composed of two primary top-level objects:
+The schema is composed of three top-level objects:
 
 1. **`credentials`**: A map of authentication profiles used by cloud providers.
 2. **`databases`**: A map of data source configurations where the key is a
    unique identifier.
+3. **`semanticContext`**: (Optional) Configuration for semantic context
+   enrichment.
 
 ---
 
@@ -66,6 +68,19 @@ details.
 - **`region`**: AWS region (e.g., `us-east-1`).
 - **`format`**: **Required.** The file format (`csv`, `parquet`, etc.).
 - **`delimiter` / `header_row` / `sheet_name**`: Same as Local File fields.
+
+### 2.3 The `semanticContext` Object
+
+Provides static enrichment layers on top of the auto-scanned semantic context.
+This is equivalent to supplying `--semantic-context-overlay` on the CLI, but
+embedded in the config file.
+
+| Field      | Type             | Description                                                                                                                                                                  |
+| ---------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `overlays` | Array of Strings | Ordered list of paths to [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI) YAML files. Applied after auto-scan semantic context, in order. |
+
+Overlays specified here are applied before any `--semantic-context-overlay`
+flags supplied on the CLI.
 
 ---
 
@@ -126,6 +141,12 @@ details.
       "header_row": true,
       "region": "us-east-1"
     }
+  },
+  "semanticContext": {
+    "overlays": [
+      "/path/to/business_glossary.yaml",
+      "/path/to/column_descriptions.yaml"
+    ]
   }
 }
 ```
