@@ -4,11 +4,15 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 
 	"github.com/kineticloom/plydb/cmd"
 )
+
+//go:embed LICENSE
+var licenseText string
 
 const usage = `Usage: plydb <command> [arguments] [flags]
 
