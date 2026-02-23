@@ -12,15 +12,22 @@ needs to be done:
 
 ## Short to mid term priorities
 
-### FEAT - PlyDB read-write access controls
+## FEAT - config file default locations
 
-See specs/table_access_policy.md and sqlwalk.Validate for foundations. End user
-code paths will need to be wired up and tested. Data sources are currently
-hardcoded to read-only by default. Due to duckdb constraints, some types of data
-sources will only support read-only (e.g. CSV), while others may support
-read-write (e.g. Postgres). The configuration interface for end users may need
-some discovery and thought - to find a good balance between ease of use and
-flexibility.
+Currently, the config file is specified via an explicit `--config` flag. To
+simplify usage of `plydb` in scenarios where configuration is static globally,
+per repo, or per working directory, establish a set of default paths where
+config files will be searched for if `--config` is not specified.
+
+Related to:
+
+- [Reduce friction of install and config of PlyDB with AI agents](#feat---reduce-friction-of-install-and-config-of-plydb-with-ai-agents)
+
+## Backlog priority
+
+Stories are in the backlog because the need or requirements are not yet clear.
+They're documented here so we can monitor and prioritize them for action as we
+learn more. They're listed in no particular order.
 
 ### FEAT - Reduce friction of install and config of PlyDB with AI agents
 
@@ -49,11 +56,15 @@ Related to:
 
 - [Reduce friction of install and config of PlyDB with AI agents](#feat---reduce-friction-of-install-and-config-of-plydb-with-ai-agents)
 
-## Backlog priority
+### FEAT - PlyDB read-write access controls
 
-Stories are in the backlog because the need or requirements are not yet clear.
-They're documented here so we can monitor and prioritize them for action as we
-learn more. They're listed in no particular order.
+See specs/table_access_policy.md and sqlwalk.Validate for foundations. End user
+code paths will need to be wired up and tested. Data sources are currently
+hardcoded to read-only by default. Due to duckdb constraints, some types of data
+sources will only support read-only (e.g. CSV), while others may support
+read-write (e.g. Postgres). The configuration interface for end users may need
+some discovery and thought - to find a good balance between ease of use and
+flexibility.
 
 ### FEAT - Connecting to data lakes (Iceberg, Delta)
 
@@ -69,7 +80,6 @@ and docs.
 
 Update data source config file spec, implement connection logic, update examples
 and docs.
-
 
 ### FEAT - Revisit logging
 
