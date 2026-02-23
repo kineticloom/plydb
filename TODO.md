@@ -49,10 +49,6 @@ Related to:
 
 - [Reduce friction of install and config of PlyDB with AI agents](#feat---reduce-friction-of-install-and-config-of-plydb-with-ai-agents)
 
-### DOCS - Licensing
-
-Decide on licensing approach and update repo with appropriate docs.
-
 ## Backlog priority
 
 Stories are in the backlog because the need or requirements are not yet clear.
@@ -160,3 +156,7 @@ _yet_ have a means of loading user customized OSI. A first pass could be to
 layer the auto scanned OSI data with user provided customized OSI data.
 
 A first step here is to better understand users need for this.
+
+### DOCS - Licensing
+
+Decide on licensing approach and update repo with appropriate docs.

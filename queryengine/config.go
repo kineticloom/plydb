@@ -1,3 +1,6 @@
+// Copyright 2026 Paul Tzen
+// SPDX-License-Identifier: Apache-2.0
+
 package queryengine
 
 import (
@@ -19,8 +22,8 @@ const (
 
 // Config is the top-level configuration for the query engine.
 type Config struct {
-	Credentials map[string]Credential      `json:"credentials"`
-	Databases   map[string]DatabaseConfig   `json:"databases"`
+	Credentials map[string]Credential     `json:"credentials"`
+	Databases   map[string]DatabaseConfig `json:"databases"`
 }
 
 // Credential holds environment variable names for cloud authentication.

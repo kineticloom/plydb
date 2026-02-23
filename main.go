@@ -1,3 +1,6 @@
+// Copyright 2026 Paul Tzen
+// SPDX-License-Identifier: Apache-2.0
+
 package main
 
 import (
@@ -14,6 +17,7 @@ Commands:
   semantic-context   Scan all data sources and output semantic context as YAML
   mcp                Start an MCP server exposing a SQL query tool
   version            Print version information
+  license            Print license information
 
 Run "plydb <command> -h" for command-specific usage.
 `
@@ -33,6 +37,8 @@ func main() {
 		cmd.RunMCP(os.Args[2:])
 	case "version", "--version", "-v":
 		cmd.RunVersion()
+	case "license":
+		cmd.RunLicense(licenseText)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n%s", os.Args[1], usage)
 		os.Exit(1)

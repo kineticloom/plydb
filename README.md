@@ -224,8 +224,22 @@ Examples of configuring data sources:
 
 ## Contributing
 
-TODO
+We love contributions! However, before getting too deep into implementation,
+please first check our [Roadmap](/TODO.md) and start a discussion so we can
+align on a direction.
+
+Features to improve PlydB for individuals can and should be a part of this open
+source version, while features aimed to improve usage at scale, as in an
+enterprise, should be reserved for the proprietary version. Doing so helps keep
+the project sustainable. If you aren't sure where a feature fits, feel free to
+open a discussion first!
+
+See [CONTRIBUTING.MD](/CONTRIBUTING.md) for details.
 
 ## License
 
-TODO
+This project is licensed under the Apache License Version 2.0. See the
+[LICENSE](/LICENSE) file for details.
+
+All code contributed prior to 02/23/2026 is also licensed under Apache License
+Version 2.0

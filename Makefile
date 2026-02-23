@@ -29,6 +29,12 @@ LDFLAGS = -X github.com/kineticloom/plydb/cmd.Version=$(VERSION) \
           -X github.com/kineticloom/plydb/cmd.Commit=$(COMMIT) \
           -X github.com/kineticloom/plydb/cmd.BuildDate=$(BUILD_DATE)
 
+LICENSE_SRCS = $(shell find . \
+  -type f \( -name "*.go" -o -name "*.sh" -o -name "*.ps1" \) \
+  -not -path "./dist/*" \
+  -not -path "./demo_sandbox/*" \
+  -not -path "./.git/*")
+
 # -----------------------------------------------------------------------------
 # Top level commands
 # -----------------------------------------------------------------------------
@@ -37,6 +43,9 @@ LDFLAGS = -X github.com/kineticloom/plydb/cmd.Version=$(VERSION) \
 clean:
 	rm -rf dist
 
+.PHONY: check
+check: build vet test integration-test license-check notices-check
+
 .PHONY: test
 test:
 	go test ./...
@@ -44,6 +53,41 @@ test:
 .PHONY: integration-test
 integration-test:
 	go test -tags=integration -v -timeout 300s ./...
+
+.PHONY: vet
+vet:
+	go vet ./...
+
+.PHONY: license-check
+license-check:
+	go run github.com/google/addlicense@latest \
+	  -check -c "Paul Tzen" -l apache -s=only \
+	  $(LICENSE_SRCS)
+	go run github.com/google/go-licenses@latest check \
+	  --allowed_licenses=Apache-2.0,MIT,BSD-2-Clause,BSD-3-Clause,ISC,MPL-2.0 \
+	  ./...
+
+.PHONY: license-fix
+license-fix:
+	go run github.com/google/addlicense@latest \
+	  -c "Paul Tzen" -l apache -s=only \
+	  $(LICENSE_SRCS)
+
+.PHONY: notices-generate
+notices-generate:
+	go run github.com/google/go-licenses@latest report \
+	  --ignore github.com/kineticloom/plydb \
+	  --template=scripts/notices.tpl \
+	  ./... > THIRD_PARTY_NOTICES.md
+
+.PHONY: notices-check
+notices-check:
+	go run github.com/google/go-licenses@latest report \
+	  --ignore github.com/kineticloom/plydb \
+	  --template=scripts/notices.tpl \
+	  ./... > /tmp/plydb_notices_check.md
+	diff THIRD_PARTY_NOTICES.md /tmp/plydb_notices_check.md \
+	  || (echo "THIRD_PARTY_NOTICES.md is out of date — run 'make notices-generate'" && exit 1)
 
 .PHONY: build
 build: dist/plydb$(EXE)

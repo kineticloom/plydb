@@ -1,3 +1,6 @@
+// Copyright 2026 Paul Tzen
+// SPDX-License-Identifier: Apache-2.0
+
 package sqlwalk
 
 import (
@@ -51,11 +54,11 @@ type CatalogPermission struct {
 
 // SchemaPermission describes access within a single schema.
 type SchemaPermission struct {
-	SchemaName string           `json:"schema_name"`
-	BaseAccess string           `json:"base_access"`
-	AllTables  bool             `json:"all_tables"`
+	SchemaName string            `json:"schema_name"`
+	BaseAccess string            `json:"base_access"`
+	AllTables  bool              `json:"all_tables"`
 	Management *SchemaManagement `json:"management,omitempty"`
-	Overrides  SchemaOverrides  `json:"overrides"`
+	Overrides  SchemaOverrides   `json:"overrides"`
 }
 
 // SchemaManagement holds DDL-level permission flags for a schema.

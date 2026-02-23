@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# Copyright 2026 Paul Tzen
+# SPDX-License-Identifier: Apache-2.0
+
 # PlyDB installer — downloads the latest release binary for your platform.
 #
 # Usage:

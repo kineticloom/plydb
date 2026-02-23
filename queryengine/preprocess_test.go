@@ -1,3 +1,6 @@
+// Copyright 2026 Paul Tzen
+// SPDX-License-Identifier: Apache-2.0
+
 package queryengine
 
 import (
@@ -34,7 +37,7 @@ func testConfig() *Config {
 				Path: "/data/report.xlsx",
 			},
 			"my_s3": {
-				Type: S3,
+				Type:   S3,
 				URI:    "s3://bucket/path/data.parquet",
 				Region: "us-east-1",
 			},

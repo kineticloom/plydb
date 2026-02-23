@@ -1,3 +1,8 @@
+<#
+ Copyright 2026 Paul Tzen
+ SPDX-License-Identifier: Apache-2.0
+#>
+
 # PlyDB installer for Windows — downloads the latest release binary.
 #
 # Usage:
