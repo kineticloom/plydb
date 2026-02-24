@@ -12,8 +12,10 @@ PlyDB is:
   they need, wherever it lives - no data movement (ETL) required.
 - **Secure:** You choose which data sources your agents are allowed to access.
   Read-only by default.
-- **Versatile** Integrate as either a CLI or
-  [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
+- **Versatile:** PlyDB can query across a wide variety of
+  [data sources](#supported-data-sources). AI agents can integrate with PlyDB
+  via either [CLI](#ai-agents--plydb-via-cli-agent-skill) or
+  [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
 
 ---
 
