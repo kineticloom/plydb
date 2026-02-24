@@ -2,8 +2,8 @@
 
 PlyDB securely bridges the gap between your AI agents and your fragmented data
 sources. It provides a single controlled access point for AI agents to query
-databases and flat files, such as Postgres, MySQL, CSV, Excel, and Parquet, with
-SQL, wherever the data lives.
+databases and flat files, such as Postgres, MySQL, CSV, Excel, Google Sheets,
+and Parquet, with SQL, wherever the data lives.
 
 PlyDB is:
 
@@ -141,6 +141,7 @@ relational view:
 | **SQL Databases**       | PostgreSQL, MySQL, SQLite (planned), DuckDB (planned) |
 | **File Formats**        | CSV, JSON, Parquet, Excel (.xlsx)                     |
 | **Object Storage**      | S3                                                    |
+| **SaaS**                | Google Sheets                                         |
 | **Data Lake** (planned) | Apache Iceberg, Delta Lake                            |
 
 ---
