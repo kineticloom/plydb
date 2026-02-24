@@ -62,11 +62,14 @@ vet:
 
 .PHONY: license-check
 license-check:
+# NOTE: license detection is failing for github.com/segmentio/asm@v1.2.1
+# Manually validated that it is MIT-0 no attribution
 	go run github.com/google/addlicense@latest \
 	  -check -c "Paul Tzen" -l apache -s=only \
 	  $(LICENSE_SRCS)
 	go run github.com/google/go-licenses@latest check \
-	  --allowed_licenses=Apache-2.0,MIT,BSD-2-Clause,BSD-3-Clause,ISC,MPL-2.0 \
+	  --ignore github.com/segmentio/asm \
+	  --allowed_licenses=Apache-2.0,MIT,MIT-0,BSD-2-Clause,BSD-3-Clause,ISC,MPL-2.0 \
 	  ./...
 
 .PHONY: license-fix
@@ -77,14 +80,20 @@ license-fix:
 
 .PHONY: notices-generate
 notices-generate:
+# NOTE: license detection is failing for github.com/segmentio/asm@v1.2.1
+# Manually validated that it is MIT-0 no attribution
 	go run github.com/google/go-licenses@latest report \
 	  --ignore github.com/kineticloom/plydb \
+	  --ignore github.com/segmentio/asm \
 	  --template=scripts/notices.tpl \
 	  ./... > THIRD_PARTY_NOTICES.md
 
 .PHONY: notices-check
 notices-check:
+# NOTE: license detection is failing for github.com/segmentio/asm@v1.2.1
+# Manually validated that it is MIT-0 no attribution
 	go run github.com/google/go-licenses@latest report \
+	  --ignore github.com/segmentio/asm \
 	  --ignore github.com/kineticloom/plydb \
 	  --template=scripts/notices.tpl \
 	  ./... > /tmp/plydb_notices_check.md
