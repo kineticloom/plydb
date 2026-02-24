@@ -34,7 +34,8 @@ sources.
 ### 2.2 The `databases` Object
 
 Each entry in this map contains common metadata and type-specific connection
-details.
+details. **Keys must consist of lowercase letters (`a`–`z`), digits (`0`–`9`),
+and underscores (`_`) only.**
 
 #### A. Common Fields (All Types)
 
@@ -95,7 +96,7 @@ flags supplied on the CLI.
     }
   },
   "databases": {
-    "db-prod-analytics": {
+    "db_prod_analytics": {
       "metadata": {
         "name": "Production Analytics",
         "description": "Primary read-replica for data warehousing."
@@ -107,7 +108,7 @@ flags supplied on the CLI.
       "username": "bi_user",
       "password_env_var": "DB_PROD_PASSWORD"
     },
-    "local-budget-report": {
+    "local_budget_report": {
       "metadata": {
         "name": "FY2026 Budget Plan",
         "description": "Local Excel workbook for department budget allocations."
@@ -117,7 +118,7 @@ flags supplied on the CLI.
       "sheet_name": "Final_Approval",
       "header_row": true
     },
-    "s3-sensor-data-glob": {
+    "s3_sensor_data_glob": {
       "metadata": {
         "name": "IoT Sensor Data",
         "description": "Partitioned sensor data using glob patterns."
@@ -128,7 +129,7 @@ flags supplied on the CLI.
       "format": "parquet",
       "region": "us-west-2"
     },
-    "inventory-snapshot": {
+    "inventory_snapshot": {
       "metadata": {
         "name": "Warehouse Inventory",
         "description": "Global inventory levels exported as CSV to S3."

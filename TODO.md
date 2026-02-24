@@ -66,6 +66,11 @@ read-write (e.g. Postgres). The configuration interface for end users may need
 some discovery and thought - to find a good balance between ease of use and
 flexibility.
 
+### FEAT - Connecting to Google Sheets
+
+Update data source config file spec, implement connection logic, update examples
+and docs.
+
 ### FEAT - Connecting to data lakes (Iceberg, Delta)
 
 Update data source config file spec, implement connection logic, update examples
