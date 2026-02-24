@@ -33,7 +33,9 @@ LICENSE_SRCS = $(shell find . \
   -type f \( -name "*.go" -o -name "*.sh" -o -name "*.ps1" \) \
   -not -path "./dist/*" \
   -not -path "./demo_sandbox/*" \
-  -not -path "./.git/*")
+  -not -path "./.git/*" \
+  -not -path "./.vscode/*" \
+  -not -path "./.claude/*")
 
 # -----------------------------------------------------------------------------
 # Top level commands

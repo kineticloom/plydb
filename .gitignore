@@ -62,3 +62,4 @@ plydb
 !plydb/
 demo_sandbox/
 dist/
+.vscode/
