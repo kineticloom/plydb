@@ -250,16 +250,16 @@ the overlay applied.
 ### Embedding overlays in the config file
 
 Instead of passing overlays on the command line, you can embed them directly in
-the config file under `semanticContext.overlays`. This is useful for deployments
-where the overlay files are always the same — for example, when the config is
-checked into version control alongside the overlays.
+the config file under `semantic_context.overlays`. This is useful for
+deployments where the overlay files are always the same — for example, when the
+config is checked into version control alongside the overlays.
 
 [`config_with_semantic_context_overlays.json`](config_with_semantic_context_overlays.json)
-is a ready-to-use example. It is identical to `config.json` except for the
-added `semanticContext` block:
+is a ready-to-use example. It is identical to `config.json` except for the added
+`semantic_context` block:
 
 ```json
-"semanticContext": {
+"semantic_context": {
   "overlays": [
     "examples/semantic_context_scanning/overlay.yaml"
   ]

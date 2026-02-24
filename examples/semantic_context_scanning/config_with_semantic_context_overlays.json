@@ -14,7 +14,7 @@
       "password_env_var": "PLYDB_PG_PASSWORD"
     }
   },
-  "semanticContext": {
+  "semantic_context": {
     "overlays": [
       "examples/semantic_context_scanning/overlay.yaml"
     ]

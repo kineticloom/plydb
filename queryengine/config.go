@@ -30,7 +30,7 @@ type SemanticContextConfig struct {
 type Config struct {
 	Credentials     map[string]Credential     `json:"credentials"`
 	Databases       map[string]DatabaseConfig `json:"databases"`
-	SemanticContext SemanticContextConfig     `json:"semanticContext,omitempty"`
+	SemanticContext SemanticContextConfig     `json:"semantic_context,omitempty"`
 }
 
 // Credential holds authentication fields for cloud providers.

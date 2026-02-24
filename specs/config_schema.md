@@ -14,7 +14,7 @@ The schema is composed of three top-level objects:
 1. **`credentials`**: A map of authentication profiles used by cloud providers.
 2. **`databases`**: A map of data source configurations where the key is a
    unique identifier.
-3. **`semanticContext`**: (Optional) Configuration for semantic context
+3. **`semantic_context`**: (Optional) Configuration for semantic context
    enrichment.
 
 ---
@@ -85,7 +85,7 @@ and underscores (`_`) only.**
 - **`header_row`**: (Optional) Boolean; indicates if row 1 is the header.
   Defaults to true if omitted.
 
-### 2.3 The `semanticContext` Object
+### 2.3 The `semantic_context` Object
 
 Provides static enrichment layers on top of the auto-scanned semantic context.
 This is equivalent to supplying `--semantic-context-overlay` on the CLI, but
@@ -105,7 +105,7 @@ flags supplied on the CLI.
 ```json
 {
   "credentials": {
-    "aws-marketing-user": {
+    "aws_marketing_user": {
       "access_key_env": "AWS_ACCESS_KEY_ID",
       "secret_key_env": "AWS_SECRET_ACCESS_KEY"
     },
@@ -142,7 +142,7 @@ flags supplied on the CLI.
         "description": "Partitioned sensor data using glob patterns."
       },
       "type": "s3",
-      "credential_profile": "aws-marketing-user",
+      "credential_profile": "aws_marketing_user",
       "uri": "s3://iot-bucket/2026/*/device_id_100?/sensor_*.parquet",
       "format": "parquet",
       "region": "us-west-2"
@@ -153,7 +153,7 @@ flags supplied on the CLI.
         "description": "Global inventory levels exported as CSV to S3."
       },
       "type": "s3",
-      "credential_profile": "aws-marketing-user",
+      "credential_profile": "aws_marketing_user",
       "uri": "s3://corporate-reports/inventory/daily_snapshot.csv",
       "format": "csv",
       "delimiter": ",",
@@ -181,7 +181,7 @@ flags supplied on the CLI.
       "spreadsheet_id": "1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcdefg"
     }
   },
-  "semanticContext": {
+  "semantic_context": {
     "overlays": [
       "/path/to/business_glossary.yaml",
       "/path/to/column_descriptions.yaml"

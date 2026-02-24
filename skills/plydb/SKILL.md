@@ -83,12 +83,12 @@ the auto-scanner.
 #### Embedding overlays in the config file
 
 Overlays can also be specified in the config file under
-`semanticContext.overlays` instead of (or in addition to) the CLI flag:
+`semantic_context.overlays` instead of (or in addition to) the CLI flag:
 
 ```json
 {
   "databases": { ... },
-  "semanticContext": {
+  "semantic_context": {
     "overlays": [
       "path/to/base_overlay.yaml",
       "path/to/team_overlay.yaml"
