@@ -11,16 +11,19 @@ import (
 
 // requiredExtensions returns deduplicated INSTALL/LOAD SQL statements
 // based on the database types present in the configuration.
+// The map value is the install source ("" for default, "community" for community).
 func requiredExtensions(cfg *Config) []string {
-	need := make(map[string]bool)
+	need := make(map[string]string) // extension name -> install source
 	for _, db := range cfg.Databases {
 		switch db.Type {
 		case PostgreSQL:
-			need["postgres"] = true
+			need["postgres"] = ""
 		case MySQL:
-			need["mysql"] = true
+			need["mysql"] = ""
 		case S3:
-			need["httpfs"] = true
+			need["httpfs"] = ""
+		case GSheet:
+			need["gsheets"] = "community"
 		}
 	}
 
@@ -33,7 +36,12 @@ func requiredExtensions(cfg *Config) []string {
 
 	stmts := make([]string, 0, len(exts)*2)
 	for _, ext := range exts {
-		stmts = append(stmts, fmt.Sprintf("INSTALL %s;", ext))
+		source := need[ext]
+		if source != "" {
+			stmts = append(stmts, fmt.Sprintf("INSTALL %s FROM %s;", ext, source))
+		} else {
+			stmts = append(stmts, fmt.Sprintf("INSTALL %s;", ext))
+		}
 		stmts = append(stmts, fmt.Sprintf("LOAD %s;", ext))
 	}
 	return stmts
@@ -66,6 +74,16 @@ func s3ConfigSQL(cred Credential, region string) ([]string, error) {
 		fmt.Sprintf("SET s3_secret_access_key='%s';", secretKey),
 		fmt.Sprintf("SET s3_region='%s';", region),
 	}, nil
+}
+
+// gsheetSecretSQL returns a CREATE SECRET statement for Google Sheets authentication.
+// If keyFilePath is non-empty, service account key file auth is used.
+// If empty, browser-based OAuth is used.
+func gsheetSecretSQL(keyFilePath string) string {
+	if keyFilePath != "" {
+		return fmt.Sprintf("CREATE SECRET (TYPE gsheet, PROVIDER key_file, FILEPATH '%s');", keyFilePath)
+	}
+	return "CREATE SECRET (TYPE gsheet);"
 }
 
 // attachSQL returns an ATTACH statement for a networked database (postgresql or mysql).

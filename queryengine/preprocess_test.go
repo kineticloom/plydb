@@ -11,6 +11,8 @@ import (
 	pg_query "github.com/pganalyze/pg_query_go/v6"
 )
 
+func boolPtr(b bool) *bool { return &b }
+
 func testConfig() *Config {
 	return &Config{
 		Databases: map[string]DatabaseConfig{
@@ -40,6 +42,15 @@ func testConfig() *Config {
 				Type:   S3,
 				URI:    "s3://bucket/path/data.parquet",
 				Region: "us-east-1",
+			},
+			"my_gsheet": {
+				Type:          GSheet,
+				SpreadsheetID: "abc123spreadsheet",
+				SheetName:     "Sales",
+			},
+			"my_gsheet_nosheet": {
+				Type:          GSheet,
+				SpreadsheetID: "xyz789spreadsheet",
 			},
 		},
 	}
@@ -142,6 +153,87 @@ func TestPreprocessQuery_S3Rewrite(t *testing.T) {
 	}
 	if !strings.Contains(result, `"s3://bucket/path/data.parquet"`) {
 		t.Errorf("expected S3 URI rewrite, got %q", result)
+	}
+}
+
+func TestPreprocessQuery_GSheetWithConfigSheetName(t *testing.T) {
+	cfg := testConfig()
+	query := "SELECT * FROM my_gsheet.default.data"
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "read_gsheet('abc123spreadsheet', sheet := 'Sales')"
+	if !strings.Contains(result, want) {
+		t.Errorf("expected %q in result, got %q", want, result)
+	}
+}
+
+func TestPreprocessQuery_GSheetDynamicSheetName(t *testing.T) {
+	cfg := testConfig()
+	// Note: pg_query lowercases unquoted identifiers, so "Revenue" becomes "revenue".
+	query := "SELECT * FROM my_gsheet_nosheet.default.Revenue"
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "read_gsheet('xyz789spreadsheet', sheet := 'revenue')"
+	if !strings.Contains(result, want) {
+		t.Errorf("expected %q in result, got %q", want, result)
+	}
+}
+
+func TestPreprocessQuery_GSheetWithAlias(t *testing.T) {
+	cfg := testConfig()
+	query := "SELECT g.col1 FROM my_gsheet.default.data AS g"
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "read_gsheet('abc123spreadsheet', sheet := 'Sales') g"
+	if !strings.Contains(result, want) {
+		t.Errorf("expected %q in result, got %q", want, result)
+	}
+}
+
+func TestPreprocessQuery_GSheetHeaderRowFalse(t *testing.T) {
+	cfg := testConfig()
+	cfg.Databases["my_gsheet_noheader"] = DatabaseConfig{
+		Type:          GSheet,
+		SpreadsheetID: "noheader123",
+		SheetName:     "Raw",
+		HeaderRow:     boolPtr(false),
+	}
+	query := "SELECT * FROM my_gsheet_noheader.default.data"
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(result, "read_gsheet('noheader123'") {
+		t.Errorf("expected read_gsheet call, got %q", result)
+	}
+	if !strings.Contains(result, "sheet := 'Raw'") {
+		t.Errorf("expected sheet named arg, got %q", result)
+	}
+	if !strings.Contains(result, "headers := 'false'") {
+		t.Errorf("expected headers := 'false', got %q", result)
+	}
+}
+
+func TestPreprocessQuery_GSheetCrossJoinPostgres(t *testing.T) {
+	cfg := testConfig()
+	query := `SELECT u.id, g.amount
+		FROM my_pg.public.users AS u
+		JOIN my_gsheet.default.data AS g ON u.id = g.user_id`
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(result, "my_pg.public.users") {
+		t.Errorf("expected postgres ref preserved, got %q", result)
+	}
+	if !strings.Contains(result, "read_gsheet('abc123spreadsheet', sheet := 'Sales')") {
+		t.Errorf("expected gsheet rewrite, got %q", result)
 	}
 }
 

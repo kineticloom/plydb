@@ -79,6 +79,40 @@ func TestRequiredExtensions(t *testing.T) {
 	}
 }
 
+func TestRequiredExtensionsGSheet(t *testing.T) {
+	cfg := &Config{Databases: map[string]DatabaseConfig{
+		"gs1": {Type: GSheet},
+	}}
+	got := requiredExtensions(cfg)
+	want := []string{"INSTALL gsheets FROM community;", "LOAD gsheets;"}
+	if len(got) != len(want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			t.Fatalf("index %d: got %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
+func TestGsheetSecretSQL(t *testing.T) {
+	t.Run("key_file auth", func(t *testing.T) {
+		sql := gsheetSecretSQL("/path/to/key.json")
+		want := "CREATE SECRET (TYPE gsheet, PROVIDER key_file, FILEPATH '/path/to/key.json');"
+		if sql != want {
+			t.Fatalf("got %q, want %q", sql, want)
+		}
+	})
+
+	t.Run("browser OAuth", func(t *testing.T) {
+		sql := gsheetSecretSQL("")
+		want := "CREATE SECRET (TYPE gsheet);"
+		if sql != want {
+			t.Fatalf("got %q, want %q", sql, want)
+		}
+	})
+}
+
 func TestResolveEnvVar(t *testing.T) {
 	t.Run("set and non-empty", func(t *testing.T) {
 		t.Setenv("TEST_RESOLVE_VAR", "myvalue")

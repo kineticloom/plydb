@@ -335,6 +335,95 @@ func TestParseConfig(t *testing.T) {
 			}`,
 		},
 		{
+			name: "valid gsheet with key_file credential",
+			json: `{
+				"credentials": {
+					"gsa": {"key_file": "/path/to/key.json"}
+				},
+				"databases": {
+					"gs1": {
+						"metadata": {"name": "GSheet", "description": "test"},
+						"type": "gsheet",
+						"spreadsheet_id": "abc123",
+						"credential_profile": "gsa"
+					}
+				}
+			}`,
+		},
+		{
+			name: "valid gsheet without credential_profile (browser OAuth)",
+			json: `{
+				"databases": {
+					"gs1": {
+						"metadata": {"name": "GSheet", "description": "test"},
+						"type": "gsheet",
+						"spreadsheet_id": "abc123"
+					}
+				}
+			}`,
+		},
+		{
+			name:    "gsheet missing spreadsheet_id",
+			wantErr: "spreadsheet_id is required",
+			json: `{
+				"databases": {
+					"gs1": {
+						"metadata": {"name": "GSheet", "description": "test"},
+						"type": "gsheet"
+					}
+				}
+			}`,
+		},
+		{
+			name:    "gsheet bad credential reference",
+			wantErr: `credential_profile "nope" not found`,
+			json: `{
+				"databases": {
+					"gs1": {
+						"metadata": {"name": "GSheet", "description": "test"},
+						"type": "gsheet",
+						"spreadsheet_id": "abc123",
+						"credential_profile": "nope"
+					}
+				}
+			}`,
+		},
+		{
+			name:    "gsheet credential with wrong type (S3 cred)",
+			wantErr: "must have key_file for gsheet type",
+			json: `{
+				"credentials": {
+					"aws1": {"access_key_env": "K", "secret_key_env": "S"}
+				},
+				"databases": {
+					"gs1": {
+						"metadata": {"name": "GSheet", "description": "test"},
+						"type": "gsheet",
+						"spreadsheet_id": "abc123",
+						"credential_profile": "aws1"
+					}
+				}
+			}`,
+		},
+		{
+			name:    "credential with mixed fields",
+			wantErr: "cannot mix S3 fields",
+			json: `{
+				"credentials": {
+					"bad": {"access_key_env": "K", "secret_key_env": "S", "key_file": "/path"}
+				}
+			}`,
+		},
+		{
+			name:    "credential with no fields",
+			wantErr: "must provide either",
+			json: `{
+				"credentials": {
+					"bad": {}
+				}
+			}`,
+		},
+		{
 			name:    "credential missing access_key_env",
 			wantErr: "access_key_env is required",
 			json: `{

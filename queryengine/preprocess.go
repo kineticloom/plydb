@@ -78,6 +78,20 @@ func PreprocessQuery(query string, cfg *Config, validators ...ValidateFunc) (str
 			}
 		case S3:
 			renames[key] = sqlwalk.TableName{Name: dbCfg.URI}
+		case GSheet:
+			sheetName := dbCfg.SheetName
+			if sheetName == "" {
+				sheetName = ref.Name // use SQL table name as sheet name
+			}
+			namedArgs := [][2]string{{"sheet", sheetName}}
+			if dbCfg.HeaderRow != nil && !*dbCfg.HeaderRow {
+				namedArgs = append(namedArgs, [2]string{"headers", "false"})
+			}
+			funcReplacements[key] = sqlwalk.FuncReplace{
+				FuncName:  "read_gsheet",
+				Args:      []string{dbCfg.SpreadsheetID},
+				NamedArgs: namedArgs,
+			}
 		default:
 			return "", fmt.Errorf("unsupported database type %q for catalog %q", dbCfg.Type, ref.Catalog)
 		}

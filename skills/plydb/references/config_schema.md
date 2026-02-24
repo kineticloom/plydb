@@ -30,6 +30,10 @@ sources.
 | ---------------- | ------ | ----------------------------------------------------------- |
 | `access_key_env` | String | Name of the environment variable for the Access Key ID.     |
 | `secret_key_env` | String | Name of the environment variable for the Secret Access Key. |
+| `key_file`       | String | Path to a Google service account JSON key file.             |
+
+Each credential entry must contain **either** S3 fields (`access_key_env` +
+`secret_key_env`) **or** the gsheet field (`key_file`), not both.
 
 ### 2.2 The `databases` Object
 
@@ -40,8 +44,8 @@ and underscores (`_`) only.**
 #### A. Common Fields (All Types)
 
 - **`metadata`**: Object containing `name` (String) and `description` (String).
-- **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`, or
-  `s3`.
+- **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`, `s3`,
+  or `gsheet`.
 
 #### B. Networked Database Fields (`type: "postgresql" | "mysql" | etc.`)
 
@@ -70,6 +74,17 @@ and underscores (`_`) only.**
 - **`format`**: **Required.** The file format (`csv`, `parquet`, etc.).
 - **`delimiter` / `header_row` / `sheet_name**`: Same as Local File fields.
 
+#### E. Google Sheets Fields (`type: "gsheet"`)
+
+- **`spreadsheet_id`**: The Google Sheets spreadsheet ID (from the sheet URL).
+- **`credential_profile`**: (Optional) Key matching an entry in the top-level
+  `credentials` map (must reference a credential with `key_file`). If omitted,
+  browser-based OAuth is used (interactive Google login flow).
+- **`sheet_name`**: (Optional) The tab/sheet name. If omitted, the table name
+  from the SQL query is used as the sheet name.
+- **`header_row`**: (Optional) Boolean; indicates if row 1 is the header.
+  Defaults to true if omitted.
+
 ### 2.3 The `semanticContext` Object
 
 Provides static enrichment layers on top of the auto-scanned semantic context.
@@ -93,6 +108,9 @@ flags supplied on the CLI.
     "aws-marketing-user": {
       "access_key_env": "AWS_ACCESS_KEY_ID",
       "secret_key_env": "AWS_SECRET_ACCESS_KEY"
+    },
+    "gsheet_service_account": {
+      "key_file": "/etc/secrets/gsheet-sa-key.json"
     }
   },
   "databases": {
@@ -141,6 +159,26 @@ flags supplied on the CLI.
       "delimiter": ",",
       "header_row": true,
       "region": "us-east-1"
+    }
+  },
+    "gsheet_sales_forecast": {
+      "metadata": {
+        "name": "Sales Forecast",
+        "description": "Q3 sales forecast shared via Google Sheets."
+      },
+      "type": "gsheet",
+      "spreadsheet_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+      "credential_profile": "gsheet_service_account",
+      "sheet_name": "Forecast",
+      "header_row": true
+    },
+    "gsheet_personal": {
+      "metadata": {
+        "name": "Personal Tracker",
+        "description": "Ad-hoc personal sheet accessed via browser OAuth."
+      },
+      "type": "gsheet",
+      "spreadsheet_id": "1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcdefg"
     }
   },
   "semanticContext": {

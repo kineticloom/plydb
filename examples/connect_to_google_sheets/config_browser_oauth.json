@@ -1,0 +1,13 @@
+{
+  "credentials": {},
+  "databases": {
+    "sales": {
+      "metadata": {
+        "name": "Sales Data",
+        "description": "Q1 sales figures tracked in Google Sheets."
+      },
+      "type": "gsheet",
+      "spreadsheet_id": "YOUR_SPREADSHEET_ID"
+    }
+  }
+}

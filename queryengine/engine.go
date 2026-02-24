@@ -20,6 +20,7 @@ const (
 	ConnMySQL    ConnectionType = "mysql"
 	ConnS3       ConnectionType = "s3"
 	ConnFile     ConnectionType = "file"
+	ConnGSheet   ConnectionType = "gsheet"
 )
 
 // QueryEngine wraps a DuckDB instance with attached remote sources.
@@ -57,6 +58,11 @@ func New(cfg *Config) (*QueryEngine, error) {
 		return nil, err
 	}
 
+	// Configure GSheet if any gsheet sources exist.
+	if err := configureGSheet(db, cfg); err != nil {
+		return nil, err
+	}
+
 	active := make(map[string]ConnectionType)
 
 	// Iterate databases in sorted key order for deterministic bootstrapping.
@@ -88,6 +94,9 @@ func New(cfg *Config) (*QueryEngine, error) {
 
 		case S3:
 			active[key] = ConnS3
+
+		case GSheet:
+			active[key] = ConnGSheet
 		}
 	}
 
@@ -116,6 +125,28 @@ func configureS3(db *sql.DB, cfg *Config) error {
 			if _, err := db.Exec(stmt); err != nil {
 				return fmt.Errorf("executing S3 config %q: %w", stmt, err)
 			}
+		}
+		return nil
+	}
+	return nil
+}
+
+// configureGSheet sets up Google Sheets authentication in the DuckDB session
+// if any gsheet sources are present. All gsheet sources must share the same
+// credential profile (enforced at parse time).
+func configureGSheet(db *sql.DB, cfg *Config) error {
+	for _, dbCfg := range cfg.Databases {
+		if dbCfg.Type != GSheet {
+			continue
+		}
+		var keyFile string
+		if dbCfg.CredentialProfile != "" {
+			cred := cfg.Credentials[dbCfg.CredentialProfile]
+			keyFile = cred.KeyFile
+		}
+		stmt := gsheetSecretSQL(keyFile)
+		if _, err := db.Exec(stmt); err != nil {
+			return fmt.Errorf("configuring gsheet credentials: %w", err)
 		}
 		return nil
 	}

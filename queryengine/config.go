@@ -18,6 +18,7 @@ const (
 	SQLServer  DatabaseType = "sqlserver"
 	File       DatabaseType = "file"
 	S3         DatabaseType = "s3"
+	GSheet     DatabaseType = "gsheet"
 )
 
 // SemanticContextConfig holds semantic context configuration.
@@ -32,10 +33,13 @@ type Config struct {
 	SemanticContext SemanticContextConfig     `json:"semanticContext,omitempty"`
 }
 
-// Credential holds environment variable names for cloud authentication.
+// Credential holds authentication fields for cloud providers.
+// Each credential must contain either S3 fields (access_key_env + secret_key_env)
+// or the gsheet field (key_file), not both.
 type Credential struct {
-	AccessKeyEnv string `json:"access_key_env"`
-	SecretKeyEnv string `json:"secret_key_env"`
+	AccessKeyEnv string `json:"access_key_env,omitempty"`
+	SecretKeyEnv string `json:"secret_key_env,omitempty"`
+	KeyFile      string `json:"key_file,omitempty"`
 }
 
 // Metadata describes a data source.
@@ -65,7 +69,10 @@ type DatabaseConfig struct {
 	CredentialProfile string `json:"credential_profile,omitempty"`
 	Region            string `json:"region,omitempty"`
 
-	// Shared file/S3 fields
+	// GSheet fields
+	SpreadsheetID string `json:"spreadsheet_id,omitempty"`
+
+	// Shared file/S3/GSheet fields
 	Format    string `json:"format,omitempty"`
 	Delimiter string `json:"delimiter,omitempty"`
 	HeaderRow *bool  `json:"header_row,omitempty"`
@@ -86,18 +93,30 @@ func ParseConfig(data []byte) (*Config, error) {
 		cfg.Databases = make(map[string]DatabaseConfig)
 	}
 
-	// Validate credentials.
+	// Validate credentials: each must have either S3 fields or key_file, not both.
 	for key, cred := range cfg.Credentials {
-		if strings.TrimSpace(cred.AccessKeyEnv) == "" {
-			return nil, fmt.Errorf("credential %q: access_key_env is required", key)
+		hasS3 := strings.TrimSpace(cred.AccessKeyEnv) != "" || strings.TrimSpace(cred.SecretKeyEnv) != ""
+		hasKeyFile := strings.TrimSpace(cred.KeyFile) != ""
+		if hasS3 && hasKeyFile {
+			return nil, fmt.Errorf("credential %q: cannot mix S3 fields (access_key_env/secret_key_env) with gsheet field (key_file)", key)
 		}
-		if strings.TrimSpace(cred.SecretKeyEnv) == "" {
-			return nil, fmt.Errorf("credential %q: secret_key_env is required", key)
+		if !hasS3 && !hasKeyFile {
+			return nil, fmt.Errorf("credential %q: must provide either S3 fields (access_key_env + secret_key_env) or gsheet field (key_file)", key)
+		}
+		if hasS3 {
+			if strings.TrimSpace(cred.AccessKeyEnv) == "" {
+				return nil, fmt.Errorf("credential %q: access_key_env is required", key)
+			}
+			if strings.TrimSpace(cred.SecretKeyEnv) == "" {
+				return nil, fmt.Errorf("credential %q: secret_key_env is required", key)
+			}
 		}
 	}
 
-	// Track S3 credential profiles for single-profile enforcement.
+	// Track credential profiles for single-profile enforcement.
 	var s3CredProfile string
+	var gsheetCredProfile string
+	gsheetCredProfileSet := false
 
 	for key, db := range cfg.Databases {
 		switch db.Type {
@@ -127,6 +146,21 @@ func ParseConfig(data []byte) (*Config, error) {
 				)
 			}
 
+		case GSheet:
+			if err := validateGSheet(key, db, cfg.Credentials); err != nil {
+				return nil, err
+			}
+			cp := db.CredentialProfile
+			if !gsheetCredProfileSet {
+				gsheetCredProfile = cp
+				gsheetCredProfileSet = true
+			} else if gsheetCredProfile != cp {
+				return nil, fmt.Errorf(
+					"database %q: all gsheet sources must share the same credential_profile (found %q and %q)",
+					key, gsheetCredProfile, cp,
+				)
+			}
+
 		default:
 			return nil, fmt.Errorf("database %q: unknown type %q", key, db.Type)
 		}
@@ -150,6 +184,22 @@ func validateNetworkedDB(key string, db DatabaseConfig) error {
 	}
 	if strings.TrimSpace(db.PasswordEnvVar) == "" {
 		return fmt.Errorf("database %q: password_env_var is required for %s type", key, db.Type)
+	}
+	return nil
+}
+
+func validateGSheet(key string, db DatabaseConfig, creds map[string]Credential) error {
+	if strings.TrimSpace(db.SpreadsheetID) == "" {
+		return fmt.Errorf("database %q: spreadsheet_id is required for gsheet type", key)
+	}
+	if cp := strings.TrimSpace(db.CredentialProfile); cp != "" {
+		cred, ok := creds[cp]
+		if !ok {
+			return fmt.Errorf("database %q: credential_profile %q not found in credentials", key, cp)
+		}
+		if strings.TrimSpace(cred.KeyFile) == "" {
+			return fmt.Errorf("database %q: credential_profile %q must have key_file for gsheet type", key, cp)
+		}
 	}
 	return nil
 }
