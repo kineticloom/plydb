@@ -220,6 +220,7 @@ Examples of configuring data sources:
 
 - [Query CSV files](examples/connect_to_csv_files/README.md)
 - [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
+- [Query Google Sheets](examples/connect_to_google_sheets/README.md)
 - [Providing semantic context](examples/semantic_context_scanning/README.md)
 
 ## Contributing
