@@ -42,6 +42,9 @@ column types and foreign keys as structured YAML that follows the
 [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
 specification.
 
+For quick reference, look in `references\config_schema.md` for a copy of the OSI
+spec.
+
 ```sh
 plydb semantic-context --config path/to/config/file/config.json
 ```
@@ -67,15 +70,20 @@ plydb semantic-context \
   --semantic-context-overlay team_overlay.yaml
 ```
 
-Overlay files must be valid OSI YAML. Overlays can add descriptions to existing
-datasets and fields, define relationships between existing datasets, and add or
-update metrics. They cannot introduce new datasets or fields - only enrich what
-was already discovered by the auto-scanner.
+Overlay files must be valid
+[Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
+YAML. For quick reference, look in `references\config_schema.md` for a copy of
+the OSI spec.
+
+Overlays can add descriptions to existing datasets and fields, define
+relationships between existing datasets, and add or update metrics. They cannot
+introduce new datasets or fields - only enrich what was already discovered by
+the auto-scanner.
 
 #### Embedding overlays in the config file
 
-Overlays can also be specified in the config file under `semanticContext.overlays`
-instead of (or in addition to) the CLI flag:
+Overlays can also be specified in the config file under
+`semanticContext.overlays` instead of (or in addition to) the CLI flag:
 
 ```json
 {

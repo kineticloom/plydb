@@ -92,6 +92,7 @@ notices-generate:
 	  --ignore github.com/segmentio/asm \
 	  --template=scripts/notices.tpl \
 	  ./... > THIRD_PARTY_NOTICES.md
+	cat scripts/notices_manual.md >> THIRD_PARTY_NOTICES.md
 
 .PHONY: notices-check
 notices-check:
@@ -102,6 +103,7 @@ notices-check:
 	  --ignore github.com/kineticloom/plydb \
 	  --template=scripts/notices.tpl \
 	  ./... > /tmp/plydb_notices_check.md
+	cat scripts/notices_manual.md >> /tmp/plydb_notices_check.md
 	diff THIRD_PARTY_NOTICES.md /tmp/plydb_notices_check.md \
 	  || (echo "THIRD_PARTY_NOTICES.md is out of date — run 'make notices-generate'" && exit 1)
 
