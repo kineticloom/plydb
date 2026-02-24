@@ -46,7 +46,7 @@ clean:
 	rm -rf dist
 
 .PHONY: check
-check: build vet test integration-test license-check notices-check
+check: build lint vuln-check test integration-test license-check notices-check
 
 .PHONY: test
 test:
@@ -56,9 +56,14 @@ test:
 integration-test:
 	go test -tags=integration -v -timeout 300s ./...
 
-.PHONY: vet
-vet:
+.PHONEY: lint
+lint:
 	go vet ./...
+	go run honnef.co/go/tools/cmd/staticcheck@latest ./...
+
+.PHONY: vuln-check
+vuln-check:
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 .PHONY: license-check
 license-check:
