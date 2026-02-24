@@ -40,6 +40,10 @@ Use this method for interactive, ad-hoc querying.
    - Set `spreadsheet_id` to your spreadsheet's ID.
 2. On first query, DuckDB will open your browser for Google login. No service
    account or key file is needed.
+3. The OAuth token is automatically persisted to `~/.duckdb/stored_secrets/`.
+   Subsequent runs reuse the cached token without re-authenticating.
+4. To force re-authentication, delete the cached secret:
+   `rm -rf ~/.duckdb/stored_secrets/`
 
 ## Usage
 
@@ -59,7 +63,7 @@ used in the SQL (`data` above), PlyDB reads from the `Q1` tab.
 ```bash
 plydb query \
   --config examples/connect_to_google_sheets/config_browser_oauth.json \
-  "SELECT * FROM sales.default.Q1 LIMIT 10"
+  "SELECT * FROM sales.default.\"Q1\" LIMIT 10"
 ```
 
 Since no `sheet_name` is set in the config, PlyDB uses the table name from the
@@ -84,6 +88,15 @@ plydb query \
   "SELECT * FROM sales.default.\"February\""
 ```
 
+**Note on case sensitivity:** SQL lowercases unquoted identifiers per the SQL
+standard. If your Google Sheets tab name contains uppercase letters (e.g.,
+`Revenue`), an unquoted reference like `FROM sales.default.Revenue` will look
+for a tab named `revenue`, which won't match. Two workarounds:
+
+- **Quote the identifier** with double quotes to preserve case:
+  `FROM sales.default."Revenue"`
+- **Set `sheet_name` in the config** to bypass SQL identifier parsing entirely.
+
 ### Cross-Source Join
 
 Google Sheets sources can be joined with any other PlyDB data source. For
@@ -94,6 +107,6 @@ file and query across them:
 plydb query \
   --config your_config.json \
   "SELECT s.product, s.revenue, t.target
-   FROM sales.default.Q1 AS s
+   FROM sales.default.\"Q1\" AS s
    JOIN targets.default.targets AS t ON s.product = t.product"
 ```

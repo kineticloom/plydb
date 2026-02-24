@@ -83,7 +83,7 @@ func gsheetSecretSQL(keyFilePath string) string {
 	if keyFilePath != "" {
 		return fmt.Sprintf("CREATE SECRET (TYPE gsheet, PROVIDER key_file, FILEPATH '%s');", keyFilePath)
 	}
-	return "CREATE SECRET (TYPE gsheet);"
+	return "CREATE PERSISTENT SECRET __plydb_gsheet (TYPE gsheet);"
 }
 
 // attachSQL returns an ATTACH statement for a networked database (postgresql or mysql).

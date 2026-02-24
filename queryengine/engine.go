@@ -144,6 +144,17 @@ func configureGSheet(db *sql.DB, cfg *Config) error {
 			cred := cfg.Credentials[dbCfg.CredentialProfile]
 			keyFile = cred.KeyFile
 		}
+		// For browser OAuth, check if a persisted secret was auto-loaded.
+		if keyFile == "" {
+			var count int
+			err := db.QueryRow(
+				"SELECT count(*) FROM duckdb_secrets() WHERE name = '__plydb_gsheet'",
+			).Scan(&count)
+			if err == nil && count > 0 {
+				return nil // already loaded from disk
+			}
+		}
+
 		stmt := gsheetSecretSQL(keyFile)
 		if _, err := db.Exec(stmt); err != nil {
 			return fmt.Errorf("configuring gsheet credentials: %w", err)
