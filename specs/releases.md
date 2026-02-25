@@ -48,9 +48,16 @@ Binaries are built natively (no cross-compilation) using the following runners:
 | Platform        | Runner             |
 | --------------- | ------------------ |
 | `linux/amd64`   | `ubuntu-latest`    |
-| `linux/arm64`   | `ubuntu-24.04-arm` |
+| `linux/arm64`   | `ubuntu-22.04-arm` |
 | `darwin/arm64`  | `macos-latest`     |
 | `windows/amd64` | `windows-latest`   |
+
+Notes:
+
+- The `ubuntu-22.04-arm` runner uses glibc 2.35, so the resulting ARM64 binary
+  will link against glibc 2.35 and run on any system with glibc ≥ 2.35. As of
+  2/25/2026, glibc 2.35 is requirement of the Linux VM that Claude Desktop
+  Cowork uses.
 
 ---
 
@@ -58,11 +65,11 @@ Binaries are built natively (no cross-compilation) using the following runners:
 
 The Makefile provides targets that mirror the CI build pipeline:
 
-| Command                                   | Output                              |
-| ----------------------------------------- | ----------------------------------- |
-| `make build`                              | `dist/plydb[.exe]` — VERSION=dev    |
-| `make package-release`                    | `dist/plydb_<os>_<arch>.tar.gz`     |
-| `make build-skill`                        | `dist/plydb_skill.zip`              |
+| Command                | Output                           |
+| ---------------------- | -------------------------------- |
+| `make build`           | `dist/plydb[.exe]` — VERSION=dev |
+| `make package-release` | `dist/plydb_<os>_<arch>.tar.gz`  |
+| `make build-skill`     | `dist/plydb_skill.zip`           |
 
 `GOOS` and `GOARCH` default to the current machine. `VERSION` and `COMMIT`
 default to `dev` / `none` unless overridden on the command line:
@@ -83,10 +90,10 @@ Release binaries have version metadata injected at build time via `-ldflags`:
 | `main.Commit`    | `github.sha`            | `a1b2c3d4...`          |
 | `main.BuildDate` | `date -u` at build time | `2026-01-15T10:30:00Z` |
 
-Builds via `make build` without overrides embed `dev` / `none` for
-`Version` and `Commit`, but a real timestamp for `BuildDate`. A bare
-`go build .` or `go run .` uses the hardcoded defaults in `cmd/version.go` and
-shows `dev` / `none` / `unknown`.
+Builds via `make build` without overrides embed `dev` / `none` for `Version` and
+`Commit`, but a real timestamp for `BuildDate`. A bare `go build .` or
+`go run .` uses the hardcoded defaults in `cmd/version.go` and shows `dev` /
+`none` / `unknown`.
 
 To inspect the version of a binary:
 
