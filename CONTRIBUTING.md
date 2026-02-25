@@ -42,7 +42,7 @@ We love ideas! However, before getting too deep into implementation, please
 first check our [Roadmap](/TODO.md) and start a discussion so we can align on a
 direction.
 
-Features to improve PlydB for individuals can and should be a part of this open
+Features to improve PlyDB for individuals can and should be a part of this open
 source version, while features aimed to improve usage at scale, as in an
 enterprise, should be reserved for the proprietary version. Doing so helps keep
 the project sustainable. If you aren't sure where a feature fits, feel free to

@@ -129,6 +129,38 @@ Most likely best left out of scope for PlyDB and best handled by an
 organization's established practices - e.g. Cloud auth, ssh tunneling, zero
 trust networking solutions, etc.
 
+### FEAT - Reduce Google Sheets OAuth friction, copy-and-pasting auth code
+
+PlyDB uses the DuckDB duckdb_gsheets extension to query Google Sheets.
+Currently, the OAuth opens a browser and requires a user copy and paste a token
+back into the terminal to complete the auth flow.
+
+There is work in progress in the duckdb_gsheets project to remove the need to
+copy and paste the token.
+
+https://github.com/evidence-dev/duckdb_gsheets/pull/64
+
+Since DuckDB downloads extensions at runtime, whenever this work is merged, then
+this should "just work" with PlyDB without updates on our side.
+
+### FEAT - Reduce Google Sheets OAuth friction, customized branding during auth flow
+
+When using a Google Sheets data source with interactive OAuth auth, the user
+will encounter the text "DuckDB GSheets" throughout various points of the flow.
+While PlyDB's usage of DuckDB is not meant to be a secret, this branding
+dissonance is somewhat jarring for users of PlyDB - _especially_ during an auth
+flow.
+
+We should connect with the maintainers of [duckdb_gsheets]
+(https://github.com/evidence-dev/duckdb_gsheets) and see we can find a solution
+for this scenario.
+
+### DOCS - Marketing and documentation site
+
+The PlyDB code repo is available on GitHub and it contains docs and examples.
+However a specialized marketing and documentation site with a better user
+experience for non-technical users would be nice.
+
 ## Completed
 
 ### DOCS - PlyDB CLI Skill

@@ -21,7 +21,7 @@ PlyDB is:
 
 ## Demo
 
-PlyDB can connect with a wide [variety of data sources](#supported-data-sources)
+PlyDB can connect with a wide variety of [data sources](#supported-data-sources)
 and integrate with any AI agent that supports
 [CLI tools](#ai-agents--plydb-via-cli-agent-skill) or
 [MCP](#ai-agents--plydb-via-mcp).
