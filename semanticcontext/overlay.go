@@ -54,9 +54,12 @@ func (p *OverlayProvider) Provide(ctx context.Context, existing *SemanticModelFi
 func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 	result := *base
 
-	// 1. Model-level description.
+	// 1. Model-level description and ai_context.
 	if overlay.SemanticModel.Description != "" {
 		result.SemanticModel.Description = overlay.SemanticModel.Description
+	}
+	if !overlay.SemanticModel.AIContext.IsZero() {
+		result.SemanticModel.AIContext = overlay.SemanticModel.AIContext
 	}
 
 	// Build an index of base datasets by name for O(1) lookup.
@@ -82,6 +85,15 @@ func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 		if overlayDS.Description != "" {
 			ds.Description = overlayDS.Description
 		}
+		if !overlayDS.AIContext.IsZero() {
+			ds.AIContext = overlayDS.AIContext
+		}
+		if len(overlayDS.PrimaryKey) > 0 {
+			ds.PrimaryKey = overlayDS.PrimaryKey
+		}
+		if len(overlayDS.UniqueKeys) > 0 {
+			ds.UniqueKeys = overlayDS.UniqueKeys
+		}
 
 		// Index base fields by name.
 		fieldIdx := make(map[string]int, len(ds.Fields))
@@ -101,6 +113,9 @@ func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 			}
 			if overlayField.Description != "" {
 				fields[fi].Description = overlayField.Description
+			}
+			if !overlayField.AIContext.IsZero() {
+				fields[fi].AIContext = overlayField.AIContext
 			}
 			if overlayField.Dimension != nil {
 				fields[fi].Dimension = overlayField.Dimension

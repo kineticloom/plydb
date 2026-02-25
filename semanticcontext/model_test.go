@@ -10,6 +10,94 @@ import (
 	"go.yaml.in/yaml/v4"
 )
 
+func TestAIContext_UnmarshalString(t *testing.T) {
+	input := `ai_context: "some text"`
+	var dst struct {
+		AIContext AIContext `yaml:"ai_context"`
+	}
+	if err := yaml.Unmarshal([]byte(input), &dst); err != nil {
+		t.Fatalf("unmarshal error: %v", err)
+	}
+	if dst.AIContext.String != "some text" {
+		t.Errorf("String = %q, want %q", dst.AIContext.String, "some text")
+	}
+	if dst.AIContext.Object != nil {
+		t.Error("Object should be nil for string-form ai_context")
+	}
+}
+
+func TestAIContext_UnmarshalObject(t *testing.T) {
+	input := `ai_context:
+  instructions: Use for sales analysis
+  synonyms:
+    - orders
+    - purchases
+  examples:
+    - How many orders were placed?
+`
+	var dst struct {
+		AIContext AIContext `yaml:"ai_context"`
+	}
+	if err := yaml.Unmarshal([]byte(input), &dst); err != nil {
+		t.Fatalf("unmarshal error: %v", err)
+	}
+	if dst.AIContext.Object == nil {
+		t.Fatal("Object should be non-nil for object-form ai_context")
+	}
+	obj := dst.AIContext.Object
+	if obj.Instructions != "Use for sales analysis" {
+		t.Errorf("Instructions = %q, want %q", obj.Instructions, "Use for sales analysis")
+	}
+	if len(obj.Synonyms) != 2 || obj.Synonyms[0] != "orders" || obj.Synonyms[1] != "purchases" {
+		t.Errorf("Synonyms = %v, want [orders purchases]", obj.Synonyms)
+	}
+	if len(obj.Examples) != 1 || obj.Examples[0] != "How many orders were placed?" {
+		t.Errorf("Examples = %v, want [How many orders were placed?]", obj.Examples)
+	}
+	if dst.AIContext.String != "" {
+		t.Error("String should be empty for object-form ai_context")
+	}
+}
+
+func TestAIContext_MarshalObject(t *testing.T) {
+	model := SemanticModelFile{
+		SemanticModel: SemanticModel{
+			Name: "m",
+			AIContext: AIContext{
+				Object: &AIContextObject{
+					Instructions: "Use for sales",
+					Synonyms:     []string{"orders"},
+				},
+			},
+		},
+	}
+	data, err := yaml.Marshal(&model)
+	if err != nil {
+		t.Fatalf("marshal error: %v", err)
+	}
+	out := string(data)
+	for _, want := range []string{"instructions: Use for sales", "synonyms:", "- orders"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("YAML output missing %q\nGot:\n%s", want, out)
+		}
+	}
+}
+
+func TestAIContext_ZeroOmittedFromYAML(t *testing.T) {
+	model := SemanticModelFile{
+		SemanticModel: SemanticModel{
+			Name: "m",
+		},
+	}
+	data, err := yaml.Marshal(&model)
+	if err != nil {
+		t.Fatalf("marshal error: %v", err)
+	}
+	if strings.Contains(string(data), "ai_context") {
+		t.Errorf("zero AIContext should be omitted from YAML\nGot:\n%s", string(data))
+	}
+}
+
 func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 	model := SemanticModelFile{
 		SemanticModel: SemanticModel{

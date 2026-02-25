@@ -1,17 +1,47 @@
 semantic_model:
   name: Grid overlay
+  ai_context: >
+    Use this model to analyse energy stability across vortex anchors.
+    Prefer time-windowed queries on flux_telemetry for trend analysis.
   datasets:
     - name: grid.public.flux_telemetry
       description: >
         Time-series log of multidimensional energy fluctuations. Each row
         captures a single telemetry reading from a vortex anchor.
+      ai_context:
+        instructions: >
+          Use for time-series analysis of energy fluctuations.
+          Always filter by anchor_ref when analysing a single anchor.
+        synonyms:
+          - telemetry
+          - readings
+      primary_key:
+        - telemetry_id
+      unique_keys:
+        - - anchor_ref
+          - recorded_at
       fields:
         - name: anchor_ref
           description: Foreign key to vortex_anchor.anchor_id.
+        - name: entropy_delta
+          ai_context: Positive values indicate energy leakage; negative values indicate gain.
     - name: grid.public.vortex_anchor
+      ai_context:
+        instructions: Use to look up anchor metadata such as stability thresholds and designations.
+        synonyms:
+          - anchor
+          - stability point
+      primary_key:
+        - anchor_id
+      unique_keys:
+        - - designation
       fields:
         - name: anchor_id
           description: Unique identifier for this stability point.
+        - name: stability_threshold
+          ai_context: >
+            Anchors below this threshold are considered unstable.
+            Compare against recent entropy_delta readings to detect collapse risk.
   relationships:
     - name: flux_telemetry_anchor
       from: grid.public.flux_telemetry

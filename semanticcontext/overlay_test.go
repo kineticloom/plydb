@@ -312,6 +312,154 @@ func TestOverlayProvider_MultipleFiles(t *testing.T) {
 	}
 }
 
+func TestApplyOverlay_ModelAIContext_String(t *testing.T) {
+	base := baseModel()
+	overlay := &SemanticModelFile{
+		SemanticModel: SemanticModel{
+			AIContext: AIContext{String: "Use for revenue analysis"},
+		},
+	}
+	result := applyOverlay(base, overlay)
+	if result.SemanticModel.AIContext.String != "Use for revenue analysis" {
+		t.Errorf("model ai_context = %q, want %q", result.SemanticModel.AIContext.String, "Use for revenue analysis")
+	}
+}
+
+func TestApplyOverlay_DatasetAIContext_Object(t *testing.T) {
+	base := baseModel()
+	overlay := &SemanticModelFile{
+		SemanticModel: SemanticModel{
+			Datasets: []Dataset{
+				{
+					Name: "catalog.public.users",
+					AIContext: AIContext{
+						Object: &AIContextObject{
+							Instructions: "Use for user analysis",
+							Synonyms:     []string{"accounts", "members"},
+						},
+					},
+				},
+			},
+		},
+	}
+	result := applyOverlay(base, overlay)
+	got := result.SemanticModel.Datasets[0].AIContext
+	if got.Object == nil {
+		t.Fatal("dataset ai_context Object should be non-nil")
+	}
+	if got.Object.Instructions != "Use for user analysis" {
+		t.Errorf("Instructions = %q, want %q", got.Object.Instructions, "Use for user analysis")
+	}
+	if len(got.Object.Synonyms) != 2 {
+		t.Errorf("Synonyms = %v, want [accounts members]", got.Object.Synonyms)
+	}
+}
+
+func TestApplyOverlay_FieldAIContext_Object(t *testing.T) {
+	base := baseModel()
+	overlay := &SemanticModelFile{
+		SemanticModel: SemanticModel{
+			Datasets: []Dataset{
+				{
+					Name: "catalog.public.users",
+					Fields: []Field{
+						{
+							Name: "name",
+							AIContext: AIContext{
+								Object: &AIContextObject{
+									Instructions: "Full name of the user",
+									Examples:     []string{"John Doe"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	result := applyOverlay(base, overlay)
+	ds := result.SemanticModel.Datasets[0]
+	var nameField *Field
+	for i := range ds.Fields {
+		if ds.Fields[i].Name == "name" {
+			nameField = &ds.Fields[i]
+			break
+		}
+	}
+	if nameField == nil {
+		t.Fatal("name field not found")
+	}
+	if nameField.AIContext.Object == nil {
+		t.Fatal("field ai_context Object should be non-nil")
+	}
+	if nameField.AIContext.Object.Instructions != "Full name of the user" {
+		t.Errorf("Instructions = %q, want %q", nameField.AIContext.Object.Instructions, "Full name of the user")
+	}
+}
+
+func TestApplyOverlay_DatasetPrimaryKey(t *testing.T) {
+	base := baseModel()
+	overlay := &SemanticModelFile{
+		SemanticModel: SemanticModel{
+			Datasets: []Dataset{
+				{
+					Name:       "catalog.public.users",
+					PrimaryKey: []string{"id"},
+				},
+			},
+		},
+	}
+	result := applyOverlay(base, overlay)
+
+	var usersDS, ordersDS Dataset
+	for _, ds := range result.SemanticModel.Datasets {
+		switch ds.Name {
+		case "catalog.public.users":
+			usersDS = ds
+		case "catalog.public.orders":
+			ordersDS = ds
+		}
+	}
+
+	if len(usersDS.PrimaryKey) != 1 || usersDS.PrimaryKey[0] != "id" {
+		t.Errorf("users PrimaryKey = %v, want [id]", usersDS.PrimaryKey)
+	}
+	if len(ordersDS.PrimaryKey) != 0 {
+		t.Errorf("orders PrimaryKey = %v, want empty", ordersDS.PrimaryKey)
+	}
+}
+
+func TestApplyOverlay_DatasetUniqueKeys(t *testing.T) {
+	base := baseModel()
+	overlay := &SemanticModelFile{
+		SemanticModel: SemanticModel{
+			Datasets: []Dataset{
+				{
+					Name:       "catalog.public.users",
+					UniqueKeys: [][]string{{"name", "created_at"}},
+				},
+			},
+		},
+	}
+	result := applyOverlay(base, overlay)
+
+	var usersDS Dataset
+	for _, ds := range result.SemanticModel.Datasets {
+		if ds.Name == "catalog.public.users" {
+			usersDS = ds
+			break
+		}
+	}
+
+	if len(usersDS.UniqueKeys) != 1 {
+		t.Fatalf("users UniqueKeys = %v, want 1 entry", usersDS.UniqueKeys)
+	}
+	uk := usersDS.UniqueKeys[0]
+	if len(uk) != 2 || uk[0] != "name" || uk[1] != "created_at" {
+		t.Errorf("users UniqueKeys[0] = %v, want [name created_at]", uk)
+	}
+}
+
 func TestApplyOverlay_DimensionFromOverlay(t *testing.T) {
 	base := baseModel()
 	// Apply an overlay that sets a dimension on the "user_id" field of orders.
