@@ -159,8 +159,7 @@ flags supplied on the CLI.
       "delimiter": ",",
       "header_row": true,
       "region": "us-east-1"
-    }
-  },
+    },
     "gsheet_sales_forecast": {
       "metadata": {
         "name": "Sales Forecast",
