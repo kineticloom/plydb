@@ -202,6 +202,12 @@ the entanglement between two different vortex anchors."
 
 ## Layering Additional Semantic Context
 
+> Pro tip: If you have the
+> [PlyDB Agent Skill](/README.md#ai-agents--plydb-via-cli-agent-skill)
+> installed, after a session of data analysis, ask your agent to record its
+> learnings into a semantic overlay file so that future sessions can benefit
+> from them.
+
 Auto-scanning captures what the database already knows. The
 `--semantic-context-overlay` flag lets you supply one or more OSI YAML files
 that enrich the auto-scanned model with additional descriptions, relationships,

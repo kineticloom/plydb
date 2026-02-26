@@ -1,5 +1,10 @@
 # Connect to CSV + PostgreSQL
 
+> Pro tip: If you have the
+> [PlyDB Agent Skill](/README.md#ai-agents--plydb-via-cli-agent-skill)
+> installed, you can ask your agent to work with you on data source
+> configuration instead of writing a config file manually.
+
 This example demonstrates querying across a local CSV file and a PostgreSQL
 database using PlyDB.
 

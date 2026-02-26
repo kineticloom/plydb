@@ -1,5 +1,10 @@
 # Connect to CSV files
 
+> Pro tip: If you have the
+> [PlyDB Agent Skill](/README.md#ai-agents--plydb-via-cli-agent-skill)
+> installed, you can ask your agent to work with you on data source
+> configuration instead of writing a config file manually.
+
 This is a simple example that connects two CSV files as data sources.
 
 [Install or build](/README.md#installation) `plydb` if you have not already.

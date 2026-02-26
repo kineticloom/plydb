@@ -1,12 +1,19 @@
 # Connect to Google Sheets
 
+> Pro tip: If you have the
+> [PlyDB Agent Skill](/README.md#ai-agents--plydb-via-cli-agent-skill)
+> installed, you can ask your agent to work with you on data source
+> configuration instead of writing a config file manually.
+
 This example demonstrates querying a Google Sheets spreadsheet with PlyDB.
 
 Two authentication methods are supported:
 
 - **Service account key file** - for server-side, non-interactive use.
-- **Browser-based OAuth** - for interactive/ad-hoc use. DuckDB opens a browser
-  for Google login; no credentials needed in the config.
+- **Browser-based OAuth** - for interactive/ad-hoc use. PlyDB opens a browser
+  for Google login, you will be led through an interactive OAuth flow for DuckDB
+  GSheets (this what PlyDB uses to connect to Google Sheets), and no credentials
+  are needed in the config file.
 
 ## Prerequisites
 
@@ -38,12 +45,13 @@ Use this method for interactive, ad-hoc querying.
 
 1. Edit `config_browser_oauth.json`:
    - Set `spreadsheet_id` to your spreadsheet's ID.
-2. On first query, DuckDB will open your browser for Google login. No service
-   account or key file is needed.
+2. On first query, PlyDB will open your browser for Google login to authorize
+   the connection for DuckDB GSheets (this is what PlyDB uses to connect to
+   Google Sheets). No service account or key file is needed.
 3. The OAuth token is automatically persisted to `~/.duckdb/stored_secrets/`.
    Subsequent runs reuse the cached token without re-authenticating.
-4. To force re-authentication, delete the cached secret:
-   `rm -rf ~/.duckdb/stored_secrets/`
+4. To force re-authentication run
+   `plydb auth --config /path/to/config_browser_oauth.json`
 
 ## Usage
 

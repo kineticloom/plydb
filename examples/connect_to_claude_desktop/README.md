@@ -1,5 +1,10 @@
 # Connecting Claude Desktop to PlyDB
 
+> Pro tip: If you have the
+> [PlyDB Agent Skill](/README.md#ai-agents--plydb-via-cli-agent-skill)
+> installed, you can ask your agent to work with you on data source
+> configuration instead of writing a config file manually.
+
 This tutorial walks you through connecting
 [Claude Desktop](https://claude.ai/download) to PlyDB so that Claude can
 autonomously query your data using SQL. By the end you will have Claude
