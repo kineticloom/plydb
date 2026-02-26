@@ -23,6 +23,17 @@ See also:
 - [Does the PlyDB CLI work with Claude Desktop Cowork?](#does-the-plydb-cli-work-with-claude-desktop-cowork)
 - [Does the PlyDB CLI work with Claude Code?](#does-the-plydb-cli-work-with-claude-code)
 
+## How organized should my data be?
+
+If your data is well organized, that's great, but if it is not, you may be
+pleasantly surprised how capable AI agents can be at making sense of unorganized
+data. We suggest you give it a shot!
+
+Pro tip: Up front or after a session of data analysis, ask your AI agent to
+distill its learnings about your data's semantics and
+[write a semantic context overlay](#can-i-have-an-ai-agent-write-my-plydb-semantic-context-overlays-for-me)
+to record its findings for future sessions.
+
 ## Can I have an AI agent write my PlyDB config file for me?
 
 Yes! Install the

@@ -219,6 +219,20 @@ your specific agent's instructions for installing skills:
 
 ## Configuring data sources
 
+Data sources are configured via the
+[PlyDB config file](/specs/config_schema.md).
+
+You can configure more than one type of data source in a config file, depending
+on your needs, and query across all of them.
+
+To guide your AI agent's understanding of the semantics of your data, PlyDB can
+automatically scan your data sources and provide your AI agent
+[semantic context](/examples/semantic_context_scanning/README.md) about your
+data sources - schema, tables, columns, and comment metadata. This automatically
+scanned semantic context can also be further enriched by
+[overlaying](/examples/semantic_context_scanning/README.md#layering-additional-semantic-context)
+human or AI written overrides.
+
 Examples of configuring data sources:
 
 - [Query CSV files](examples/connect_to_csv_files/README.md)
@@ -232,13 +246,13 @@ We love contributions! However, before getting too deep into implementation,
 please first check our [Roadmap](/TODO.md) and start a discussion so we can
 align on a direction.
 
-Features to improve PlydB for individuals can and should be a part of this open
+Features to improve PlyDB for individuals can and should be a part of this open
 source version, while features aimed to improve usage at scale, as in an
 enterprise, should be reserved for the proprietary version. Doing so helps keep
 the project sustainable. If you aren't sure where a feature fits, feel free to
 open a discussion first!
 
-See [CONTRIBUTING.MD](/CONTRIBUTING.md) for details.
+See [CONTRIBUTING.md](/CONTRIBUTING.md) for details.
 
 ## License
 

@@ -80,6 +80,11 @@ relationships between existing datasets, and add or update metrics. They cannot
 introduce new datasets or fields - only enrich what was already discovered by
 the auto-scanner.
 
+Good opportunities to create or edit an overlay file are when encountering a new
+dataset or after a session of data analysis with the user. These are great
+opportunities to distill your learnings about the data's semantics and record
+them into an overlay file for future sessions. Ask the user first.
+
 #### Embedding overlays in the config file
 
 Overlays can also be specified in the config file under
