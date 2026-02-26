@@ -210,8 +210,9 @@ Then download the Agent Skill bundle
 ([plydb_skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
 your specific agent's instructions for installing skills:
 
+- [Claude Code](examples/connect_to_claude_code/README.md) - full tutorial
+  querying CSV files in Claude Code via Agent Skill + CLI
 - [Claude](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#claude-ai)
-- [Claude Code](https://code.claude.com/docs/en/skills)
 - [Codex](https://developers.openai.com/codex/skills)
 - [Gemini CLI](https://geminicli.com/docs/cli/skills/)
 - [OpenClaw](https://docs.openclaw.ai/tools/skills)
