@@ -106,7 +106,7 @@ func TestGsheetSecretSQL(t *testing.T) {
 
 	t.Run("browser OAuth", func(t *testing.T) {
 		sql := gsheetSecretSQL("")
-		want := "CREATE PERSISTENT SECRET __plydb_gsheet (TYPE gsheet);"
+		want := "CREATE OR REPLACE PERSISTENT SECRET __plydb_gsheet (TYPE gsheet);"
 		if sql != want {
 			t.Fatalf("got %q, want %q", sql, want)
 		}

@@ -17,6 +17,7 @@ var licenseText string
 const usage = `Usage: plydb <command> [arguments] [flags]
 
 Commands:
+  auth               Authenticate an interactive data source (e.g. gsheet OAuth)
   query              Execute a SQL query
   semantic-context   Scan all data sources and output semantic context as YAML
   mcp                Start an MCP server exposing a SQL query tool
@@ -33,6 +34,8 @@ func main() {
 	}
 
 	switch os.Args[1] {
+	case "auth":
+		cmd.RunAuth(os.Args[2:])
 	case "query":
 		cmd.RunQuery(os.Args[2:])
 	case "semantic-context":

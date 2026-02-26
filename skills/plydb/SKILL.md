@@ -104,3 +104,7 @@ plydb semantic-context --config path/to/config.json
 ```
 
 Config-file overlays are applied before any `--semantic-context-overlay` flags.
+
+## Troubleshooting
+
+- [gsheet data source with interactive OAuth](./references/troubleshooting.md#gsheet-data-source-with-interactive-oauth)

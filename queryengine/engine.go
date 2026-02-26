@@ -164,6 +164,31 @@ func configureGSheet(db *sql.DB, cfg *Config) error {
 	return nil
 }
 
+// AuthGSheet forces a new browser OAuth flow for Google Sheets,
+// replacing any existing persistent secret. Use this to recover from an
+// aborted or stale OAuth session.
+func AuthGSheet() error {
+	db, err := sql.Open("duckdb", "")
+	if err != nil {
+		return fmt.Errorf("opening DuckDB: %w", err)
+	}
+	defer db.Close()
+
+	for _, stmt := range []string{
+		"INSTALL gsheets FROM community;",
+		"LOAD gsheets;",
+	} {
+		if _, err := db.Exec(stmt); err != nil {
+			return fmt.Errorf("loading gsheets extension: %w", err)
+		}
+	}
+
+	if _, err := db.Exec(gsheetSecretSQL("")); err != nil {
+		return fmt.Errorf("gsheet authentication: %w", err)
+	}
+	return nil
+}
+
 // Query executes the provided SQL and returns the result rows.
 func (e *QueryEngine) Query(ctx context.Context, sqlQuery string) (*sql.Rows, error) {
 	return e.db.QueryContext(ctx, sqlQuery)
