@@ -128,11 +128,49 @@ main() {
     *)
       echo "NOTE: ${install_dir} is not in your PATH."
       echo
-      echo "Add it by appending the following to your shell profile"
-      echo "(e.g. ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish):"
-      echo
-      echo "  export PATH=\"${install_dir}:\$PATH\""
-      echo
+
+      shell_name="$(basename "${SHELL:-}")"
+      case "$shell_name" in
+        zsh)  profile="$HOME/.zshrc" ;;
+        bash) profile="$HOME/.bashrc" ;;
+        fish) profile="${XDG_CONFIG_HOME:-$HOME/.config}/fish/config.fish" ;;
+        *)    profile="" ;;
+      esac
+
+      export_line="export PATH=\"${install_dir}:\$PATH\""
+      fish_line="set -gx PATH \"${install_dir}\" \$PATH"
+
+      if [ -n "$profile" ] && [ -c /dev/tty ]; then
+        printf "Would you like to add it to %s? [Y/n] " "$profile"
+        read -r answer </dev/tty
+        case "${answer:-y}" in
+          [Yy]*|"")
+            if [ "$shell_name" = "fish" ]; then
+              line_to_add="$fish_line"
+            else
+              line_to_add="$export_line"
+            fi
+            if ! grep -qF "$line_to_add" "$profile" 2>/dev/null; then
+              printf '\n# Added by PlyDB installer\n%s\n' "$line_to_add" >> "$profile"
+            fi
+            echo "Added to ${profile}."
+            echo "Restart your shell or run: . ${profile}"
+            echo
+            ;;
+          *)
+            echo "To add it manually, append the following to your shell profile:"
+            echo
+            echo "  $export_line"
+            echo
+            ;;
+        esac
+      else
+        echo "Add it by appending the following to your shell profile"
+        echo "(e.g. ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish):"
+        echo
+        echo "  $export_line"
+        echo
+      fi
       ;;
   esac
 }

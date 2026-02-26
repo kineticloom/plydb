@@ -71,8 +71,18 @@ $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($UserPath -notlike "*$InstallDir*") {
     Write-Host "NOTE: $InstallDir is not in your PATH."
     Write-Host ""
-    Write-Host "To add it, run:"
-    Write-Host ""
-    Write-Host "  [Environment]::SetEnvironmentVariable('Path', `"$InstallDir;`$env:Path`", 'User')"
-    Write-Host ""
+
+    $answer = Read-Host "Would you like to add it to your User PATH? [Y/n]"
+    if ($answer -eq "" -or $answer -match "^[Yy]") {
+        [Environment]::SetEnvironmentVariable("Path", "$InstallDir;$UserPath", "User")
+        $env:Path = "$InstallDir;$env:Path"
+        Write-Host "Added $InstallDir to your User PATH."
+        Write-Host "Restart your terminal for the change to take effect."
+        Write-Host ""
+    } else {
+        Write-Host "To add it manually, run:"
+        Write-Host ""
+        Write-Host "  [Environment]::SetEnvironmentVariable('Path', `"$InstallDir;`$env:Path`", 'User')"
+        Write-Host ""
+    }
 }
