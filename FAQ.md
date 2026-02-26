@@ -1,36 +1,43 @@
 # FAQ
 
+## Do I need to write SQL myself or can my AI agent do that?
+
+While you are welcome to manually use PlyDB with your hand crafted SQL, AI
+agents can be very good at writing SQL too - exploring, understanding, and
+analysing datasets - even if your data is
+[less organized](#how-organized-should-my-data-be) than you'd like it to be.
+
 ## Should I use MCP or CLI?
 
 It depends. There are tradeoffs and limitations depending on your situation.
 
 Having an AI agent use PlyDB as a
 [CLI tool](/README.md#ai-agents--plydb-via-cli-agent-skill) can be a more
-dynamic workflow. For example, AI agents can reconfigure `plydb` from call to
-call - changing config files, or evolving semantic context overlays on the fly.
-In contrast, PlyDB's MCP server will need to be restarted to change its
+dynamic workflow. For example, AI agents can reconfigure `plydb` between calls —
+changing config files, or evolving semantic context overlays on the fly. In
+contrast, PlyDB's MCP server will need to be restarted to change its
 configuration. Usually this means restarting your agent, too. (Though we might
-[address this](/TODO.md#feat---dynamic-data-source-configuration) in the future)
+[address this](/TODO.md#feat---dynamic-data-source-configuration) in the
+future.)
 
 Your choice may also be informed by what your agent's limitations are around CLI
 tool calling. For example, OpenClaw allows very permissive access to your
-system, while Claude Desktop Cowork operates in an isolated VM sandbox that
-strictly limits allowed tools and outbound networking, and Claude Code is
-somewhere in the middle.
+system, while Claude Cowork operates in an isolated VM sandbox that strictly
+limits allowed tools and outbound networking, and Claude Code is somewhere in
+the middle.
 
 See also:
 
-- [Does the PlyDB CLI work with Claude Desktop Cowork?](#does-the-plydb-cli-work-with-claude-desktop-cowork)
 - [Does the PlyDB CLI work with Claude Code?](#does-the-plydb-cli-work-with-claude-code)
+- [Does the PlyDB CLI work with Claude Cowork?](#does-the-plydb-cli-work-with-claude-cowork)
 
 ## How organized should my data be?
 
-If your data is well organized, that's great, but if it is not, you may be
-pleasantly surprised how capable AI agents can be at making sense of unorganized
-data. We suggest you give it a shot!
+Even if your data isn't well organized, you may be pleasantly surprised at how
+capable AI agents are at making sense of it. We suggest you give it a shot!
 
-Pro tip: Up front or after a session of data analysis, ask your AI agent to
-distill its learnings about your data's semantics and
+Pro tip: After a session of data analysis, ask your AI agent to distill its
+learnings about your data's semantics and
 [write a semantic context overlay](#can-i-have-an-ai-agent-write-my-plydb-semantic-context-overlays-for-me)
 to record its findings for future sessions.
 
@@ -48,43 +55,33 @@ Yes! Install the
 about PlyDB
 [semantic context overlays](/examples/semantic_context_scanning/README.md#example-overlay).
 
-Try asking your AI agent write an overlay file after a session of data analysis,
-that is a particularly good opportunity to record some learnings into an overlay
-file for future sessions.
+Try asking your AI agent to write an overlay file after a data analysis session
+— it's a particularly good opportunity to capture learnings for future sessions.
 
-## Does the PlyDB CLI work with Claude Desktop Cowork?
+## Does the PlyDB CLI work with Claude Cowork?
 
 Yes, but with some limitations when using PlyDB via the CLI (not MCP).
 
 Limitations:
 
-- Claude Desktop Cowork's security sandboxing requires that the `plydb` binary
-  be available in a directory that you've granted Claude access to. For example,
+- Claude Cowork's security sandboxing requires that the `plydb` binary be
+  available in a directory that you've granted Claude access to. For example,
   you can place it in your project's workspace.
-- Also, Claude Desktop Cowork's sandboxing limits network access from within the
-  sandbox. This means that in this scenario, PlyDB is not able to connect to
-  networked data sources nor download extensions for its data connectors.
+- Claude Cowork's sandboxing also limits network access from within the sandbox.
+  This means PlyDB is not able to connect to networked data sources or download
+  extensions for its data connectors.
 
-When working with local CVS files as data sources, you should not run into the
+When working with local CSV files as data sources, you should not run into the
 networking restrictions.
 
 However, when connecting to networked data sources such as Postgres, MySQL, S3,
 or Google Sheets, it is recommended that you integrate PlyDB via
-[MCP](/README.md#ai-agents--plydb-via-mcp) instead of CLI.
-
-For more information, you can ask Claude Cowork.
+[MCP](/README.md#ai-agents--plydb-via-mcp) instead of CLI when using Claude
+Cowork.
 
 ## Does the PlyDB CLI work with Claude Code?
 
 Yes. Claude Code does not use the same
-[security sandboxing](#does-the-plydb-cli-work-with-claude-desktop-cowork) as
-Claude Desktop Cowork. Claude Code can run any tool available on your system
-(with your permission).
-
-Limitations:
-
-- A Google Sheet configured as data source with OAuth requires an interactive
-  login workflow. This interactivity does not work with Claude Code's subprocess
-  execution. Instead, in this scenario, a Google Sheet data source should be
-  configured with a
-  [service account token](examples/connect_to_google_sheets/README.md#option-a-service-account-authentication).
+[security sandboxing](#does-the-plydb-cli-work-with-claude-cowork) as Claude
+Cowork. Claude Code can run any tool available on your system (with your
+permission).

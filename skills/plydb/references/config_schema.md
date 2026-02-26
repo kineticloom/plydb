@@ -72,7 +72,7 @@ and underscores (`_`) only.**
   map.
 - **`region`**: AWS region (e.g., `us-east-1`).
 - **`format`**: **Required.** The file format (`csv`, `parquet`, etc.).
-- **`delimiter` / `header_row` / `sheet_name**`: Same as Local File fields.
+- **`delimiter` / `header_row` / `sheet_name`**: Same as Local File fields.
 
 #### E. Google Sheets Fields (`type: "gsheet"`)
 

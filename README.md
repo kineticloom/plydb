@@ -240,6 +240,10 @@ Examples of configuring data sources:
 - [Query Google Sheets](examples/connect_to_google_sheets/README.md)
 - [Providing semantic context](examples/semantic_context_scanning/README.md)
 
+## FAQ
+
+[FAQ](/FAQ.md)
+
 ## Contributing
 
 We love contributions! However, before getting too deep into implementation,
