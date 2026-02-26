@@ -6,7 +6,6 @@ package semanticcontext
 import (
 	"context"
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
@@ -57,9 +56,10 @@ func (p *AutoScanProvider) Provide(ctx context.Context, existing *SemanticModelF
 			datasets, err = scanFile(ctx, p.querier, key, dbCfg)
 		case queryengine.S3:
 			datasets, err = scanS3(ctx, p.querier, key, dbCfg)
+		case queryengine.GSheet:
+			datasets, err = scanGSheet(ctx, p.querier, key, dbCfg)
 		default:
-			log.Printf("warning: unsupported database type %q for %q, skipping", dbCfg.Type, key)
-			continue
+			return nil, fmt.Errorf("unsupported database type %q for %q", dbCfg.Type, key)
 		}
 
 		if err != nil {

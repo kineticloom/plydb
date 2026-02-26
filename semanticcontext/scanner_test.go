@@ -6,6 +6,8 @@ package semanticcontext
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 	"testing"
 
 	_ "github.com/duckdb/duckdb-go/v2"
@@ -203,6 +205,182 @@ func TestColumnsToDataset(t *testing.T) {
 		if f.Expression == nil || len(f.Expression.Dialects) == 0 {
 			t.Errorf("fields[%d].Expression is empty", i)
 		}
+	}
+}
+
+// mockQuerier implements MetadataQuerier for testing.
+// It ignores the actual SQL and returns pre-canned DESCRIBE-shaped rows
+// using an in-memory DuckDB connection, while capturing the query string.
+type mockQuerier struct {
+	db           *sql.DB
+	capturedSQL  string
+	describeRows []struct{ name, dtype string }
+}
+
+func (m *mockQuerier) Query(ctx context.Context, sqlQuery string) (*sql.Rows, error) {
+	m.capturedSQL = sqlQuery
+	if len(m.describeRows) == 0 {
+		return m.db.QueryContext(ctx,
+			"SELECT NULL::VARCHAR AS column_name, NULL::VARCHAR AS column_type WHERE false")
+	}
+	parts := make([]string, len(m.describeRows))
+	for i, r := range m.describeRows {
+		parts[i] = fmt.Sprintf(
+			"SELECT '%s' AS column_name, '%s' AS column_type",
+			r.name, r.dtype,
+		)
+	}
+	return m.db.QueryContext(ctx, strings.Join(parts, " UNION ALL "))
+}
+
+func newMockQuerier(t *testing.T, rows []struct{ name, dtype string }) (*mockQuerier, func()) {
+	t.Helper()
+	db, err := sql.Open("duckdb", "")
+	if err != nil {
+		t.Fatalf("opening duckdb for mock: %v", err)
+	}
+	return &mockQuerier{db: db, describeRows: rows}, func() { db.Close() }
+}
+
+func TestScanGSheet(t *testing.T) {
+	descRows := []struct{ name, dtype string }{
+		{"order_id", "INTEGER"},
+		{"amount", "DOUBLE"},
+	}
+	mq, cleanup := newMockQuerier(t, descRows)
+	defer cleanup()
+
+	dbCfg := queryengine.DatabaseConfig{
+		Type:          queryengine.GSheet,
+		SpreadsheetID: "sheet123",
+		SheetName:     "Orders",
+		Metadata: queryengine.Metadata{
+			Description: "Order data",
+		},
+	}
+
+	datasets, err := scanGSheet(context.Background(), mq, "orders", dbCfg)
+	if err != nil {
+		t.Fatalf("scanGSheet error: %v", err)
+	}
+
+	if len(datasets) != 1 {
+		t.Fatalf("expected 1 dataset, got %d", len(datasets))
+	}
+	ds := datasets[0]
+	if ds.Name != "orders.default.orders" {
+		t.Errorf("dataset name = %q, want %q", ds.Name, "orders.default.orders")
+	}
+	if ds.Source != "orders.default.orders" {
+		t.Errorf("dataset source = %q, want %q", ds.Source, "orders.default.orders")
+	}
+	if ds.Description != "Order data" {
+		t.Errorf("dataset description = %q, want %q", ds.Description, "Order data")
+	}
+	if len(ds.Fields) != 2 {
+		t.Fatalf("expected 2 fields, got %d", len(ds.Fields))
+	}
+	if ds.Fields[0].Name != "order_id" {
+		t.Errorf("fields[0].Name = %q, want %q", ds.Fields[0].Name, "order_id")
+	}
+	if ds.Fields[1].Name != "amount" {
+		t.Errorf("fields[1].Name = %q, want %q", ds.Fields[1].Name, "amount")
+	}
+
+	// SQL should reference the configured sheet name and spreadsheet ID.
+	if !strings.Contains(mq.capturedSQL, "sheet123") {
+		t.Errorf("SQL missing spreadsheet ID: %s", mq.capturedSQL)
+	}
+	if !strings.Contains(mq.capturedSQL, "Orders") {
+		t.Errorf("SQL missing sheet name: %s", mq.capturedSQL)
+	}
+	// Default (headers present) should not include headers=false.
+	if strings.Contains(mq.capturedSQL, "headers=false") {
+		t.Errorf("SQL should not contain headers=false: %s", mq.capturedSQL)
+	}
+}
+
+func TestScanGSheet_SheetNameFallback(t *testing.T) {
+	descRows := []struct{ name, dtype string }{
+		{"col1", "VARCHAR"},
+	}
+	mq, cleanup := newMockQuerier(t, descRows)
+	defer cleanup()
+
+	// SheetName is empty — should fall back to the catalog key.
+	dbCfg := queryengine.DatabaseConfig{
+		Type:          queryengine.GSheet,
+		SpreadsheetID: "spreadsheet456",
+	}
+
+	_, err := scanGSheet(context.Background(), mq, "mysheet", dbCfg)
+	if err != nil {
+		t.Fatalf("scanGSheet error: %v", err)
+	}
+
+	if !strings.Contains(mq.capturedSQL, "mysheet") {
+		t.Errorf("SQL should use catalog key as sheet name fallback: %s", mq.capturedSQL)
+	}
+}
+
+func TestScanGSheet_HeaderRowFalse(t *testing.T) {
+	descRows := []struct{ name, dtype string }{
+		{"column0", "VARCHAR"},
+	}
+	mq, cleanup := newMockQuerier(t, descRows)
+	defer cleanup()
+
+	headerRow := false
+	dbCfg := queryengine.DatabaseConfig{
+		Type:          queryengine.GSheet,
+		SpreadsheetID: "nohdr789",
+		SheetName:     "Raw",
+		HeaderRow:     &headerRow,
+	}
+
+	_, err := scanGSheet(context.Background(), mq, "rawdata", dbCfg)
+	if err != nil {
+		t.Fatalf("scanGSheet error: %v", err)
+	}
+
+	if !strings.Contains(mq.capturedSQL, "headers=false") {
+		t.Errorf("SQL should contain headers=false when HeaderRow=false: %s", mq.capturedSQL)
+	}
+}
+
+func TestProvide_GSheet(t *testing.T) {
+	descRows := []struct{ name, dtype string }{
+		{"id", "INTEGER"},
+		{"value", "VARCHAR"},
+	}
+	mq, cleanup := newMockQuerier(t, descRows)
+	defer cleanup()
+
+	cfg := &queryengine.Config{
+		Databases: map[string]queryengine.DatabaseConfig{
+			"sales": {
+				Type:          queryengine.GSheet,
+				SpreadsheetID: "salessheet",
+				SheetName:     "Sales",
+				Metadata: queryengine.Metadata{
+					Description: "Sales data",
+				},
+			},
+		},
+	}
+
+	provider := NewAutoScanProvider(cfg, mq)
+	result, err := provider.Provide(context.Background(), nil)
+	if err != nil {
+		t.Fatalf("Provide error: %v", err)
+	}
+
+	if len(result.SemanticModel.Datasets) != 1 {
+		t.Fatalf("expected 1 dataset, got %d", len(result.SemanticModel.Datasets))
+	}
+	if result.SemanticModel.Datasets[0].Name != "sales.default.sales" {
+		t.Errorf("dataset name = %q, want %q",
+			result.SemanticModel.Datasets[0].Name, "sales.default.sales")
 	}
 }
 
