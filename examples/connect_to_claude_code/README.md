@@ -5,12 +5,11 @@
 > installed, you can ask Claude Code to help you write and evolve your PlyDB
 > config files instead of editing them manually.
 
-This tutorial walks you through connecting
-[Claude Code](https://claude.ai/claude-code) to PlyDB so that Claude can
-autonomously query your data using SQL. Unlike the MCP approach used with Claude
-Desktop, Claude Code can integrate with PlyDB through the **Agent Skill + CLI**
-— a more dynamic workflow that lets Claude adapt its own configuration on the
-fly.
+This tutorial walks you through connecting Claude Code to PlyDB so that Claude
+Code can autonomously query your data using SQL. Unlike the MCP approach used
+with Claude Desktop, Claude Code can integrate with PlyDB through the **Agent
+Skill + CLI** — a more dynamic workflow that lets Claude adapt its own
+configuration on the fly.
 
 By the end you will have Claude Code answering natural-language questions
 against a pair of CSV files — no database server required.
@@ -37,8 +36,12 @@ See the [FAQ](/FAQ.md#should-i-use-mcp-or-cli) for a fuller comparison.
 
 ## Prerequisites
 
+- **Claude Code** installed
+  ([download](https://code.claude.com/docs/en/overview))
 - **PlyDB** installed ([installation instructions](/README.md#installation))
-- **Claude Code** installed ([download](https://claude.ai/claude-code))
+- **PlyDB Agent Skill** installed
+  ([download](/README.md#ai-agents--plydb-via-cli-agent-skill),
+  [installation instructions](https://code.claude.com/docs/en/skills))
 
 ## Quick Start
 

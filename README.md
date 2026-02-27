@@ -191,8 +191,8 @@ If you have not yet installed PlyDB, first install PlyDB (we recommend using the
 
 Then follow your specific agent's instructions for configuring MCP:
 
-- [Claude Desktop](examples/connect_to_claude_desktop/README.md) - full tutorial
-  querying CSV files in Claude Desktop via MCP
+- [Claude Desktop + PlyDB tutorial](examples/connect_to_claude_desktop/README.md) -
+  full tutorial querying CSV files in Claude Desktop via MCP
 - [ChatGPT](https://platform.openai.com/docs/guides/developer-mode)
 - [OpenCode](https://opencode.ai/docs/mcp-servers/)
 - [Gemini](https://geminicli.com/docs/tools/mcp-server/)
@@ -210,8 +210,10 @@ Then download the Agent Skill bundle
 ([plydb_skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
 your specific agent's instructions for installing skills:
 
-- [Claude Code](examples/connect_to_claude_code/README.md) - full tutorial
-  querying CSV files in Claude Code via Agent Skill + CLI
+- [Claude Code + PlyDB tutorial](examples/connect_to_claude_code/README.md) -
+  full tutorial querying CSV files in Claude Code via Agent Skill + CLI
+- [Claude Code](https://code.claude.com/docs/en/skills) - Agent Skill
+  configuration
 - [Claude](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#claude-ai)
 - [Codex](https://developers.openai.com/codex/skills)
 - [Gemini CLI](https://geminicli.com/docs/cli/skills/)
