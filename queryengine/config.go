@@ -15,7 +15,6 @@ type DatabaseType string
 const (
 	PostgreSQL DatabaseType = "postgresql"
 	MySQL      DatabaseType = "mysql"
-	SQLServer  DatabaseType = "sqlserver"
 	File       DatabaseType = "file"
 	SQLite     DatabaseType = "sqlite"
 	S3         DatabaseType = "s3"
@@ -121,9 +120,6 @@ func ParseConfig(data []byte) (*Config, error) {
 
 	for key, db := range cfg.Databases {
 		switch db.Type {
-		case SQLServer:
-			return nil, fmt.Errorf("database %q: sqlserver is not supported", key)
-
 		case PostgreSQL, MySQL:
 			if err := validateNetworkedDB(key, db); err != nil {
 				return nil, err

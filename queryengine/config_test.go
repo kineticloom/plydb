@@ -125,23 +125,6 @@ func TestParseConfig(t *testing.T) {
 			json: `{}`,
 		},
 		{
-			name:    "sqlserver rejected",
-			wantErr: "sqlserver is not supported",
-			json: `{
-				"databases": {
-					"ss1": {
-						"metadata": {"name": "SS", "description": "test"},
-						"type": "sqlserver",
-						"host": "localhost",
-						"port": 1433,
-						"database_name": "mydb",
-						"username": "user",
-						"password_env_var": "SS_PASS"
-					}
-				}
-			}`,
-		},
-		{
 			name:    "unknown type",
 			wantErr: `unknown type "oracle"`,
 			json: `{

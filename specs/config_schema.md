@@ -44,8 +44,8 @@ and underscores (`_`) only.**
 #### A. Common Fields (All Types)
 
 - **`metadata`**: Object containing `name` (String) and `description` (String).
-- **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`,
-  `sqlite`, `s3`, or `gsheet`.
+- **`type`**: String. One of: `postgresql`, `mysql`, `file`, `sqlite`, `s3`, or
+  `gsheet`.
 
 #### B. Networked Database Fields (`type: "postgresql" | "mysql" | etc.`)
 
