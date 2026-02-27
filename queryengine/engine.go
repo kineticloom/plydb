@@ -19,6 +19,7 @@ const (
 	ConnPostgres ConnectionType = "postgresql"
 	ConnMySQL    ConnectionType = "mysql"
 	ConnS3       ConnectionType = "s3"
+	ConnSQLite   ConnectionType = "sqlite"
 	ConnFile     ConnectionType = "file"
 	ConnGSheet   ConnectionType = "gsheet"
 )
@@ -88,6 +89,22 @@ func New(cfg *Config) (*QueryEngine, error) {
 				return nil, fmt.Errorf("validating connection %q: %w", key, err)
 			}
 			active[key] = ConnectionType(dbCfg.Type)
+
+		case SQLite:
+			stmt := attachSQLiteSQL(key, dbCfg)
+			if _, err := db.Exec(stmt); err != nil {
+				return nil, fmt.Errorf("attaching %q: %w", key, err)
+			}
+			// SQLite doesn't expose information_schema and sqlite_master cannot be
+			// referenced cross-catalog; validate via duckdb_databases().
+			var cnt int
+			if err := db.QueryRow(`SELECT count(*) FROM duckdb_databases() WHERE database_name = $1`, key).Scan(&cnt); err != nil || cnt == 0 {
+				if err == nil {
+					err = fmt.Errorf("database not found after attach")
+				}
+				return nil, fmt.Errorf("validating connection %q: %w", key, err)
+			}
+			active[key] = ConnSQLite
 
 		case File:
 			active[key] = ConnFile

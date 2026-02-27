@@ -97,6 +97,30 @@ func TestParseConfig(t *testing.T) {
 			}`,
 		},
 		{
+			name: "valid sqlite",
+			json: `{
+				"databases": {
+					"sq1": {
+						"metadata": {"name": "SQLite", "description": "test"},
+						"type": "sqlite",
+						"path": "/data/app.sqlite"
+					}
+				}
+			}`,
+		},
+		{
+			name:    "sqlite missing path",
+			wantErr: "path is required",
+			json: `{
+				"databases": {
+					"sq1": {
+						"metadata": {"name": "SQLite", "description": "test"},
+						"type": "sqlite"
+					}
+				}
+			}`,
+		},
+		{
 			name: "empty config",
 			json: `{}`,
 		},

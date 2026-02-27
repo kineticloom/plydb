@@ -52,6 +52,8 @@ func (p *AutoScanProvider) Provide(ctx context.Context, existing *SemanticModelF
 			datasets, err = scanPostgres(ctx, p.querier, key, dbCfg)
 		case queryengine.MySQL:
 			datasets, err = scanMySQL(ctx, p.querier, key, dbCfg)
+		case queryengine.SQLite:
+			datasets, err = scanSQLite(ctx, p.querier, key, dbCfg)
 		case queryengine.File:
 			datasets, err = scanFile(ctx, p.querier, key, dbCfg)
 		case queryengine.S3:

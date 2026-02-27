@@ -41,11 +41,19 @@ func TestRequiredExtensions(t *testing.T) {
 			want: []string{"INSTALL httpfs;", "LOAD httpfs;"},
 		},
 		{
+			name: "sqlite only",
+			cfg: &Config{Databases: map[string]DatabaseConfig{
+				"sq1": {Type: SQLite},
+			}},
+			want: []string{"INSTALL sqlite;", "LOAD sqlite;"},
+		},
+		{
 			name: "all types deduped and sorted",
 			cfg: &Config{Databases: map[string]DatabaseConfig{
 				"pg1": {Type: PostgreSQL},
 				"pg2": {Type: PostgreSQL},
 				"my1": {Type: MySQL},
+				"sq1": {Type: SQLite},
 				"s1":  {Type: S3},
 				"f1":  {Type: File},
 			}},
@@ -53,6 +61,7 @@ func TestRequiredExtensions(t *testing.T) {
 				"INSTALL httpfs;", "LOAD httpfs;",
 				"INSTALL mysql;", "LOAD mysql;",
 				"INSTALL postgres;", "LOAD postgres;",
+				"INSTALL sqlite;", "LOAD sqlite;",
 			},
 		},
 		{
@@ -234,4 +243,16 @@ func TestAttachSQL(t *testing.T) {
 			t.Fatal("expected error for missing password env var")
 		}
 	})
+}
+
+func TestAttachSQLiteSQL(t *testing.T) {
+	db := DatabaseConfig{
+		Type: SQLite,
+		Path: "/data/app.sqlite",
+	}
+	sql := attachSQLiteSQL("mydb", db)
+	expected := `ATTACH '/data/app.sqlite' AS "mydb" (TYPE SQLITE, READ_ONLY);`
+	if sql != expected {
+		t.Fatalf("got:\n  %s\nwant:\n  %s", sql, expected)
+	}
 }

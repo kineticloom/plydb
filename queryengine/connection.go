@@ -20,6 +20,8 @@ func requiredExtensions(cfg *Config) []string {
 			need["postgres"] = ""
 		case MySQL:
 			need["mysql"] = ""
+		case SQLite:
+			need["sqlite"] = ""
 		case S3:
 			need["httpfs"] = ""
 		case GSheet:
@@ -110,4 +112,10 @@ func attachSQL(key string, db DatabaseConfig) (string, error) {
 	}
 
 	return fmt.Sprintf(`ATTACH '%s' AS "%s" (TYPE %s, READ_ONLY);`, connStr, key, dbType), nil
+}
+
+// attachSQLiteSQL returns an ATTACH statement for a SQLite database file.
+// The key is double-quoted as the DuckDB alias.
+func attachSQLiteSQL(key string, db DatabaseConfig) string {
+	return fmt.Sprintf(`ATTACH '%s' AS "%s" (TYPE SQLITE, READ_ONLY);`, db.Path, key)
 }

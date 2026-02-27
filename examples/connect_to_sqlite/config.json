@@ -1,0 +1,13 @@
+{
+  "credentials": {},
+  "databases": {
+    "shop": {
+      "metadata": {
+        "name": "Shop Database",
+        "description": "Sample shop database with customers and orders."
+      },
+      "type": "sqlite",
+      "path": "demo_sandbox/shop.sqlite"
+    }
+  }
+}

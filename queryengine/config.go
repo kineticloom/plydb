@@ -17,6 +17,7 @@ const (
 	MySQL      DatabaseType = "mysql"
 	SQLServer  DatabaseType = "sqlserver"
 	File       DatabaseType = "file"
+	SQLite     DatabaseType = "sqlite"
 	S3         DatabaseType = "s3"
 	GSheet     DatabaseType = "gsheet"
 )
@@ -61,7 +62,7 @@ type DatabaseConfig struct {
 	Username       string `json:"username,omitempty"`
 	PasswordEnvVar string `json:"password_env_var,omitempty"`
 
-	// File fields
+	// File / SQLite fields
 	Path string `json:"path,omitempty"`
 
 	// S3 fields
@@ -131,6 +132,11 @@ func ParseConfig(data []byte) (*Config, error) {
 		case File:
 			if strings.TrimSpace(db.Path) == "" {
 				return nil, fmt.Errorf("database %q: path is required for file type", key)
+			}
+
+		case SQLite:
+			if strings.TrimSpace(db.Path) == "" {
+				return nil, fmt.Errorf("database %q: path is required for sqlite type", key)
 			}
 
 		case S3:

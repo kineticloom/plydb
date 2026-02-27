@@ -7,11 +7,11 @@
 
 This is a simple example that connects two CSV files as data sources.
 
-[Install or build](/README.md#installation) `plydb` if you have not already.
+## Prerequisites
 
-```sh
-go build .
-```
+- [Install or build](/README.md#installation) `plydb` if you have not already.
+
+---
 
 For this example, we will use this PlyDB config file
 `examples/connect_to_csv_files/config.json` which configures two CSV files as

@@ -52,6 +52,10 @@ func testConfig() *Config {
 				Type:          GSheet,
 				SpreadsheetID: "xyz789spreadsheet",
 			},
+			"my_sqlite": {
+				Type: SQLite,
+				Path: "/data/app.sqlite",
+			},
 		},
 	}
 }
@@ -88,6 +92,18 @@ func TestPreprocessQuery_MySQLPassthrough(t *testing.T) {
 	}
 	if !strings.Contains(result, "my_mysql.myschema.orders") {
 		t.Errorf("expected mysql ref to be preserved, got %q", result)
+	}
+}
+
+func TestPreprocessQuery_SQLitePassthrough(t *testing.T) {
+	cfg := testConfig()
+	query := "SELECT id, name FROM my_sqlite.main.users WHERE active = true"
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(result, "my_sqlite.main.users") {
+		t.Errorf("expected sqlite ref to be preserved, got %q", result)
 	}
 }
 

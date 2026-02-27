@@ -44,8 +44,8 @@ and underscores (`_`) only.**
 #### A. Common Fields (All Types)
 
 - **`metadata`**: Object containing `name` (String) and `description` (String).
-- **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`, `s3`,
-  or `gsheet`.
+- **`type`**: String. One of: `postgresql`, `mysql`, `sqlserver`, `file`,
+  `sqlite`, `s3`, or `gsheet`.
 
 #### B. Networked Database Fields (`type: "postgresql" | "mysql" | etc.`)
 
@@ -55,7 +55,11 @@ and underscores (`_`) only.**
 - **`username`**: Login identity.
 - **`password_env_var`**: Name of the env var holding the secret.
 
-#### C. Local File Fields (`type: "file"`)
+#### C. SQLite Database Fields (`type: "sqlite"`)
+
+- **`path`**: Path to the SQLite database file (`.sqlite`, `.db`, etc.).
+
+#### D. Local File Fields (`type: "file"`)
 
 - **`path`**: Unix-style path to the file.
 - **`format`**: (Optional if inferred from extension) `csv`, `xlsx`, `parquet`,
@@ -64,7 +68,7 @@ and underscores (`_`) only.**
 - **`header_row`**: (CSV/XLSX) Boolean; indicates if row 1 is the header.
 - **`sheet_name`**: (XLSX only) The tab to read.
 
-#### D. S3 Cloud Storage Fields (`type: "s3"`)
+#### E. S3 Cloud Storage Fields (`type: "s3"`)
 
 - **`uri`**: S3 URI (e.g., `s3://bucket/path/`). Supports globbing patterns
   (`*`, `?`, `[]`).
@@ -74,7 +78,7 @@ and underscores (`_`) only.**
 - **`format`**: **Required.** The file format (`csv`, `parquet`, etc.).
 - **`delimiter` / `header_row` / `sheet_name`**: Same as Local File fields.
 
-#### E. Google Sheets Fields (`type: "gsheet"`)
+#### F. Google Sheets Fields (`type: "gsheet"`)
 
 - **`spreadsheet_id`**: The Google Sheets spreadsheet ID (from the sheet URL).
 - **`credential_profile`**: (Optional) Key matching an entry in the top-level
@@ -125,6 +129,14 @@ flags supplied on the CLI.
       "database_name": "analytics_main",
       "username": "bi_user",
       "password_env_var": "DB_PROD_PASSWORD"
+    },
+    "app_sqlite": {
+      "metadata": {
+        "name": "Application Database",
+        "description": "SQLite database backing the mobile app."
+      },
+      "type": "sqlite",
+      "path": "/data/app.sqlite"
     },
     "local_budget_report": {
       "metadata": {
