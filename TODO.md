@@ -71,11 +71,6 @@ flexibility.
 Update data source config file spec, implement connection logic, update examples
 and docs.
 
-### FEAT - Connecting to DuckDB
-
-Update data source config file spec, implement connection logic, update examples
-and docs.
-
 ### FEAT - Revisit logging
 
 First the logging requirements need to be better defined.
@@ -199,6 +194,11 @@ A first step here is to better understand users need for this.
 Decide on licensing approach and update repo with appropriate docs.
 
 ### FEAT - Connecting to Google Sheets
+
+Update data source config file spec, implement connection logic, update examples
+and docs.
+
+### FEAT - Connecting to DuckDB
 
 Update data source config file spec, implement connection logic, update examples
 and docs.

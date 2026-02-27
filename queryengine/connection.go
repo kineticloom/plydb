@@ -119,3 +119,9 @@ func attachSQL(key string, db DatabaseConfig) (string, error) {
 func attachSQLiteSQL(key string, db DatabaseConfig) string {
 	return fmt.Sprintf(`ATTACH '%s' AS "%s" (TYPE SQLITE, READ_ONLY);`, db.Path, key)
 }
+
+// attachDuckDBSQL returns an ATTACH statement for a DuckDB database file.
+// No extension is needed — DuckDB attaches its own files natively.
+func attachDuckDBSQL(key string, db DatabaseConfig) string {
+	return fmt.Sprintf(`ATTACH '%s' AS "%s" (TYPE DUCKDB, READ_ONLY);`, db.Path, key)
+}

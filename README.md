@@ -2,8 +2,8 @@
 
 PlyDB securely bridges the gap between your AI agents and your fragmented data
 sources. It provides a single controlled access point for AI agents to query
-databases and flat files, such as Postgres, MySQL, SQLite, CSV, Excel, Google
-Sheets, and Parquet, with SQL, wherever the data lives.
+databases and flat files, such as Postgres, MySQL, SQLite, DuckDB, CSV, Excel,
+Google Sheets, and Parquet, with SQL, wherever the data lives.
 
 PlyDB is:
 
@@ -138,13 +138,13 @@ by zip code"
 PlyDB abstracts the complexity of different storage formats into a single
 relational view:
 
-| Category                | Supported Sources                           |
-| :---------------------- | :------------------------------------------ |
-| **SQL Databases**       | PostgreSQL, MySQL, SQLite, DuckDB (planned) |
-| **File Formats**        | CSV, JSON, Parquet, Excel (.xlsx)           |
-| **Object Storage**      | S3                                          |
-| **SaaS**                | Google Sheets                               |
-| **Data Lake** (planned) | Apache Iceberg, Delta Lake                  |
+| Category                | Supported Sources                 |
+| :---------------------- | :-------------------------------- |
+| **SQL Databases**       | PostgreSQL, MySQL, SQLite, DuckDB |
+| **File Formats**        | CSV, JSON, Parquet, Excel (.xlsx) |
+| **Object Storage**      | S3                                |
+| **SaaS**                | Google Sheets                     |
+| **Data Lake** (planned) | Apache Iceberg, Delta Lake        |
 
 ---
 
@@ -241,6 +241,8 @@ Examples of configuring data sources:
 - [Query CSV files](examples/connect_to_csv_files/README.md)
 - [Query CSV files + PostgreSQL](examples/connect_to_csv_and_postgres/README.md)
 - [Query Google Sheets](examples/connect_to_google_sheets/README.md)
+- [Query DuckDB databases](examples/connect_to_duckdb/README.md)
+- [Query SQLite databases](examples/connect_to_sqlite/README.md)
 - [Providing semantic context](examples/semantic_context_scanning/README.md)
 
 ## FAQ

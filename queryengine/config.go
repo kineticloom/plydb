@@ -17,6 +17,7 @@ const (
 	MySQL      DatabaseType = "mysql"
 	File       DatabaseType = "file"
 	SQLite     DatabaseType = "sqlite"
+	DuckDB     DatabaseType = "duckdb"
 	S3         DatabaseType = "s3"
 	GSheet     DatabaseType = "gsheet"
 )
@@ -133,6 +134,11 @@ func ParseConfig(data []byte) (*Config, error) {
 		case SQLite:
 			if strings.TrimSpace(db.Path) == "" {
 				return nil, fmt.Errorf("database %q: path is required for sqlite type", key)
+			}
+
+		case DuckDB:
+			if strings.TrimSpace(db.Path) == "" {
+				return nil, fmt.Errorf("database %q: path is required for duckdb type", key)
 			}
 
 		case S3:

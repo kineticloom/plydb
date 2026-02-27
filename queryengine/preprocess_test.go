@@ -56,6 +56,10 @@ func testConfig() *Config {
 				Type: SQLite,
 				Path: "/data/app.sqlite",
 			},
+			"my_duckdb": {
+				Type: DuckDB,
+				Path: "/data/analytics.duckdb",
+			},
 		},
 	}
 }
@@ -104,6 +108,18 @@ func TestPreprocessQuery_SQLitePassthrough(t *testing.T) {
 	}
 	if !strings.Contains(result, "my_sqlite.main.users") {
 		t.Errorf("expected sqlite ref to be preserved, got %q", result)
+	}
+}
+
+func TestPreprocessQuery_DuckDBPassthrough(t *testing.T) {
+	cfg := testConfig()
+	query := "SELECT id, name FROM my_duckdb.main.users WHERE active = true"
+	result, err := mustPreprocess(t, query, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(result, "my_duckdb.main.users") {
+		t.Errorf("expected duckdb ref to be preserved, got %q", result)
 	}
 }
 

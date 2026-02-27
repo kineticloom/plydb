@@ -121,6 +121,30 @@ func TestParseConfig(t *testing.T) {
 			}`,
 		},
 		{
+			name: "valid duckdb",
+			json: `{
+				"databases": {
+					"dk1": {
+						"metadata": {"name": "DuckDB", "description": "test"},
+						"type": "duckdb",
+						"path": "/data/mydb.duckdb"
+					}
+				}
+			}`,
+		},
+		{
+			name:    "duckdb missing path",
+			wantErr: "path is required",
+			json: `{
+				"databases": {
+					"dk1": {
+						"metadata": {"name": "DuckDB", "description": "test"},
+						"type": "duckdb"
+					}
+				}
+			}`,
+		},
+		{
 			name: "empty config",
 			json: `{}`,
 		},

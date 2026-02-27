@@ -63,7 +63,7 @@ func PreprocessQuery(query string, cfg *Config, validators ...ValidateFunc) (str
 		}
 
 		switch dbCfg.Type {
-		case PostgreSQL, MySQL, SQLite:
+		case PostgreSQL, MySQL, SQLite, DuckDB:
 			// Already attached as a DuckDB catalog — no rewrite needed.
 			continue
 		case File:
