@@ -26,6 +26,13 @@ system, while Claude Cowork operates in an isolated VM sandbox that strictly
 limits allowed tools and outbound networking, and Claude Code is somewhere in
 the middle.
 
+> Pro Tip: When first setting up or evolving your configuration, we recommend
+> pairing a CLI-capable AI agent with the PlyDB CLI. This allows the agent to
+> actively assist with data source setup and capture semantics into a context
+> overlay - preserving its insights for future sessions. Once your configuration
+> has stabilized, you can transition to whichever method works best for your
+> preferred agent.
+
 See also:
 
 - [Does the PlyDB CLI work with Claude Code?](#does-the-plydb-cli-work-with-claude-code)
@@ -36,10 +43,10 @@ See also:
 Even if your data isn't well organized, you may be pleasantly surprised at how
 capable AI agents are at making sense of it. We suggest you give it a shot!
 
-Pro tip: After a session of data analysis, ask your AI agent to distill its
-learnings about your data's semantics and
-[write a semantic context overlay](#can-i-have-an-ai-agent-write-my-plydb-semantic-context-overlays-for-me)
-to record its findings for future sessions.
+> Pro tip: After a session of data analysis, ask your AI agent to distill its
+> learnings about your data's semantics and
+> [write a semantic context overlay](#can-i-have-an-ai-agent-write-my-plydb-semantic-context-overlays-for-me)
+> to record its findings for future sessions.
 
 ## Can I have an AI agent write my PlyDB config file for me?
 

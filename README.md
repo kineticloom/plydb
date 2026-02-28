@@ -181,6 +181,9 @@ make build
 
 ## AI agents + PlyDB via MCP
 
+> Deciding between MCP vs CLI? See the [FAQ](/FAQ.md#should-i-use-mcp-or-cli)
+> for recommendations.
+
 AI agents can connect to PlyDB via [MCP](https://modelcontextprotocol.io).
 
 Install PlyDB (we recommend using the [quick install](#installation) process).
@@ -194,6 +197,9 @@ Then follow your specific agent's instructions for configuring MCP:
 - [Gemini](https://geminicli.com/docs/tools/mcp-server/)
 
 ## AI agents + PlyDB via CLI Agent Skill
+
+> Deciding between MCP vs CLI? See the [FAQ](/FAQ.md#should-i-use-mcp-or-cli)
+> for recommendations.
 
 AI agents can also use PlyDB directly via the `plydb` CLI when provided context
 on how to do so via an [Agent Skill](https://agentskills.io).
@@ -215,6 +221,11 @@ your specific agent's instructions for installing skills:
 - [OpenCode](https://opencode.ai/docs/skills/)
 
 ## Configuring data sources
+
+> Pro tip: If you have the
+> [PlyDB Agent Skill](#ai-agents--plydb-via-cli-agent-skill) installed, you can
+> ask your agent to work with you on data source configuration instead of
+> writing a config file manually.
 
 Data sources are configured via the
 [PlyDB config file](/specs/config_schema.md).
