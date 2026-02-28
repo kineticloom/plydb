@@ -1,20 +1,23 @@
 # PlyDB: The Universal Database Gateway for AI Agents
 
-PlyDB securely bridges the gap between your AI agents and your fragmented data
-sources. It provides a single controlled access point for AI agents to query
-databases and flat files, such as Postgres, MySQL, SQLite, DuckDB, CSV, Excel,
-Google Sheets, and Parquet, with SQL, wherever the data lives.
+Real-time conversational analytics with zero data movement. Bridge your AI to
+live sources without the ETL tax. Immediate insights, where your data lives.
+
+PlyDB is a secure, unified access point for AI agents to query data in-place.
+From SQL databases like Postgres and MySQL, flat files like CSV and Excel, or
+cloud sources like Google Sheets and S3, PlyDB can query across them all with
+standard SQL - no data warehouse necessary.
 
 PlyDB is:
 
-- **Simple:** Get up and running in minutes on your personal computer. No
-  complex infrastructure or heavy dependencies. Connect your agents to the data
-  they need, wherever it lives - no data movement (ETL) required.
-- **Secure:** You choose which data sources your agents are allowed to access.
-  Read-only by default.
-- **Versatile:** PlyDB can query across a wide variety of
-  [data sources](#supported-data-sources). AI agents can integrate with PlyDB
-  via either [CLI](#ai-agents--plydb-via-cli-agent-skill) or
+- **Simple:** Deploy in minutes on a local machine with no additional
+  infrastructure. Connect your agents to live data without the friction of
+  building ETL pipelines.
+- **Secure:** Control which data sources your agents can access. Read-only by
+  default.
+- **Versatile:** Query across different [data sources](#supported-data-sources)
+  through a single interface. Integrate your agents via
+  [CLI](#ai-agents--plydb-via-cli-agent-skill) or
   [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
 
 ---
@@ -60,8 +63,6 @@ Here is a demo with Claude Desktop + PlyDB + Revenue Data:
 
 ## Why PlyDB?
 
-Empowerment + Security.
-
 - **Agentic Data Analysis:** Unleash the full potential of AI agents by allowing
   them to write sophisticated SQL and perform complex data analysis
   autonomously. Agents can use either the PlyDB CLI or MCP server to discover
@@ -75,23 +76,19 @@ Empowerment + Security.
   delete, edit, or alter your original records unless you explicitly allow it
   to.
 - **Cross-Source Queries:** Join tables across MySQL, PostgreSQL, CSV, and more
-  in a single query
+  in a single query.
 - **Operational Simplicity:** Designed to be up and running in minutes without
   additional infrastructure dependencies.
-- **Deploy Anywhere:** Run it locally for personal productivity or deploy it as
-  a stateless service in the cloud (AWS, GCP, Azure) to power enterprise-grade
-  agentic workflows.
 - **Open Source & Extensible:** Built on an open-source foundation, PlyDB
-  ensures transparency, security, and no vendor lock-in. Easily extend the
-  gateway with custom connectors or contribute to the community-driven core.
+  ensures transparency, security, and no vendor lock-in.
 
 ---
 
 ## Example Use Cases
 
-When your AI agent has a secure, real-time view of your data, it evolves from
-just a chatbot into a **Strategic Partner**. Stop getting lost in data and
-dashboards, and start finding actionable insights.
+When your AI agent has a secure, real-time view of your data, it evolves from a
+chatbot into a **Strategic Partner** — one that can answer complex questions
+about your business the moment you ask them.
 
 ### Strategic Sales & Retention
 
@@ -129,7 +126,7 @@ in the 'control' group."
 ### Public Health & Epidemiology
 
 **Prompt:** "Calculate the rolling 12-month average of ER admissions for asthma
-by zip code"
+by zip code".
 
 ---
 
@@ -186,8 +183,7 @@ make build
 
 AI agents can connect to PlyDB via [MCP](https://modelcontextprotocol.io).
 
-If you have not yet installed PlyDB, first install PlyDB (we recommend using the
-[quick install](#installation) process).
+Install PlyDB (we recommend using the [quick install](#installation) process).
 
 Then follow your specific agent's instructions for configuring MCP:
 
@@ -199,12 +195,10 @@ Then follow your specific agent's instructions for configuring MCP:
 
 ## AI agents + PlyDB via CLI Agent Skill
 
-For a simpler, more dynamic alternative to MCP, AI agents can also use PlyDB via
-the `plydb` CLI when provided context on how to do so via an
-[Agent Skill](https://agentskills.io).
+AI agents can also use PlyDB directly via the `plydb` CLI when provided context
+on how to do so via an [Agent Skill](https://agentskills.io).
 
-If you have not yet installed PlyDB, first install PlyDB (we recommend using the
-[quick install](#installation) process).
+Install PlyDB (we recommend using the [quick install](#installation) process).
 
 Then download the Agent Skill bundle
 ([plydb_skill.zip](https://github.com/kineticloom/plydb/releases)) and follow
@@ -229,12 +223,11 @@ You can configure more than one type of data source in a config file, depending
 on your needs, and query across all of them.
 
 To guide your AI agent's understanding of the semantics of your data, PlyDB can
-automatically scan your data sources and provide your AI agent
-[semantic context](/examples/semantic_context_scanning/README.md) about your
-data sources - schema, tables, columns, and comment metadata. This automatically
-scanned semantic context can also be further enriched by
+automatically scan your data sources and provide your AI agent with
+[semantic context](/examples/semantic_context_scanning/README.md) - schema,
+tables, columns, and comment metadata. You can further enrich this context by
 [overlaying](/examples/semantic_context_scanning/README.md#layering-additional-semantic-context)
-human or AI written overrides.
+your own descriptions or AI-generated annotations.
 
 Examples of configuring data sources:
 
@@ -247,7 +240,9 @@ Examples of configuring data sources:
 
 ## FAQ
 
-[FAQ](/FAQ.md)
+- [Do I need to write SQL myself or can my AI agent do that?](/FAQ.md#do-i-need-to-write-sql-myself-or-can-my-ai-agent-do-that)
+- [How organized should my data be?](/FAQ.md#how-organized-should-my-data-be)
+- [More...](/FAQ.md)
 
 ## Contributing
 
@@ -269,4 +264,4 @@ This project is licensed under the Apache License Version 2.0. See the
 [LICENSE](/LICENSE) file for details.
 
 All code contributed prior to 02/23/2026 is also licensed under Apache License
-Version 2.0
+Version 2.0.
