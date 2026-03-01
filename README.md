@@ -117,6 +117,13 @@ from the CRM, the infrastructure costs from our logs, and the headcount from the
 HR spreadsheet. **Build a financial health dashboard** and suggest three areas
 where we can improve our operating margin."
 
+### DevOps
+
+**Prompt:** "Review our app logs in S3 for errors from the past week.
+Cross-reference with our codebase and database replica to identify affected
+customers and diagnose root causes. **Open PRs with fixes** for the most severe
+issues, and draft a summary our PM and CSM teams can use."
+
 ### Genomics & Bioinformatics
 
 **Prompt:** "Query the variant_calls table to find the top 10 most frequent SNPs
