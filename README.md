@@ -1,5 +1,10 @@
 # PlyDB: The Universal Database Gateway for AI Agents
 
+- [Website](https://www.plydb.com/)
+- [Documentation](https://www.plydb.com/docs/)
+
+---
+
 Real-time conversational analytics with zero data movement. Bridge your AI to
 live sources without the ETL tax. Immediate insights, where your data lives.
 
