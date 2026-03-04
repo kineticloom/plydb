@@ -8,7 +8,7 @@ import (
 	"io"
 )
 
-const usage = `PlyDB: Query across databases and flat files (Postgres, MySQL, CSV, JSON, Excel, SQLite, DuckDB, Google Sheets) using standard SQL - locally or in the cloud.
+const usage = `PlyDB: Query across databases and flat files (Postgres, MySQL, CSV, JSON, Excel, SQLite, DuckDB, Parquet, Google Sheets) using standard SQL - locally or in the cloud.
 
 Usage: plydb <command> [arguments] [flags]
 
