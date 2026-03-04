@@ -14,22 +14,9 @@ import (
 //go:embed LICENSE
 var licenseText string
 
-const usage = `Usage: plydb <command> [arguments] [flags]
-
-Commands:
-  auth               Authenticate an interactive data source (e.g. gsheet OAuth)
-  query              Execute a SQL query
-  semantic-context   Scan all data sources and output semantic context as YAML
-  mcp                Start an MCP server exposing a SQL query tool
-  version            Print version information
-  license            Print license information
-
-Run "plydb <command> -h" for command-specific usage.
-`
-
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprint(os.Stderr, usage)
+		cmd.RunHelp(os.Stderr)
 		os.Exit(1)
 	}
 
@@ -46,8 +33,11 @@ func main() {
 		cmd.RunVersion()
 	case "license":
 		cmd.RunLicense(licenseText)
+	case "help", "-h", "--help":
+		cmd.RunHelp(os.Stdout)
 	default:
-		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n%s", os.Args[1], usage)
+		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n", os.Args[1])
+		cmd.RunHelp(os.Stderr)
 		os.Exit(1)
 	}
 }

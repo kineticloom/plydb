@@ -34,8 +34,8 @@ const (
 
 ## 2. Bootstrapping Sequence
 
-When the engine is initialized with the connection config, it must perform these
-four steps in order:
+When the engine is initialized with the data source config, it must perform
+these four steps in order:
 
 ### 2.1 Driver Initialization
 

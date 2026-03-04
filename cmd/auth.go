@@ -13,7 +13,7 @@ import (
 
 func RunAuth(args []string) {
 	fs := flag.NewFlagSet("auth", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to the connection config JSON file")
+	configPath := fs.String("config", "", "path to the data source config JSON file")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, `Usage: plydb auth [flags]
 

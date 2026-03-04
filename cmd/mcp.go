@@ -19,7 +19,7 @@ import (
 
 func RunMCP(args []string) {
 	fs := flag.NewFlagSet("mcp", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to the connection config JSON file")
+	configPath := fs.String("config", "", "path to the data source config JSON file")
 	transport := fs.String("transport", "stdio", "transport type: stdio or http")
 	addr := fs.String("addr", "localhost:8080", "address for HTTP transport")
 	var overlayFiles stringSliceFlag

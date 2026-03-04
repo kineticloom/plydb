@@ -15,7 +15,7 @@ import (
 
 func RunScanContext(args []string) {
 	fs := flag.NewFlagSet("semantic-context", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to the connection config JSON file")
+	configPath := fs.String("config", "", "path to the data source config JSON file")
 	var overlayFiles stringSliceFlag
 	fs.Var(&overlayFiles, "semantic-context-overlay", "path to an Open Semantic Interchage OSI (https://github.com/open-semantic-interchange/OSI) YAML overlay file (repeatable)")
 	fs.Usage = func() {

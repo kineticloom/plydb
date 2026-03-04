@@ -12,7 +12,7 @@ plydb mcp --config <path> [--transport stdio|http] [--addr host:port]
 
 ### Flags
 
-- `--config` (required): Path to the connection config JSON file
+- `--config` (required): Path to the data source config JSON file
 - `--transport`: Transport type — `stdio` (default) or `http`
 - `--addr`: Listen address for HTTP transport (default `localhost:8080`)
 
