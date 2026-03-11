@@ -26,10 +26,11 @@ func NewOverlayProvider(filePaths []string) *OverlayProvider {
 
 // Provide applies each overlay file in order onto existing and returns the
 // enriched model. If existing is nil, a new empty model is used as the base.
+// Each overlay file must contain exactly one semantic_model entry.
 func (p *OverlayProvider) Provide(ctx context.Context, existing *SemanticModelFile) (*SemanticModelFile, error) {
 	result := existing
 	if result == nil {
-		result = &SemanticModelFile{}
+		result = &SemanticModelFile{SemanticModel: []SemanticModel{{}}}
 	}
 
 	for _, path := range p.filePaths {
@@ -43,44 +44,64 @@ func (p *OverlayProvider) Provide(ctx context.Context, existing *SemanticModelFi
 			return nil, fmt.Errorf("parsing overlay file %q: %w", path, err)
 		}
 
+		if len(overlay.SemanticModel) != 1 {
+			return nil, fmt.Errorf("overlay file %q: semantic_model must contain exactly one entry, got %d", path, len(overlay.SemanticModel))
+		}
+
 		result = applyOverlay(result, &overlay)
 	}
 
 	return result, nil
 }
 
-// applyOverlay merges overlay into base and returns the enriched model.
-// It does not modify base or overlay in place.
+// applyOverlay merges overlay.SemanticModel[0] into base.SemanticModel[0] and
+// returns the enriched model. It does not modify base or overlay in place.
+// The caller must ensure overlay.SemanticModel has exactly one entry.
 func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 	result := *base
 
-	// 1. Model-level description and ai_context.
-	if overlay.SemanticModel.Description != "" {
-		result.SemanticModel.Description = overlay.SemanticModel.Description
+	// Copy the models slice so we can mutate [0] safely.
+	models := make([]SemanticModel, len(base.SemanticModel))
+	copy(models, base.SemanticModel)
+
+	// Ensure base has at least one model to apply onto.
+	if len(models) == 0 {
+		models = []SemanticModel{{}}
 	}
-	if !overlay.SemanticModel.AIContext.IsZero() {
-		result.SemanticModel.AIContext = overlay.SemanticModel.AIContext
+
+	model := models[0]
+	overlayModel := overlay.SemanticModel[0]
+
+	// 1. Model-level name, description and ai_context.
+	if overlayModel.Name != "" {
+		model.Name = overlayModel.Name
+	}
+	if overlayModel.Description != "" {
+		model.Description = overlayModel.Description
+	}
+	if !overlayModel.AIContext.IsZero() {
+		model.AIContext = overlayModel.AIContext
 	}
 
 	// Build an index of base datasets by name for O(1) lookup.
-	datasetIdx := make(map[string]int, len(base.SemanticModel.Datasets))
-	for i, ds := range base.SemanticModel.Datasets {
+	datasetIdx := make(map[string]int, len(model.Datasets))
+	for i, ds := range model.Datasets {
 		datasetIdx[ds.Name] = i
 	}
 
 	// Copy the datasets slice so we can mutate individual entries safely.
-	datasets := make([]Dataset, len(base.SemanticModel.Datasets))
-	copy(datasets, base.SemanticModel.Datasets)
+	datasets := make([]Dataset, len(model.Datasets))
+	copy(datasets, model.Datasets)
 
 	// 2. Enrich datasets that exist in base.
-	for _, overlayDS := range overlay.SemanticModel.Datasets {
-		idx, ok := datasetIdx[overlayDS.Name]
+	for _, overlayDS := range overlayModel.Datasets {
+		dsIdx, ok := datasetIdx[overlayDS.Name]
 		if !ok {
 			// Overlay dataset not in base — ignore.
 			continue
 		}
 
-		ds := datasets[idx]
+		ds := datasets[dsIdx]
 
 		if overlayDS.Description != "" {
 			ds.Description = overlayDS.Description
@@ -120,39 +141,39 @@ func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 			if overlayField.Dimension != nil {
 				fields[fi].Dimension = overlayField.Dimension
 			}
-			if overlayField.Expression != nil {
+			if len(overlayField.Expression.Dialects) > 0 {
 				fields[fi].Expression = overlayField.Expression
 			}
 		}
 		ds.Fields = fields
 
-		datasets[idx] = ds
+		datasets[dsIdx] = ds
 	}
 
-	result.SemanticModel.Datasets = datasets
+	model.Datasets = datasets
 
 	// 3. Relationships: add only when both sides exist in base.
-	relationships := make([]Relationship, len(base.SemanticModel.Relationships))
-	copy(relationships, base.SemanticModel.Relationships)
+	relationships := make([]Relationship, len(model.Relationships))
+	copy(relationships, model.Relationships)
 
-	for _, rel := range overlay.SemanticModel.Relationships {
+	for _, rel := range overlayModel.Relationships {
 		_, fromOK := datasetIdx[rel.From]
 		_, toOK := datasetIdx[rel.To]
 		if fromOK && toOK {
 			relationships = append(relationships, rel)
 		}
 	}
-	result.SemanticModel.Relationships = relationships
+	model.Relationships = relationships
 
 	// 4. Metrics: add new; update by Name if already present.
-	metrics := make([]Metric, len(base.SemanticModel.Metrics))
-	copy(metrics, base.SemanticModel.Metrics)
+	metrics := make([]Metric, len(model.Metrics))
+	copy(metrics, model.Metrics)
 	metricIdx := make(map[string]int, len(metrics))
 	for i, m := range metrics {
 		metricIdx[m.Name] = i
 	}
 
-	for _, overlayMetric := range overlay.SemanticModel.Metrics {
+	for _, overlayMetric := range overlayModel.Metrics {
 		if mi, exists := metricIdx[overlayMetric.Name]; exists {
 			metrics[mi] = overlayMetric
 		} else {
@@ -160,7 +181,9 @@ func applyOverlay(base, overlay *SemanticModelFile) *SemanticModelFile {
 			metrics = append(metrics, overlayMetric)
 		}
 	}
-	result.SemanticModel.Metrics = metrics
+	model.Metrics = metrics
 
+	models[0] = model
+	result.SemanticModel = models
 	return &result
 }

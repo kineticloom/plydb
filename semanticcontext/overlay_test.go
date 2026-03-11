@@ -24,7 +24,7 @@ func writeOverlay(t *testing.T, content string) string {
 // baseModel returns a SemanticModelFile for use as a base in tests.
 func baseModel() *SemanticModelFile {
 	return &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Name:        "Test Model",
 			Description: "Original description",
 			Datasets: []Dataset{
@@ -35,19 +35,19 @@ func baseModel() *SemanticModelFile {
 					Fields: []Field{
 						{
 							Name: "id",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "id"}},
 							},
 						},
 						{
 							Name: "name",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "name"}},
 							},
 						},
 						{
 							Name: "created_at",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "created_at"}},
 							},
 							Dimension: &Dimension{IsTime: true},
@@ -60,13 +60,13 @@ func baseModel() *SemanticModelFile {
 					Fields: []Field{
 						{
 							Name: "order_id",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "order_id"}},
 							},
 						},
 						{
 							Name: "user_id",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "user_id"}},
 							},
 						},
@@ -82,37 +82,50 @@ func baseModel() *SemanticModelFile {
 					},
 				},
 			},
-		},
+		}},
+	}
+}
+
+func TestApplyOverlay_ModelName(t *testing.T) {
+	base := baseModel()
+	overlay := &SemanticModelFile{
+		SemanticModel: []SemanticModel{{
+			Name: "My Named Model",
+		}},
+	}
+	result := applyOverlay(base, overlay)
+	if result.SemanticModel[0].Name != "My Named Model" {
+		t.Errorf("model name = %q, want %q", result.SemanticModel[0].Name, "My Named Model")
 	}
 }
 
 func TestApplyOverlay_ModelDescription(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Description: "Updated model description",
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if result.SemanticModel.Description != "Updated model description" {
-		t.Errorf("model description = %q, want %q", result.SemanticModel.Description, "Updated model description")
+	if result.SemanticModel[0].Description != "Updated model description" {
+		t.Errorf("model description = %q, want %q", result.SemanticModel[0].Description, "Updated model description")
 	}
 }
 
 func TestApplyOverlay_DatasetDescription(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name:        "catalog.public.users",
 					Description: "Updated user description",
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	got := result.SemanticModel.Datasets[0].Description
+	got := result.SemanticModel[0].Datasets[0].Description
 	if got != "Updated user description" {
 		t.Errorf("dataset description = %q, want %q", got, "Updated user description")
 	}
@@ -121,7 +134,7 @@ func TestApplyOverlay_DatasetDescription(t *testing.T) {
 func TestApplyOverlay_FieldDescription(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name: "catalog.public.users",
@@ -130,10 +143,10 @@ func TestApplyOverlay_FieldDescription(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	ds := result.SemanticModel.Datasets[0]
+	ds := result.SemanticModel[0].Datasets[0]
 	var nameDesc string
 	for _, f := range ds.Fields {
 		if f.Name == "name" {
@@ -149,17 +162,17 @@ func TestApplyOverlay_FieldDescription(t *testing.T) {
 func TestApplyOverlay_NewDatasetIgnored(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{Name: "catalog.public.new_table", Description: "Should be ignored"},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if len(result.SemanticModel.Datasets) != 2 {
-		t.Errorf("dataset count = %d, want 2 (new dataset should be ignored)", len(result.SemanticModel.Datasets))
+	if len(result.SemanticModel[0].Datasets) != 2 {
+		t.Errorf("dataset count = %d, want 2 (new dataset should be ignored)", len(result.SemanticModel[0].Datasets))
 	}
-	for _, ds := range result.SemanticModel.Datasets {
+	for _, ds := range result.SemanticModel[0].Datasets {
 		if ds.Name == "catalog.public.new_table" {
 			t.Error("new dataset should not appear in result")
 		}
@@ -169,7 +182,7 @@ func TestApplyOverlay_NewDatasetIgnored(t *testing.T) {
 func TestApplyOverlay_NewFieldIgnored(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name: "catalog.public.users",
@@ -178,10 +191,10 @@ func TestApplyOverlay_NewFieldIgnored(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	ds := result.SemanticModel.Datasets[0]
+	ds := result.SemanticModel[0].Datasets[0]
 	if len(ds.Fields) != 3 {
 		t.Errorf("field count = %d, want 3 (new field should be ignored)", len(ds.Fields))
 	}
@@ -195,7 +208,7 @@ func TestApplyOverlay_NewFieldIgnored(t *testing.T) {
 func TestApplyOverlay_RelationshipAdded(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Relationships: []Relationship{
 				{
 					Name:        "users_orders",
@@ -205,21 +218,21 @@ func TestApplyOverlay_RelationshipAdded(t *testing.T) {
 					ToColumns:   []string{"user_id"},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if len(result.SemanticModel.Relationships) != 1 {
-		t.Errorf("relationship count = %d, want 1", len(result.SemanticModel.Relationships))
+	if len(result.SemanticModel[0].Relationships) != 1 {
+		t.Errorf("relationship count = %d, want 1", len(result.SemanticModel[0].Relationships))
 	}
-	if result.SemanticModel.Relationships[0].Name != "users_orders" {
-		t.Errorf("relationship name = %q, want %q", result.SemanticModel.Relationships[0].Name, "users_orders")
+	if result.SemanticModel[0].Relationships[0].Name != "users_orders" {
+		t.Errorf("relationship name = %q, want %q", result.SemanticModel[0].Relationships[0].Name, "users_orders")
 	}
 }
 
 func TestApplyOverlay_RelationshipIgnoredWhenSideMissing(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Relationships: []Relationship{
 				{
 					Name:        "bad_relationship",
@@ -229,18 +242,18 @@ func TestApplyOverlay_RelationshipIgnoredWhenSideMissing(t *testing.T) {
 					ToColumns:   []string{"user_id"},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if len(result.SemanticModel.Relationships) != 0 {
-		t.Errorf("relationship count = %d, want 0 (bad relationship should be ignored)", len(result.SemanticModel.Relationships))
+	if len(result.SemanticModel[0].Relationships) != 0 {
+		t.Errorf("relationship count = %d, want 0 (bad relationship should be ignored)", len(result.SemanticModel[0].Relationships))
 	}
 }
 
 func TestApplyOverlay_MetricAdded(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Metrics: []Metric{
 				{
 					Name:        "new_metric",
@@ -250,18 +263,18 @@ func TestApplyOverlay_MetricAdded(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if len(result.SemanticModel.Metrics) != 2 {
-		t.Errorf("metric count = %d, want 2", len(result.SemanticModel.Metrics))
+	if len(result.SemanticModel[0].Metrics) != 2 {
+		t.Errorf("metric count = %d, want 2", len(result.SemanticModel[0].Metrics))
 	}
 }
 
 func TestApplyOverlay_MetricUpdated(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Metrics: []Metric{
 				{
 					Name:        "existing_metric",
@@ -271,16 +284,16 @@ func TestApplyOverlay_MetricUpdated(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if len(result.SemanticModel.Metrics) != 1 {
-		t.Errorf("metric count = %d, want 1", len(result.SemanticModel.Metrics))
+	if len(result.SemanticModel[0].Metrics) != 1 {
+		t.Errorf("metric count = %d, want 1", len(result.SemanticModel[0].Metrics))
 	}
-	if result.SemanticModel.Metrics[0].Description != "Updated description" {
-		t.Errorf("metric description = %q, want %q", result.SemanticModel.Metrics[0].Description, "Updated description")
+	if result.SemanticModel[0].Metrics[0].Description != "Updated description" {
+		t.Errorf("metric description = %q, want %q", result.SemanticModel[0].Metrics[0].Description, "Updated description")
 	}
-	got := result.SemanticModel.Metrics[0].Expression.Dialects[0].Expression
+	got := result.SemanticModel[0].Metrics[0].Expression.Dialects[0].Expression
 	if got != "COUNT(DISTINCT id)" {
 		t.Errorf("metric expression = %q, want %q", got, "COUNT(DISTINCT id)")
 	}
@@ -288,16 +301,14 @@ func TestApplyOverlay_MetricUpdated(t *testing.T) {
 
 func TestOverlayProvider_MultipleFiles(t *testing.T) {
 	overlay1 := writeOverlay(t, `semantic_model:
-  name: overlay1
-  datasets:
-    - name: catalog.public.users
-      description: From overlay 1
+  - datasets:
+      - name: catalog.public.users
+        description: From overlay 1
 `)
 	overlay2 := writeOverlay(t, `semantic_model:
-  name: overlay2
-  datasets:
-    - name: catalog.public.users
-      description: From overlay 2
+  - datasets:
+      - name: catalog.public.users
+        description: From overlay 2
 `)
 	base := baseModel()
 	provider := NewOverlayProvider([]string{overlay1, overlay2})
@@ -306,7 +317,7 @@ func TestOverlayProvider_MultipleFiles(t *testing.T) {
 		t.Fatalf("Provide error: %v", err)
 	}
 	// overlay2 should win (applied last).
-	got := result.SemanticModel.Datasets[0].Description
+	got := result.SemanticModel[0].Datasets[0].Description
 	if got != "From overlay 2" {
 		t.Errorf("dataset description = %q, want %q", got, "From overlay 2")
 	}
@@ -315,20 +326,20 @@ func TestOverlayProvider_MultipleFiles(t *testing.T) {
 func TestApplyOverlay_ModelAIContext_String(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			AIContext: AIContext{String: "Use for revenue analysis"},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	if result.SemanticModel.AIContext.String != "Use for revenue analysis" {
-		t.Errorf("model ai_context = %q, want %q", result.SemanticModel.AIContext.String, "Use for revenue analysis")
+	if result.SemanticModel[0].AIContext.String != "Use for revenue analysis" {
+		t.Errorf("model ai_context = %q, want %q", result.SemanticModel[0].AIContext.String, "Use for revenue analysis")
 	}
 }
 
 func TestApplyOverlay_DatasetAIContext_Object(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name: "catalog.public.users",
@@ -340,10 +351,10 @@ func TestApplyOverlay_DatasetAIContext_Object(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	got := result.SemanticModel.Datasets[0].AIContext
+	got := result.SemanticModel[0].Datasets[0].AIContext
 	if got.Object == nil {
 		t.Fatal("dataset ai_context Object should be non-nil")
 	}
@@ -358,7 +369,7 @@ func TestApplyOverlay_DatasetAIContext_Object(t *testing.T) {
 func TestApplyOverlay_FieldAIContext_Object(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name: "catalog.public.users",
@@ -375,10 +386,10 @@ func TestApplyOverlay_FieldAIContext_Object(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
-	ds := result.SemanticModel.Datasets[0]
+	ds := result.SemanticModel[0].Datasets[0]
 	var nameField *Field
 	for i := range ds.Fields {
 		if ds.Fields[i].Name == "name" {
@@ -400,19 +411,19 @@ func TestApplyOverlay_FieldAIContext_Object(t *testing.T) {
 func TestApplyOverlay_DatasetPrimaryKey(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name:       "catalog.public.users",
 					PrimaryKey: []string{"id"},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
 
 	var usersDS, ordersDS Dataset
-	for _, ds := range result.SemanticModel.Datasets {
+	for _, ds := range result.SemanticModel[0].Datasets {
 		switch ds.Name {
 		case "catalog.public.users":
 			usersDS = ds
@@ -432,19 +443,19 @@ func TestApplyOverlay_DatasetPrimaryKey(t *testing.T) {
 func TestApplyOverlay_DatasetUniqueKeys(t *testing.T) {
 	base := baseModel()
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name:       "catalog.public.users",
 					UniqueKeys: [][]string{{"name", "created_at"}},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
 
 	var usersDS Dataset
-	for _, ds := range result.SemanticModel.Datasets {
+	for _, ds := range result.SemanticModel[0].Datasets {
 		if ds.Name == "catalog.public.users" {
 			usersDS = ds
 			break
@@ -464,7 +475,7 @@ func TestApplyOverlay_DimensionFromOverlay(t *testing.T) {
 	base := baseModel()
 	// Apply an overlay that sets a dimension on the "user_id" field of orders.
 	overlay := &SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Datasets: []Dataset{
 				{
 					Name: "catalog.public.orders",
@@ -475,12 +486,12 @@ func TestApplyOverlay_DimensionFromOverlay(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 	result := applyOverlay(base, overlay)
 
 	var orderDS Dataset
-	for _, ds := range result.SemanticModel.Datasets {
+	for _, ds := range result.SemanticModel[0].Datasets {
 		if ds.Name == "catalog.public.orders" {
 			orderDS = ds
 			break
@@ -507,5 +518,27 @@ func TestApplyOverlay_DimensionFromOverlay(t *testing.T) {
 		if f.Name == "nonexistent" {
 			t.Error("nonexistent field should not appear in result")
 		}
+	}
+}
+
+func TestOverlayProvider_RejectsZeroModels(t *testing.T) {
+	path := writeOverlay(t, `semantic_model: []
+`)
+	provider := NewOverlayProvider([]string{path})
+	_, err := provider.Provide(context.Background(), baseModel())
+	if err == nil {
+		t.Error("expected error for overlay with 0 semantic_model entries, got nil")
+	}
+}
+
+func TestOverlayProvider_RejectsMultipleModels(t *testing.T) {
+	path := writeOverlay(t, `semantic_model:
+  - name: model_a
+  - name: model_b
+`)
+	provider := NewOverlayProvider([]string{path})
+	_, err := provider.Provide(context.Background(), baseModel())
+	if err == nil {
+		t.Error("expected error for overlay with 2 semantic_model entries, got nil")
 	}
 }

@@ -61,7 +61,7 @@ func TestAIContext_UnmarshalObject(t *testing.T) {
 
 func TestAIContext_MarshalObject(t *testing.T) {
 	model := SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Name: "m",
 			AIContext: AIContext{
 				Object: &AIContextObject{
@@ -69,7 +69,7 @@ func TestAIContext_MarshalObject(t *testing.T) {
 					Synonyms:     []string{"orders"},
 				},
 			},
-		},
+		}},
 	}
 	data, err := yaml.Marshal(&model)
 	if err != nil {
@@ -85,9 +85,9 @@ func TestAIContext_MarshalObject(t *testing.T) {
 
 func TestAIContext_ZeroOmittedFromYAML(t *testing.T) {
 	model := SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Name: "m",
-		},
+		}},
 	}
 	data, err := yaml.Marshal(&model)
 	if err != nil {
@@ -100,7 +100,7 @@ func TestAIContext_ZeroOmittedFromYAML(t *testing.T) {
 
 func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 	model := SemanticModelFile{
-		SemanticModel: SemanticModel{
+		SemanticModel: []SemanticModel{{
 			Name:        "Test Model",
 			Description: "A test semantic model",
 			Datasets: []Dataset{
@@ -111,19 +111,19 @@ func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 					Fields: []Field{
 						{
 							Name: "id",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "id"}},
 							},
 						},
 						{
 							Name: "name",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "name"}},
 							},
 						},
 						{
 							Name: "created_at",
-							Expression: &Expression{
+							Expression: Expression{
 								Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: "created_at"}},
 							},
 							Dimension: &Dimension{IsTime: true},
@@ -149,7 +149,7 @@ func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 	}
 
 	data, err := yaml.Marshal(&model)
@@ -187,13 +187,16 @@ func TestSemanticModelFile_YAMLRoundTrip(t *testing.T) {
 		t.Fatalf("unmarshal error: %v", err)
 	}
 
-	if decoded.SemanticModel.Name != "Test Model" {
-		t.Errorf("round-trip name = %q, want %q", decoded.SemanticModel.Name, "Test Model")
+	if len(decoded.SemanticModel) != 1 {
+		t.Fatalf("round-trip model count = %d, want 1", len(decoded.SemanticModel))
 	}
-	if len(decoded.SemanticModel.Datasets) != 1 {
-		t.Fatalf("round-trip datasets count = %d, want 1", len(decoded.SemanticModel.Datasets))
+	if decoded.SemanticModel[0].Name != "Test Model" {
+		t.Errorf("round-trip name = %q, want %q", decoded.SemanticModel[0].Name, "Test Model")
 	}
-	ds := decoded.SemanticModel.Datasets[0]
+	if len(decoded.SemanticModel[0].Datasets) != 1 {
+		t.Fatalf("round-trip datasets count = %d, want 1", len(decoded.SemanticModel[0].Datasets))
+	}
+	ds := decoded.SemanticModel[0].Datasets[0]
 	if len(ds.Fields) != 3 {
 		t.Errorf("round-trip fields count = %d, want 3", len(ds.Fields))
 	}

@@ -14,37 +14,42 @@ import (
 
 // SemanticModelFile is the top-level container for a semantic model YAML file.
 type SemanticModelFile struct {
-	SemanticModel SemanticModel `yaml:"semantic_model"`
+	Version       string          `yaml:"version"`
+	SemanticModel []SemanticModel `yaml:"semantic_model"`
 }
 
 // SemanticModel describes the overall data model.
 type SemanticModel struct {
-	Name          string         `yaml:"name"`
-	Description   string         `yaml:"description,omitempty"`
-	AIContext     AIContext      `yaml:"ai_context,omitempty"`
-	Datasets      []Dataset      `yaml:"datasets,omitempty"`
-	Relationships []Relationship `yaml:"relationships,omitempty"`
-	Metrics       []Metric       `yaml:"metrics,omitempty"`
+	Name             string            `yaml:"name"`
+	Description      string            `yaml:"description,omitempty"`
+	AIContext        AIContext         `yaml:"ai_context,omitempty"`
+	Datasets         []Dataset         `yaml:"datasets"`
+	Relationships    []Relationship    `yaml:"relationships,omitempty"`
+	Metrics          []Metric          `yaml:"metrics,omitempty"`
+	CustomExtensions []CustomExtension `yaml:"custom_extensions,omitempty"`
 }
 
 // Dataset represents a single table or file in the semantic model.
 type Dataset struct {
-	Name        string     `yaml:"name"`
-	Source      string     `yaml:"source"`
-	Description string     `yaml:"description,omitempty"`
-	AIContext   AIContext  `yaml:"ai_context,omitempty"`
-	PrimaryKey  []string   `yaml:"primary_key,omitempty"`
-	UniqueKeys  [][]string `yaml:"unique_keys,omitempty"`
-	Fields      []Field    `yaml:"fields,omitempty"`
+	Name             string            `yaml:"name"`
+	Source           string            `yaml:"source"`
+	Description      string            `yaml:"description,omitempty"`
+	AIContext        AIContext         `yaml:"ai_context,omitempty"`
+	PrimaryKey       []string          `yaml:"primary_key,omitempty"`
+	UniqueKeys       [][]string        `yaml:"unique_keys,omitempty"`
+	Fields           []Field           `yaml:"fields,omitempty"`
+	CustomExtensions []CustomExtension `yaml:"custom_extensions,omitempty"`
 }
 
 // Field describes a single column.
 type Field struct {
-	Name        string      `yaml:"name"`
-	Description string      `yaml:"description,omitempty"`
-	AIContext   AIContext   `yaml:"ai_context,omitempty"`
-	Expression  *Expression `yaml:"expression,omitempty"`
-	Dimension   *Dimension  `yaml:"dimension,omitempty"`
+	Name             string            `yaml:"name"`
+	Expression       Expression        `yaml:"expression"`
+	Dimension        *Dimension        `yaml:"dimension,omitempty"`
+	Label            string            `yaml:"label,omitempty"`
+	Description      string            `yaml:"description,omitempty"`
+	AIContext        AIContext         `yaml:"ai_context,omitempty"`
+	CustomExtensions []CustomExtension `yaml:"custom_extensions,omitempty"`
 }
 
 // Dimension describes a dimension for analytics.
@@ -65,20 +70,28 @@ type DialectExpression struct {
 
 // Relationship describes a join between two datasets.
 type Relationship struct {
-	Name        string    `yaml:"name"`
-	From        string    `yaml:"from"`
-	To          string    `yaml:"to"`
-	FromColumns []string  `yaml:"from_columns"`
-	ToColumns   []string  `yaml:"to_columns"`
-	AIContext   AIContext `yaml:"ai_context,omitempty"`
+	Name             string            `yaml:"name"`
+	From             string            `yaml:"from"`
+	To               string            `yaml:"to"`
+	FromColumns      []string          `yaml:"from_columns"`
+	ToColumns        []string          `yaml:"to_columns"`
+	AIContext        AIContext         `yaml:"ai_context,omitempty"`
+	CustomExtensions []CustomExtension `yaml:"custom_extensions,omitempty"`
 }
 
 // Metric describes a derived measure.
 type Metric struct {
-	Name        string     `yaml:"name"`
-	Description string     `yaml:"description,omitempty"`
-	AIContext   AIContext  `yaml:"ai_context,omitempty"`
-	Expression  Expression `yaml:"expression"`
+	Name             string            `yaml:"name"`
+	Expression       Expression        `yaml:"expression"`
+	Description      string            `yaml:"description,omitempty"`
+	AIContext        AIContext         `yaml:"ai_context,omitempty"`
+	CustomExtensions []CustomExtension `yaml:"custom_extensions,omitempty"`
+}
+
+// CustomExtension holds vendor-specific metadata without breaking core compatibility.
+type CustomExtension struct {
+	VendorName string `yaml:"vendor_name"`
+	Data       string `yaml:"data"`
 }
 
 // AIContextObject holds structured AI context properties per the OSI spec.

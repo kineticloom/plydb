@@ -107,16 +107,16 @@ func TestIntegrationDuckDB(t *testing.T) {
 		}
 
 		// Should discover both departments and employees.
-		if len(result.SemanticModel.Datasets) != 2 {
-			names := make([]string, len(result.SemanticModel.Datasets))
-			for i, ds := range result.SemanticModel.Datasets {
+		if len(result.SemanticModel[0].Datasets) != 2 {
+			names := make([]string, len(result.SemanticModel[0].Datasets))
+			for i, ds := range result.SemanticModel[0].Datasets {
 				names[i] = ds.Name
 			}
-			t.Fatalf("expected 2 datasets, got %d: %v", len(result.SemanticModel.Datasets), names)
+			t.Fatalf("expected 2 datasets, got %d: %v", len(result.SemanticModel[0].Datasets), names)
 		}
 
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "dk.main.departments")
-		empDS := findDataset(t, result.SemanticModel.Datasets, "dk.main.employees")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "dk.main.departments")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "dk.main.employees")
 
 		// Departments: id, name
 		if len(deptDS.Fields) != 2 {
@@ -141,11 +141,11 @@ func TestIntegrationDuckDB(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "dk.main.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "dk.main.employees")
 
 		// Verify each field has an expression.
 		for _, f := range empDS.Fields {
-			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+			if len(f.Expression.Dialects) == 0 {
 				t.Errorf("field %q has empty Expression", f.Name)
 			}
 		}
@@ -162,7 +162,7 @@ func TestIntegrationDuckDB(t *testing.T) {
 
 		// Unlike SQLite, DuckDB preserves native types, so TIMESTAMP columns
 		// will have isTime detected.
-		empDS := findDataset(t, result.SemanticModel.Datasets, "dk.main.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "dk.main.employees")
 		for _, f := range empDS.Fields {
 			if f.Name == "hired_at" {
 				if f.Dimension == nil || !f.Dimension.IsTime {
@@ -172,7 +172,7 @@ func TestIntegrationDuckDB(t *testing.T) {
 		}
 
 		// Departments should have no time dimensions.
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "dk.main.departments")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "dk.main.departments")
 		for _, f := range deptDS.Fields {
 			if f.Dimension != nil {
 				t.Errorf("departments field %q: expected no dimension, got %+v", f.Name, f.Dimension)

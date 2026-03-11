@@ -110,16 +110,16 @@ func TestIntegrationSQLite(t *testing.T) {
 		}
 
 		// Should discover both departments and employees.
-		if len(result.SemanticModel.Datasets) != 2 {
-			names := make([]string, len(result.SemanticModel.Datasets))
-			for i, ds := range result.SemanticModel.Datasets {
+		if len(result.SemanticModel[0].Datasets) != 2 {
+			names := make([]string, len(result.SemanticModel[0].Datasets))
+			for i, ds := range result.SemanticModel[0].Datasets {
 				names[i] = ds.Name
 			}
-			t.Fatalf("expected 2 datasets, got %d: %v", len(result.SemanticModel.Datasets), names)
+			t.Fatalf("expected 2 datasets, got %d: %v", len(result.SemanticModel[0].Datasets), names)
 		}
 
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "sq.main.departments")
-		empDS := findDataset(t, result.SemanticModel.Datasets, "sq.main.employees")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "sq.main.departments")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "sq.main.employees")
 
 		// Departments: id, name
 		if len(deptDS.Fields) != 2 {
@@ -144,11 +144,11 @@ func TestIntegrationSQLite(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "sq.main.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "sq.main.employees")
 
 		// Verify each field has an expression.
 		for _, f := range empDS.Fields {
-			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+			if len(f.Expression.Dialects) == 0 {
 				t.Errorf("field %q has empty Expression", f.Name)
 			}
 		}
@@ -167,7 +167,7 @@ func TestIntegrationSQLite(t *testing.T) {
 		// VARCHAR via type affinity, so time dimensions are not detected.
 		// Verify no fields have time dimensions in either table.
 		for _, dsName := range []string{"sq.main.departments", "sq.main.employees"} {
-			ds := findDataset(t, result.SemanticModel.Datasets, dsName)
+			ds := findDataset(t, result.SemanticModel[0].Datasets, dsName)
 			for _, f := range ds.Fields {
 				if f.Dimension != nil {
 					t.Errorf("dataset %q field %q: expected no dimension (SQLite type affinity), got %+v",

@@ -27,8 +27,8 @@ func NewAutoScanProvider(cfg *queryengine.Config, querier MetadataQuerier) *Auto
 // If existing is non-nil, it is used as the base; otherwise a new one is created.
 func (p *AutoScanProvider) Provide(ctx context.Context, existing *SemanticModelFile) (*SemanticModelFile, error) {
 	result := &SemanticModelFile{
-		SemanticModel: SemanticModel{
-			Name: "Auto-scanned Semantic Model",
+		SemanticModel: []SemanticModel{
+			{Name: "Auto-scanned Semantic Model"},
 		},
 	}
 	if existing != nil {
@@ -69,7 +69,7 @@ func (p *AutoScanProvider) Provide(ctx context.Context, existing *SemanticModelF
 		if err != nil {
 			return nil, fmt.Errorf("scanning %q: %w", key, err)
 		}
-		result.SemanticModel.Datasets = append(result.SemanticModel.Datasets, datasets...)
+		result.SemanticModel[0].Datasets = append(result.SemanticModel[0].Datasets, datasets...)
 	}
 
 	return result, nil
@@ -95,7 +95,7 @@ func columnsToDataset(catalog, schema, table string, cols []columnInfo, descript
 	for _, c := range cols {
 		f := Field{
 			Name: c.Column,
-			Expression: &Expression{
+			Expression: Expression{
 				Dialects: []DialectExpression{{Dialect: "ANSI_SQL", Expression: c.Column}},
 			},
 		}

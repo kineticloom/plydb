@@ -320,12 +320,12 @@ func TestIntegrationPostgres(t *testing.T) {
 		}
 
 		// Should discover both departments and employees.
-		if len(result.SemanticModel.Datasets) != 2 {
-			t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel.Datasets))
+		if len(result.SemanticModel[0].Datasets) != 2 {
+			t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel[0].Datasets))
 		}
 
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.departments")
-		empDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.employees")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.departments")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.employees")
 
 		// Departments: id, name
 		if len(deptDS.Fields) != 2 {
@@ -350,7 +350,7 @@ func TestIntegrationPostgres(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.employees")
 
 		// Verify column comments are propagated as field descriptions.
 		tests := []struct {
@@ -371,7 +371,7 @@ func TestIntegrationPostgres(t *testing.T) {
 		}
 
 		// Also check department column comments.
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.departments")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.departments")
 		idField := findField(t, deptDS.Fields, "id")
 		if idField.Description != "Department identifier" {
 			t.Errorf("departments.id description = %q, want %q", idField.Description, "Department identifier")
@@ -396,7 +396,7 @@ func TestIntegrationPostgres(t *testing.T) {
 			{"pg.public.employees", "Employee records"},
 		}
 		for _, tt := range tests {
-			ds := findDataset(t, result.SemanticModel.Datasets, tt.datasetName)
+			ds := findDataset(t, result.SemanticModel[0].Datasets, tt.datasetName)
 			if ds.Description != tt.wantDesc {
 				t.Errorf("dataset %q description = %q, want %q", tt.datasetName, ds.Description, tt.wantDesc)
 			}
@@ -412,11 +412,11 @@ func TestIntegrationPostgres(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.employees")
 
 		// Verify each field has an expression with the column name.
 		for _, f := range empDS.Fields {
-			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+			if len(f.Expression.Dialects) == 0 {
 				t.Errorf("field %q has empty Expression", f.Name)
 			} else if f.Expression.Dialects[0].Expression != f.Name {
 				t.Errorf("field %q expression = %q, want %q", f.Name, f.Expression.Dialects[0].Expression, f.Name)
@@ -433,7 +433,7 @@ func TestIntegrationPostgres(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.employees")
 
 		// hired_at is a timestamp → should have a time dimension on the field.
 		hiredAt := findField(t, empDS.Fields, "hired_at")
@@ -442,7 +442,7 @@ func TestIntegrationPostgres(t *testing.T) {
 		}
 
 		// departments has no time columns → no fields with dimensions.
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "pg.public.departments")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "pg.public.departments")
 		for _, f := range deptDS.Fields {
 			if f.Dimension != nil {
 				t.Errorf("expected no dimensions for departments, but field %q has %+v", f.Name, f.Dimension)
@@ -454,10 +454,10 @@ func TestIntegrationPostgres(t *testing.T) {
 		engine, cfg := pgEngine(t, "pg", host, port)
 
 		existing := &SemanticModelFile{
-			SemanticModel: SemanticModel{
+			SemanticModel: []SemanticModel{{
 				Name:        "My Model",
 				Description: "Pre-existing model",
-			},
+			}},
 		}
 
 		provider := NewAutoScanProvider(cfg, engine)
@@ -467,16 +467,16 @@ func TestIntegrationPostgres(t *testing.T) {
 		}
 
 		// Should preserve existing model metadata.
-		if result.SemanticModel.Name != "My Model" {
-			t.Errorf("name = %q, want %q", result.SemanticModel.Name, "My Model")
+		if result.SemanticModel[0].Name != "My Model" {
+			t.Errorf("name = %q, want %q", result.SemanticModel[0].Name, "My Model")
 		}
-		if result.SemanticModel.Description != "Pre-existing model" {
-			t.Errorf("description = %q, want %q", result.SemanticModel.Description, "Pre-existing model")
+		if result.SemanticModel[0].Description != "Pre-existing model" {
+			t.Errorf("description = %q, want %q", result.SemanticModel[0].Description, "Pre-existing model")
 		}
 
 		// Should still have scanned datasets appended.
-		if len(result.SemanticModel.Datasets) != 2 {
-			t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel.Datasets))
+		if len(result.SemanticModel[0].Datasets) != 2 {
+			t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel[0].Datasets))
 		}
 	})
 }
@@ -501,12 +501,12 @@ func TestIntegrationMySQL(t *testing.T) {
 		}
 
 		// Should discover both departments and employees in testdb schema.
-		if len(result.SemanticModel.Datasets) != 2 {
-			t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel.Datasets))
+		if len(result.SemanticModel[0].Datasets) != 2 {
+			t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel[0].Datasets))
 		}
 
-		deptDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.departments")
-		empDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.employees")
+		deptDS := findDataset(t, result.SemanticModel[0].Datasets, "my.testdb.departments")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "my.testdb.employees")
 
 		// Departments: id, name
 		if len(deptDS.Fields) != 2 {
@@ -528,7 +528,7 @@ func TestIntegrationMySQL(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "my.testdb.employees")
 
 		// Verify column comments from MySQL's column_comment are propagated.
 		tests := []struct {
@@ -567,7 +567,7 @@ func TestIntegrationMySQL(t *testing.T) {
 			{"my.testdb.employees", "Employee records"},
 		}
 		for _, tt := range tests {
-			ds := findDataset(t, result.SemanticModel.Datasets, tt.datasetName)
+			ds := findDataset(t, result.SemanticModel[0].Datasets, tt.datasetName)
 			if ds.Description != tt.wantDesc {
 				t.Errorf("dataset %q description = %q, want %q", tt.datasetName, ds.Description, tt.wantDesc)
 			}
@@ -583,11 +583,11 @@ func TestIntegrationMySQL(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "my.testdb.employees")
 
 		// Verify each field has an expression with the column name.
 		for _, f := range empDS.Fields {
-			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+			if len(f.Expression.Dialects) == 0 {
 				t.Errorf("field %q has empty Expression", f.Name)
 			}
 		}
@@ -602,7 +602,7 @@ func TestIntegrationMySQL(t *testing.T) {
 			t.Fatalf("Provide: %v", err)
 		}
 
-		empDS := findDataset(t, result.SemanticModel.Datasets, "my.testdb.employees")
+		empDS := findDataset(t, result.SemanticModel[0].Datasets, "my.testdb.employees")
 
 		hiredAt := findField(t, empDS.Fields, "hired_at")
 		if hiredAt.Dimension == nil || !hiredAt.Dimension.IsTime {
@@ -650,16 +650,16 @@ func TestIntegrationMySQL(t *testing.T) {
 		}
 
 		// 2 MySQL tables + 1 CSV = 3 datasets.
-		if len(result.SemanticModel.Datasets) != 3 {
-			names := make([]string, len(result.SemanticModel.Datasets))
-			for i, ds := range result.SemanticModel.Datasets {
+		if len(result.SemanticModel[0].Datasets) != 3 {
+			names := make([]string, len(result.SemanticModel[0].Datasets))
+			for i, ds := range result.SemanticModel[0].Datasets {
 				names[i] = ds.Name
 			}
-			t.Fatalf("expected 3 datasets, got %d: %v", len(result.SemanticModel.Datasets), names)
+			t.Fatalf("expected 3 datasets, got %d: %v", len(result.SemanticModel[0].Datasets), names)
 		}
 
 		// CSV dataset should have its description from Metadata.
-		csvDS := findDataset(t, result.SemanticModel.Datasets, "products_csv.default.products_csv")
+		csvDS := findDataset(t, result.SemanticModel[0].Datasets, "products_csv.default.products_csv")
 		if csvDS.Description != "Product catalog" {
 			t.Errorf("csv description = %q, want %q", csvDS.Description, "Product catalog")
 		}
@@ -683,8 +683,8 @@ func TestIntegrationPostgresEmptyDatabase(t *testing.T) {
 		t.Fatalf("Provide: %v", err)
 	}
 
-	if len(result.SemanticModel.Datasets) != 0 {
-		t.Fatalf("expected 0 datasets for empty database, got %d", len(result.SemanticModel.Datasets))
+	if len(result.SemanticModel[0].Datasets) != 0 {
+		t.Fatalf("expected 0 datasets for empty database, got %d", len(result.SemanticModel[0].Datasets))
 	}
 }
 
@@ -701,7 +701,7 @@ func TestIntegrationMySQLEmptyDatabase(t *testing.T) {
 		t.Fatalf("Provide: %v", err)
 	}
 
-	if len(result.SemanticModel.Datasets) != 0 {
-		t.Fatalf("expected 0 datasets for empty database, got %d", len(result.SemanticModel.Datasets))
+	if len(result.SemanticModel[0].Datasets) != 0 {
+		t.Fatalf("expected 0 datasets for empty database, got %d", len(result.SemanticModel[0].Datasets))
 	}
 }

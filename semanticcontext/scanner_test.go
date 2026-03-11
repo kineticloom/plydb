@@ -85,7 +85,7 @@ func TestScanFile_CSV(t *testing.T) {
 		if got.Name != want.name {
 			t.Errorf("field[%d].Name = %q, want %q", i, got.Name, want.name)
 		}
-		if got.Expression == nil || len(got.Expression.Dialects) == 0 {
+		if len(got.Expression.Dialects) == 0 {
 			t.Errorf("field[%d].Expression is empty", i)
 		} else if got.Expression.Dialects[0].Expression != want.expression {
 			t.Errorf("field[%d].Expression = %q, want %q", i, got.Expression.Dialects[0].Expression, want.expression)
@@ -127,15 +127,15 @@ func TestScanFile_MultipleFiles(t *testing.T) {
 	}
 
 	// Should have 2 datasets, in sorted key order: customers, products.
-	if len(result.SemanticModel.Datasets) != 2 {
-		t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel.Datasets))
+	if len(result.SemanticModel[0].Datasets) != 2 {
+		t.Fatalf("expected 2 datasets, got %d", len(result.SemanticModel[0].Datasets))
 	}
 
-	if result.SemanticModel.Datasets[0].Name != "customers.default.customers" {
-		t.Errorf("first dataset = %q, want customers", result.SemanticModel.Datasets[0].Name)
+	if result.SemanticModel[0].Datasets[0].Name != "customers.default.customers" {
+		t.Errorf("first dataset = %q, want customers", result.SemanticModel[0].Datasets[0].Name)
 	}
-	if result.SemanticModel.Datasets[1].Name != "products.default.products" {
-		t.Errorf("second dataset = %q, want products", result.SemanticModel.Datasets[1].Name)
+	if result.SemanticModel[0].Datasets[1].Name != "products.default.products" {
+		t.Errorf("second dataset = %q, want products", result.SemanticModel[0].Datasets[1].Name)
 	}
 }
 
@@ -202,7 +202,7 @@ func TestColumnsToDataset(t *testing.T) {
 
 	// All fields should have expressions.
 	for i, f := range ds.Fields {
-		if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+		if len(f.Expression.Dialects) == 0 {
 			t.Errorf("fields[%d].Expression is empty", i)
 		}
 	}
@@ -375,12 +375,12 @@ func TestProvide_GSheet(t *testing.T) {
 		t.Fatalf("Provide error: %v", err)
 	}
 
-	if len(result.SemanticModel.Datasets) != 1 {
-		t.Fatalf("expected 1 dataset, got %d", len(result.SemanticModel.Datasets))
+	if len(result.SemanticModel[0].Datasets) != 1 {
+		t.Fatalf("expected 1 dataset, got %d", len(result.SemanticModel[0].Datasets))
 	}
-	if result.SemanticModel.Datasets[0].Name != "sales.default.sales" {
+	if result.SemanticModel[0].Datasets[0].Name != "sales.default.sales" {
 		t.Errorf("dataset name = %q, want %q",
-			result.SemanticModel.Datasets[0].Name, "sales.default.sales")
+			result.SemanticModel[0].Datasets[0].Name, "sales.default.sales")
 	}
 }
 
@@ -474,7 +474,7 @@ func TestScanSQLite(t *testing.T) {
 	// All fields should have expressions.
 	for _, d := range datasets {
 		for i, f := range d.Fields {
-			if f.Expression == nil || len(f.Expression.Dialects) == 0 {
+			if len(f.Expression.Dialects) == 0 {
 				t.Errorf("dataset %q field[%d].Expression is empty", d.Name, i)
 			}
 		}
