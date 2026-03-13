@@ -65,7 +65,8 @@ and underscores (`_`) only.**
 
 #### E. Local File Fields (`type: "file"`)
 
-- **`path`**: Unix-style path to the file.
+- **`path`**: Unix-style path to the file. Supports globbing patterns (`*`, `?`,
+  `[]`) to read data from multiple files as if they were a single table.
 - **`format`**: (Optional if inferred from extension) `csv`, `xlsx`, `parquet`,
   `json`.
 - **`delimiter`**: (CSV only) The separator character.
@@ -75,7 +76,8 @@ and underscores (`_`) only.**
 #### F. S3 Cloud Storage Fields (`type: "s3"`)
 
 - **`uri`**: S3 URI (e.g., `s3://bucket/path/`). Supports globbing patterns
-  (`*`, `?`, `[]`).
+  (`*`, `?`, `[]`) to read data from multiple files as if they were a single
+  table.
 - **`credential_profile`**: Key matching an entry in the top-level `credentials`
   map.
 - **`region`**: AWS region (e.g., `us-east-1`).
