@@ -1,6 +1,11 @@
 ---
 name: plydb
-description: Skill for using the PlyDB CLI to perform SQL analysis of connected data sources. Use for SQL queries across heterogeneous databases and files such as Postgres, MySQL, CSV, Parquet, JSON, Excel. Triggers on "plydb", "sql", "query", "data analysis", "parquet", "csv", "excel", "database".
+description:
+  Skill for using the PlyDB CLI to perform SQL analysis of connected data
+  sources. Use for SQL queries across heterogeneous databases and files such as
+  Postgres, MySQL, CSV, Parquet, JSON, Excel, SQLite, DuckDB, Google Sheets.
+  Triggers on "plydb", "sql", "query", "data analysis", "parquet", "csv",
+  "excel", "database".
 ---
 
 # PlyDB CLI skill
@@ -42,7 +47,7 @@ column types and foreign keys as structured YAML that follows the
 [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
 specification.
 
-For quick reference, look in `references\config_schema.md` for a copy of the OSI
+For quick reference, look in `references\OSI\core-spec\` for a copy of the OSI
 spec.
 
 ```sh
@@ -72,8 +77,8 @@ plydb semantic-context \
 
 Overlay files must be valid
 [Open Semantic Interchange (OSI)](https://github.com/open-semantic-interchange/OSI)
-YAML. For quick reference, look in `references\config_schema.md` for a copy of
-the OSI spec.
+YAML. For quick reference, look in `references\OSI\core-spec\` for a copy of the
+OSI spec.
 
 Overlays can add descriptions to existing datasets and fields, define
 relationships between existing datasets, and add or update metrics. They cannot
