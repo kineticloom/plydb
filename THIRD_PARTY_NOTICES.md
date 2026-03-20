@@ -155,9 +155,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## github.com/modelcontextprotocol/go-sdk (v1.4.0)
+## github.com/modelcontextprotocol/go-sdk (v1.4.1)
 
-**License:** [Apache-2.0](https://github.com/modelcontextprotocol/go-sdk/blob/v1.4.0/LICENSE)
+**License:** [Apache-2.0](https://github.com/modelcontextprotocol/go-sdk/blob/v1.4.1/LICENSE)
 
 ```
 The MCP project is undergoing a licensing transition from the MIT License to the Apache License, Version 2.0 ("Apache-2.0"). All new code and specification contributions to the project are licensed under Apache-2.0. Documentation contributions (excluding specifications) are licensed under CC-BY-4.0.
