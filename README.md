@@ -95,6 +95,13 @@ When your AI agent has a secure, real-time view of your data, it evolves from a
 chatbot into a **Strategic Partner** — one that can answer complex questions
 about your business the moment you ask them.
 
+### DevOps
+
+**Prompt:** "Review our app logs in S3 for errors from the past week.
+Cross-reference with our codebase and database replica to identify affected
+customers and diagnose root causes. **Open PRs with fixes** for the most severe
+issues, and draft a summary our PM and CSM teams can use."
+
 ### Strategic Sales & Retention
 
 **Prompt:** "Analyze our top 20 accounts by revenue. Cross-reference their
@@ -121,13 +128,6 @@ and build a summary table that the billing team can use to issue invoices."
 from the CRM, the infrastructure costs from our logs, and the headcount from the
 HR spreadsheet. **Build a financial health dashboard** and suggest three areas
 where we can improve our operating margin."
-
-### DevOps
-
-**Prompt:** "Review our app logs in S3 for errors from the past week.
-Cross-reference with our codebase and database replica to identify affected
-customers and diagnose root causes. **Open PRs with fixes** for the most severe
-issues, and draft a summary our PM and CSM teams can use."
 
 ### Genomics & Bioinformatics
 
