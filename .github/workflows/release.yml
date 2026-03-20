@@ -26,9 +26,9 @@ jobs:
           # windows/arm64 omitted: not yet supported by duckdb-go-bindings
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -42,7 +42,7 @@ jobs:
         run: make package-release VERSION=${{ github.ref_name }} COMMIT=${{ github.sha }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: assets-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
@@ -55,10 +55,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: dist/assets
           merge-multiple: true
