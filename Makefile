@@ -46,7 +46,7 @@ clean:
 	rm -rf dist
 
 .PHONY: check
-check: build lint vuln-check test integration-test license-check notices-check
+check: build lint test integration-test license-check notices-check vuln-check
 
 .PHONY: test
 test:

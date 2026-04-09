@@ -16,6 +16,7 @@ import (
 func RunScanContext(args []string) {
 	fs := flag.NewFlagSet("semantic-context", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to the data source config JSON file")
+	configEnvVar := fs.String("config-env-var", "", "name of env var containing config JSON (alternative to --config)")
 	var overlayFiles stringSliceFlag
 	fs.Var(&overlayFiles, "semantic-context-overlay", "path to an Open Semantic Interchage OSI (https://github.com/open-semantic-interchange/OSI) YAML overlay file (repeatable)")
 	fs.Usage = func() {
@@ -26,13 +27,7 @@ Flags:`)
 	}
 	fs.Parse(args)
 
-	if *configPath == "" {
-		fmt.Fprintln(os.Stderr, "error: --config is required")
-		fs.Usage()
-		os.Exit(1)
-	}
-
-	cfg, engine := LoadConfigAndEngine(*configPath)
+	cfg, engine := LoadConfigAndEngineFromFlags(*configPath, *configEnvVar, fs.Usage)
 	defer engine.Close()
 
 	provider := semanticcontext.NewAutoScanProvider(cfg, engine)

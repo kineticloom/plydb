@@ -20,6 +20,7 @@ import (
 func RunMCP(args []string) {
 	fs := flag.NewFlagSet("mcp", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to the data source config JSON file")
+	configEnvVar := fs.String("config-env-var", "", "name of env var containing config JSON (alternative to --config)")
 	transport := fs.String("transport", "stdio", "transport type: stdio or http")
 	addr := fs.String("addr", "localhost:8080", "address for HTTP transport")
 	var overlayFiles stringSliceFlag
@@ -34,13 +35,7 @@ Flags:`)
 	}
 	fs.Parse(reorderArgs(args))
 
-	if *configPath == "" {
-		fmt.Fprintln(os.Stderr, "error: --config is required")
-		fs.Usage()
-		os.Exit(1)
-	}
-
-	cfg, engine := LoadConfigAndEngine(*configPath)
+	cfg, engine := LoadConfigAndEngineFromFlags(*configPath, *configEnvVar, fs.Usage)
 	defer engine.Close()
 
 	provider := semanticcontext.NewAutoScanProvider(cfg, engine)

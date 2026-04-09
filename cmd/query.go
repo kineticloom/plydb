@@ -16,6 +16,7 @@ import (
 func RunQuery(args []string) {
 	fs := flag.NewFlagSet("query", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to the data source config JSON file")
+	configEnvVar := fs.String("config-env-var", "", "name of env var containing config JSON (alternative to --config)")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, `Usage: plydb query <sql> [flags]
 
@@ -33,13 +34,7 @@ Flags:`)
 	}
 	rawQuery := fs.Arg(0)
 
-	if *configPath == "" {
-		fmt.Fprintln(os.Stderr, "error: --config is required")
-		fs.Usage()
-		os.Exit(1)
-	}
-
-	cfg, engine := LoadConfigAndEngine(*configPath)
+	cfg, engine := LoadConfigAndEngineFromFlags(*configPath, *configEnvVar, fs.Usage)
 	defer engine.Close()
 
 	policy := queryengine.ReadOnlyPolicy(cfg)
