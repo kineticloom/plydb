@@ -9,10 +9,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/docker/go-connections/nat"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kineticloom/plydb/queryengine"
 	_ "github.com/lib/pq"
@@ -37,8 +37,8 @@ func pgContainer(t *testing.T) (host string, port int, cleanup func()) {
 			"POSTGRES_DB":       "testdb",
 		},
 		WaitingFor: wait.ForSQL("5432/tcp", "postgres",
-			func(host string, port nat.Port) string {
-				return fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb?sslmode=disable", host, port.Port())
+			func(host string, port string) string {
+				return fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb?sslmode=disable", host, strings.SplitN(port, "/", 2)[0])
 			}).WithStartupTimeout(60 * time.Second),
 	}
 
@@ -60,7 +60,7 @@ func pgContainer(t *testing.T) (host string, port int, cleanup func()) {
 		t.Fatalf("getting postgres port: %v", err)
 	}
 
-	return mappedHost, mappedPort.Int(), func() {
+	return mappedHost, int(mappedPort.Num()), func() {
 		if err := container.Terminate(ctx); err != nil {
 			t.Logf("warning: terminating postgres container: %v", err)
 		}
@@ -81,8 +81,8 @@ func mysqlContainer(t *testing.T) (host string, port int, cleanup func()) {
 			"MYSQL_PASSWORD":      "testpass",
 		},
 		WaitingFor: wait.ForSQL("3306/tcp", "mysql",
-			func(host string, port nat.Port) string {
-				return fmt.Sprintf("testuser:testpass@tcp(%s:%s)/testdb", host, port.Port())
+			func(host string, port string) string {
+				return fmt.Sprintf("testuser:testpass@tcp(%s:%s)/testdb", host, strings.SplitN(port, "/", 2)[0])
 			}).WithStartupTimeout(120 * time.Second),
 	}
 
@@ -104,7 +104,7 @@ func mysqlContainer(t *testing.T) (host string, port int, cleanup func()) {
 		t.Fatalf("getting mysql port: %v", err)
 	}
 
-	return mappedHost, mappedPort.Int(), func() {
+	return mappedHost, int(mappedPort.Num()), func() {
 		if err := container.Terminate(ctx); err != nil {
 			t.Logf("warning: terminating mysql container: %v", err)
 		}
