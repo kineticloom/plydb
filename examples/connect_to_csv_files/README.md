@@ -21,6 +21,8 @@ With this config file, PlyDB can run queries that span across both of the CSV's.
 For example, here's a query that returns data from the two CSV's joined on
 customer id:
 
+## Using the PlyDB CLI:
+
 ```
 plydb query \
   --config examples/connect_to_csv_files/config.json \
@@ -128,6 +130,23 @@ Expected output:
   "truncated": false
 }
 ```
+
+## Using the PlyDB MCP server
+
+PlyDB can also be queried via MCP. The following example starts the PlyDB MCP
+server configured with STDIO transport then immediately sends the same query we
+used in the above CLI example.
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"demo","version":"0.1.0"}}}
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query","arguments":{"sql":"SELECT * FROM customers.default.customers c JOIN orders.default.orders o ON c.id = o.customer_id"}}}' \
+  | plydb mcp --config examples/connect_to_csv_files/config.json --transport stdio
+```
+
+In practice, how you configure your agent with MCP will depend on the type of
+agent. For example, see the
+[connecting to Claude Desktop to PlyDB example](../connect_to_claude_desktop/README.md)
+for a step by step tutorial that demonstrates how to connect Claude Desktop.
 
 ## Next Steps
 
